@@ -65,7 +65,7 @@ export const postsRepositories = {
 
 
     deletePost(id: string) {
-        const postIndex = db.posts.findIndex(post => post.id = id);
+        const postIndex = db.posts.findIndex(post => post.id === id);
         if (postIndex === -1) return false;
         db.posts.splice(postIndex, 1);
         return true;
