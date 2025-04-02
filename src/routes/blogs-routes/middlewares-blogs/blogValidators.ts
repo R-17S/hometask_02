@@ -7,18 +7,21 @@ import {authMiddleware} from "../../../middlewares/autorization-middleware";
 
 export const blogInputValidator = [
     body ('name')
-    .isString().withMessage('Name must be a string')
-    .trim()
-    .isLength({max: 15}).withMessage('Name must be no longer than 15 characters'),
+        .isString().withMessage('Name must be a string')
+        .trim()
+        .notEmpty().withMessage('Name cannot be empty')
+        .isLength({max: 15}).withMessage('Name must be no longer than 15 characters'),
 
     body ('description')
         .isString().withMessage('Description must be a string')
         .trim()
+        .notEmpty().withMessage('Description cannot be empty')
         .isLength({max: 500}).withMessage('Description must be no longer than 500 characters'),
 
     body ('websiteUrl')
         .isString().withMessage('WebsiteUrl must be a string')
         .trim()
+        .notEmpty().withMessage('WebsiteUrl cannot be empty')
         .isLength({max: 100}).withMessage('WebsiteUrl must be no longer than 100 characters')
         .matches(/^https:\/\/([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$/).withMessage('WebsiteUrl must be a valid URL')
     ];
