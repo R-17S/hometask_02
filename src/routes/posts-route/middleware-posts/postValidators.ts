@@ -11,16 +11,19 @@ export const postInputValidation = [
     body ('title')
     .isString().withMessage('Title must be a string')
     .trim()
+    .notEmpty().withMessage('Title must be a string')
     .isLength({min: 1, max: 30}).withMessage('Title must be no longer than 30 characters'),
 
     body ('shortDescription')
     .isString().withMessage('ShortDescription must be a string')
     .trim()
+    .notEmpty().withMessage('Title must be a string')
     .isLength({min: 1, max: 100}).withMessage('ShortDescription must be no longer than 100 characters'),
 
     body ('content')
     .isString().withMessage('Content must be a string')
     .trim()
+    .notEmpty().withMessage('Title must be a string')
     .isLength({min: 1, max: 1000}).withMessage('Content must be no longer than 1000 characters'),
 
     body ('blogId')
