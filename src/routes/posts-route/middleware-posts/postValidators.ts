@@ -35,7 +35,12 @@ export const postInputValidation = [
     .custom(blogId => {
         const blog = blogsRepository.getBlogById(blogId);
         return !!blog
-    }).withMessage('No blog found at existing blogId')
+    }).withMessage('No blog found at existing blogId'),
+    // param('id')
+    //     .custom(id => {
+    //         const blog = blogsRepository.getBlogById(blogId);
+    //         return !!blog
+    //     }).withMessage('No blog found at existing blogId')
 ];
 
 export const postExistsValidation = (req: Request<{id: string}>, res: Response<PostViewModel>, next: NextFunction) => {

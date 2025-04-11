@@ -8,18 +8,20 @@ import {authMiddleware} from "../../middlewares/autorization-middleware";
 import {deletePostHandler} from "./handlers/deletePostHandler";
 
 
+
 export const postsRouter = Router();
 
 postsRouter.get('/', getPostsHandler);
 postsRouter.get('/:id', postExistsValidation, getPostHandler);
 postsRouter.post('/', ...overallPostValidation, createPostHandler);
 postsRouter.put('/:id', postExistsValidation, ...overallPostValidation, updatePostHandler );
-// postRouter.put('/:id', (req:  Request<{id: string},{},PostInputModel>, res: Response<PostViewModel>) => {
-//     blogsRepository.getBlogById(req.body.blogId);
-//     postsRepositories.getPostById(req.params.id);
-//     postsRepositories.updatePost2(req.params.id, req.body)
-//     const updatedPost = db.posts.find(post => post.id === req.params.id)!
-//     res.status(200).json(postsRepositories.map2(updatedPost));
+// postsRouter.put('/:id', (req:  Request<{id: string},{},PostInputModel>, res: Response<PostViewModel>) => {
+    // const foundBlog = blogsRepository.getBlogById(req.body.blogId);
+    // if(!foundBlog) return res.sendStatus(404)
+    // const foundPost = postsRepositories.getPostById(req.params.id);
+    // if(!foundBlog) return res.sendStatus(404)
+    // postsRepositories.updatePost2(req.params.id, req.body)
+    // res.sendStatus(200)
 // });
 postsRouter.delete('/:id', authMiddleware, postExistsValidation, deletePostHandler);
 

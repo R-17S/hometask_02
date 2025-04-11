@@ -34,9 +34,12 @@ export const postsRepositories = {
             ...input,
             blogName: blog.name
         };
-        return this.map(db.posts[postIndex]);
+
+        return this.getPostViewModel(db.posts[postIndex]);
     },
-    map(input: PostDbTypes): PostViewModel {
+
+
+    getPostViewModel(input: PostDbTypes): PostViewModel {
         return {
             id: input.id,
             title: input.title,
@@ -49,7 +52,15 @@ export const postsRepositories = {
 
     // updatePost2(id: string, input: PostInputModel) {
     //     const blog = blogsRepository.getBlogById(input.blogId)!;
-    //     db.posts = db.posts.map(p => p.id === id ? {...p, ...input, blogName: blog.name} : p);
+    //     let updatedPost: PostDbTypes | undefined = undefined;
+    //
+    //     db.posts = db.posts.map(p => p.id === id
+    //         ? (() => {
+    //             updatedPost = {...p, ...input, blogName: blog.name}
+    //             return updatedPost } )()
+    //         : p);
+    //
+    //     return updatedPost
     // },
     // map2(input: PostDbTypes) {
     //     const postUpdate: PostViewModel = {

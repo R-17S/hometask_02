@@ -9,4 +9,12 @@ export const SETTINGS = {
         TESTING: '/testing',
     },
     ADMIN: process.env.ADMIN || 'admin:qwerty',
+    MONGO_URL: process.env.MONGO_URL || 'mongodb://localhost:27017',
+    DB: {
+        NAME: process.env.DB_NAME || 'blog-platform',
+        COLLECTION: {
+            BLOGS: 'blogs',
+            POSTS: 'posts',
+        },
+    }
 }
