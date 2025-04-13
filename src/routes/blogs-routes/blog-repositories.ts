@@ -1,43 +1,56 @@
 import {BlogDbTypes} from "../../db/blog-type";
-import {db} from "../../db/db";
-import {BlogInputModel} from "../../models/blogTypes";
+import {BlogInputModel, BlogViewModel} from "../../models/blogTypes";
+import {blogsCollection} from "../../db/mongoDB";
+import {ObjectId} from "mongodb";
+
 
 
 export const blogsRepository = {
-    getAllBlogs(): BlogDbTypes[] {
-        return db.blogs
+    async getAllBlogs(): Promise<BlogViewModel[]> {
+        const result = await  blogsCollection.find().toArray();
+        return  result.map(this.mapViewModel);
     },
 
-    getBlogById(id: string)  {
-        return db.blogs.find((blog) => blog.id === id);
+    async getBlogById(id: string): Promise<BlogViewModel | null >  {
+        const result = await blogsCollection.findOne({ _id: new ObjectId(id) });
+        return  result ?this.mapViewModel(result): null
+
     },
 
-    createBlog(input: BlogInputModel) {
+    async createBlog(input: BlogInputModel): Promise<ObjectId> {
         const newBlog = {
-            id: Date.now().toString().slice(-2),
+            _id: new ObjectId(),
             name: input.name,
             description: input.description,
             websiteUrl: input.websiteUrl,
+            createdAt: new Date(),
+            isMembership: false
         }
-        db.blogs.push(newBlog);
-        return newBlog
+        const result = await blogsCollection.insertOne(newBlog);
+        return result.insertedId
     },
 
-    updateBlog(id: string, input: BlogInputModel) {
-        const foundBlog = db.blogs.find((blog) => blog.id === id);
-        if (!foundBlog) return false;
-
-        foundBlog.name = input.name;
-        foundBlog.description = input.description;
-        foundBlog.websiteUrl = input.websiteUrl;
-
-        return true;
+    async updateBlog(id: string, input: BlogInputModel) {
+        const updateBlog = await blogsCollection.updateOne(
+            { _id: new ObjectId(id) },
+            {$set: {...input}}
+        );
+        return updateBlog.modifiedCount === 1;
     },
 
-    deleteBlog(id: string) {
-        const blogIndex = db.blogs.findIndex((blog) => blog.id === id);
-        if (blogIndex === -1) return false;
-        db.blogs.splice(blogIndex, 1);
-        return true;
+    async deleteBlog(id: string) {
+        const result = await blogsCollection.deleteOne({ _id: new ObjectId(id) });
+        return result.deletedCount === 1
+    },
+
+    mapViewModel(input: BlogDbTypes): BlogViewModel {
+        return {
+            id: input._id.toString(),
+            name: input.name,
+            description: input.description,
+            websiteUrl: input.websiteUrl,
+            createdAt: input.createdAt,
+            //isMembership: input.isMembership
+        };
     }
 };
