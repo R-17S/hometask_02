@@ -7,14 +7,14 @@ import {ObjectId} from "mongodb";
 
 export const blogsRepository = {
     async getAllBlogs(): Promise<BlogViewModel[]> {
-        const result = await  blogsCollection.find().toArray();
+        const result = await blogsCollection.find().toArray();
         return  result.map(this.mapViewModel);
     },
 
-    async getBlogById(id: string): Promise<BlogViewModel | null >  {
+    async getBlogById(id: string): Promise<BlogViewModel | null>  {
         const result = await blogsCollection.findOne({ _id: new ObjectId(id) });
-        return  result ?this.mapViewModel(result): null
-
+        if (!result) return null;
+        return  this.mapViewModel(result)
     },
 
     async createBlog(input: BlogInputModel): Promise<ObjectId> {

@@ -1,9 +1,10 @@
 import {body} from "express-validator";
 import {NextFunction, Request, Response} from "express";
-import {BlogViewModel} from "../../../models/blogTypes";
 import {blogsRepository} from "../blog-repositories";
 import {inputErrorsResult} from "../../../middlewares/errors-middleware";
 import {authMiddleware} from "../../../middlewares/autorization-middleware";
+import {ObjectId} from "mongodb";
+import {ErrorsType} from "../../../models/errorsType";
 
 export const blogInputValidator = [
     body ('name')
@@ -26,10 +27,14 @@ export const blogInputValidator = [
         .matches(/^https:\/\/([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$/).withMessage('WebsiteUrl must be a valid URL')
     ];
 
-export const blogExistsValidator = (req: Request<{id: string}>, res: Response<BlogViewModel>, next: NextFunction) => {
-    const blog = blogsRepository.getBlogById(req.params.id);
+export const blogExistsValidator = async  (req: Request<{id: string}>, res: Response<ErrorsType | {}>, next: NextFunction) => {
+    if (!ObjectId.isValid(req.params.id)) {
+        res.sendStatus(400).json({errorsMessage: {field: 'id', message: 'Invalid blog ID'}});
+        return;
+    }
+    const blog = await blogsRepository.getBlogById(req.params.id);
     if (!blog) {
-        res.sendStatus(404);
+        res.sendStatus(404).json({errorsMessage: {field: 'id', message: 'Blog not found'}});
         return;
     }
     next();
