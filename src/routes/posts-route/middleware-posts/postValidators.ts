@@ -1,10 +1,11 @@
 import {body} from "express-validator";
 import {blogsRepository} from "../../blogs-routes/blog-repositories";
 import {NextFunction, Response, Request} from "express";
-import {PostViewModel} from "../../../models/postTypes";
 import {postsRepositories} from "../post-repositories";
 import {authMiddleware} from "../../../middlewares/autorization-middleware";
 import {inputErrorsResult} from "../../../middlewares/errors-middleware";
+import {ObjectId} from "mongodb";
+import {ErrorsType} from "../../../models/errorsType";
 
 
 export const postInputValidation = [
@@ -32,21 +33,23 @@ export const postInputValidation = [
         //.optional({nullable: true}) Позволяет полю быть пустым
     .isString().withMessage('BlogId must be a string')
     .trim()
-    .custom(blogId => {
-        const blog = blogsRepository.getBlogById(blogId);
-        return !!blog
+    .custom(async blogId => {
+        const blog = await blogsRepository.getBlogById(blogId);
+        if (!blog) {
+            throw new Error('Blog not found');
+        }
+        return true;
     }).withMessage('No blog found at existing blogId'),
-    // param('id')
-    //     .custom(id => {
-    //         const blog = blogsRepository.getBlogById(blogId);
-    //         return !!blog
-    //     }).withMessage('No blog found at existing blogId')
 ];
 
-export const postExistsValidation = (req: Request<{id: string}>, res: Response<PostViewModel>, next: NextFunction) => {
-    const post = postsRepositories.getPostById(req.params.id);
+export const postExistsValidation = async (req: Request<{id: string}>, res: Response<ErrorsType | {}>, next: NextFunction) => {
+    if (!ObjectId.isValid(req.params.id)) {
+        res.status(400).json({errorsMessage: [{field: 'id', message: 'Invalid post ID'}]});
+        return;
+    }
+    const post = await postsRepositories.getPostById(req.params.id);
     if (!post) {
-        res.sendStatus(404)
+        res.status(404).json({errorsMessage:[ {field: 'id', message: 'Post not found'}]});
         return;
     }
     next();
@@ -57,3 +60,9 @@ export const overallPostValidation = [
     ...postInputValidation,
     inputErrorsResult
 ];
+
+// export const TextPostValidation = [
+//     postExistsValidation,
+//     inputErrorsResult
+// ];
+

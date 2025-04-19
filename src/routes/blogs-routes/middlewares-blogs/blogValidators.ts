@@ -29,12 +29,12 @@ export const blogInputValidator = [
 
 export const blogExistsValidator = async  (req: Request<{id: string}>, res: Response<ErrorsType | {}>, next: NextFunction) => {
     if (!ObjectId.isValid(req.params.id)) {
-        res.sendStatus(400).json({errorsMessage: {field: 'id', message: 'Invalid blog ID'}});
+        res.status(400).json({errorsMessage: [{field: 'id', message: 'Invalid blog ID'}]});
         return;
     }
     const blog = await blogsRepository.getBlogById(req.params.id);
     if (!blog) {
-        res.sendStatus(404).json({errorsMessage: {field: 'id', message: 'Blog not found'}});
+        res.status(404).json({errorsMessage: [{field: 'id', message: 'Blog not found'}]});
         return;
     }
     next();

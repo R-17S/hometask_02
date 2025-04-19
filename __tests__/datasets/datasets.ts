@@ -35,12 +35,13 @@ export const blog2: BlogDbTypes = {
 } as const
 
 export const post1: PostDbTypes = {
-    id: Date.now().toString().slice(-2),
+    _id: new ObjectId(),
     title: 'Post 1',
     shortDescription: 'Short 1',
     content: 'Content 1',
-    blogId: blog1._id,
+    blogId: blog1._id.toString(),
     blogName: 'Blog 1',
+    createdAt: new Date()
 } as const
 
 export const dataset1: dbType = {

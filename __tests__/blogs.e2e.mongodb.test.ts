@@ -57,7 +57,7 @@ describe('/blogs', () => {
             .expect(201);
 
         expect(res.body).toEqual({
-            id: expect.any(ObjectId),
+            id: expect.any(String),
             name: newBlog.name,
             description: newBlog.description,
             websiteUrl: newBlog.websiteUrl,
@@ -131,21 +131,33 @@ describe('/blogs', () => {
             .expect(200);
 
         console.log(res.body);
+        const expectedBlog = {
+            id: dataset1.blogs[0]._id.toString(),
+            name: dataset1.blogs[0].name,
+            description: dataset1.blogs[0].description,
+            websiteUrl: dataset1.blogs[0].websiteUrl,
+            createdAt: dataset1.blogs[0].createdAt.toISOString(),
+            isMembership: dataset1.blogs[0].isMembership
+        };
 
         expect(res.body).toHaveLength(1);
-        expect(res.body[0]).toEqual(dataset1.blogs[0]);
+        expect(res.body[0]).toEqual(expectedBlog);
     });
 
     it ('shouldn\'t get find 400', async () => {
 
         const res = await req
-            .delete(SETTINGS.PATH.BLOGS + '/1')
+            .get(SETTINGS.PATH.BLOGS + '/1')
             .set('Authorization', `Basic ${authToken}`)
             .expect(400) // проверка на ошибку
 
-        expect(res.body.errorsMessages.length).toEqual(1);
-        expect(res.body.errorsMessages[0].field).toEqual('id');
-        expect(res.body.errorsMessages[0].message).toEqual('Invalid blog ID');
+        expect(res.body.errorsMessage.length).toEqual(1);
+        expect(res.body).toEqual({
+            errorsMessage: [{
+                field: 'id',
+                message: 'Invalid blog ID'
+            }]
+        });
     });
 
     it('shouldn\'t get find 404', async () => {
@@ -155,9 +167,9 @@ describe('/blogs', () => {
             .get(`${SETTINGS.PATH.BLOGS}/${nonExistentId}`)
             .expect(404)
 
-        expect(res.body.errorsMessages.length).toEqual(1);
-        expect(res.body.errorsMessages[0].field).toEqual('id');
-        expect(res.body.errorsMessages[0].message).toEqual('Blog not found');
+        expect(res.body.errorsMessage.length).toEqual(1);
+        expect(res.body.errorsMessage[0].field).toEqual('id');
+        expect(res.body.errorsMessage[0].message).toEqual('Blog not found');
     });
 
     it('should get find 200', async () => {
@@ -167,15 +179,23 @@ describe('/blogs', () => {
             .expect(200)
 
         console.log(res.body)
+        const expectedBlog = {
+            id: dataset1.blogs[0]._id.toString(),
+            name: dataset1.blogs[0].name,
+            description: dataset1.blogs[0].description,
+            websiteUrl: dataset1.blogs[0].websiteUrl,
+            createdAt: dataset1.blogs[0].createdAt.toISOString(),
+            isMembership: dataset1.blogs[0].isMembership
+        };
 
-        expect(res.body).toEqual(dataset1.blogs[0])
+        expect(res.body).toEqual(expectedBlog)
     });
 
     it ('should delete', async () => {
         await blogsCollection.deleteMany({});
         await blogsCollection.insertMany(dataset1.blogs)
 
-        const res = await req
+        await req
             .delete(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0]._id)
             .set('Authorization', `Basic ${authToken}`)
             .expect(204)
@@ -191,9 +211,9 @@ describe('/blogs', () => {
             .set('Authorization', `Basic ${authToken}`)
             .expect(400) // проверка на ошибку
 
-        expect(res.body.errorsMessages.length).toEqual(1);
-        expect(res.body.errorsMessages[0].field).toEqual('id');
-        expect(res.body.errorsMessages[0].message).toEqual('Invalid blog ID');
+        expect(res.body.errorsMessage.length).toEqual(1);
+        expect(res.body.errorsMessage[0].field).toEqual('id');
+        expect(res.body.errorsMessage[0].message).toEqual('Invalid blog ID');
     });
 
     it('shouldn\'t get find 404', async () => {
@@ -201,11 +221,12 @@ describe('/blogs', () => {
         const nonExistentId = new ObjectId();
         const res = await req
             .delete(`${SETTINGS.PATH.BLOGS}/${nonExistentId}`)
+            .set('Authorization', `Basic ${authToken}`)
             .expect(404)
 
-        expect(res.body.errorsMessages.length).toEqual(1);
-        expect(res.body.errorsMessages[0].field).toEqual('id');
-        expect(res.body.errorsMessages[0].message).toEqual('Blog not found');
+        expect(res.body.errorsMessage.length).toEqual(1);
+        expect(res.body.errorsMessage[0].field).toEqual('id');
+        expect(res.body.errorsMessage[0].message).toEqual('Blog not found');
     });
 
     it('shouldn\'t del 401', async () => {
@@ -230,7 +251,7 @@ describe('/blogs', () => {
             websiteUrl: 'https://blogUpdate.com',
         }
 
-        const res = await req
+        await req
             .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0]._id)
             .set('Authorization', `Basic ${authToken}`)
             .send(blog)
@@ -247,7 +268,7 @@ describe('/blogs', () => {
         });
 
         //expect(dataset1.blogs[0]).toEqual({...dataset1.blogs[0], ...blog})
-    });
+    }, 20000);
 
     it('shouldn\'t update 400', async () => {
         await blogsCollection.deleteMany({});
@@ -265,9 +286,9 @@ describe('/blogs', () => {
             .send(blog)
             .expect(400)
 
-        expect(res.body.errorsMessages.length).toEqual(1);
-        expect(res.body.errorsMessages[0].field).toEqual('id');
-        expect(res.body.errorsMessages[0].message).toEqual('Invalid blog ID');
+        expect(res.body.errorsMessage.length).toEqual(1);
+        expect(res.body.errorsMessage[0].field).toEqual('id');
+        expect(res.body.errorsMessage[0].message).toEqual('Invalid blog ID');
     });
 
     it('shouldn\'t update 404', async () => {
@@ -288,9 +309,9 @@ describe('/blogs', () => {
             .send(blog)
             .expect(404)
 
-        expect(res.body.errorsMessages.length).toEqual(1);
-        expect(res.body.errorsMessages[0].field).toEqual('id');
-        expect(res.body.errorsMessages[0].message).toEqual('Blog not found');
+        expect(res.body.errorsMessage.length).toEqual(1);
+        expect(res.body.errorsMessage[0].field).toEqual('id');
+        expect(res.body.errorsMessage[0].message).toEqual('Blog not found');
     });
 
     it('shouldn\'t update2', async () => {

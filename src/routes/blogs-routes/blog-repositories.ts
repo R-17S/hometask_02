@@ -8,13 +8,13 @@ import {ObjectId} from "mongodb";
 export const blogsRepository = {
     async getAllBlogs(): Promise<BlogViewModel[]> {
         const result = await blogsCollection.find().toArray();
-        return  result.map(this.mapViewModel);
+        return  result.map(this.mapToBlogViewModel);
     },
 
     async getBlogById(id: string): Promise<BlogViewModel | null>  {
         const result = await blogsCollection.findOne({ _id: new ObjectId(id) });
         if (!result) return null;
-        return  this.mapViewModel(result)
+        return  this.mapToBlogViewModel(result)
     },
 
     async createBlog(input: BlogInputModel): Promise<ObjectId> {
@@ -43,14 +43,14 @@ export const blogsRepository = {
         return result.deletedCount === 1
     },
 
-    mapViewModel(input: BlogDbTypes): BlogViewModel {
+    mapToBlogViewModel(input: BlogDbTypes): BlogViewModel {
         return {
             id: input._id.toString(),
             name: input.name,
             description: input.description,
             websiteUrl: input.websiteUrl,
             createdAt: input.createdAt,
-            //isMembership: input.isMembership
+            isMembership: input.isMembership
         };
     }
 };
