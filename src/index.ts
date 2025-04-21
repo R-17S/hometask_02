@@ -1,5 +1,5 @@
 // Импортируем Express
-import {app} from "./app";
+import app from "./app";
 import {SETTINGS} from "./settings";
 import {runDb} from "./db/mongoDB";
 
