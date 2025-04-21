@@ -13,7 +13,7 @@ app.use(cors())
 
 // Роут для главной страницы
 app.get('/', (req: Request, res: Response) => {
-    res.send('No Mercy');
+    res.status(204);
 });
 app.get('/favicon.ico', (req: Request, res: Response) => {
     res.status(204);
