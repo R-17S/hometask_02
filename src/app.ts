@@ -15,7 +15,9 @@ app.use(cors())
 app.get('/', (req: Request, res: Response) => {
     res.send('No Mercy');
 });
-
+app.get('/favicon.ico', (req: Request, res: Response) => {
+    res.status(204);
+});
 app.use(SETTINGS.PATH.BLOGS, blogsRouter)
 app.use(SETTINGS.PATH.POSTS, postsRouter)
 app.use(SETTINGS.PATH.TESTING, testingRouter)

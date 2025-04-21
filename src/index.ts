@@ -10,6 +10,7 @@ const startApp = async () => {
     app.listen(SETTINGS.PORT, () => {
         console.log(`Server started on port ${SETTINGS.PORT}`)
     })
+
 }
 
 startApp();
