@@ -13,7 +13,7 @@ app.use(cors())
 
 // Роут для главной страницы
 app.get('/', (req: Request, res: Response) => {
-    res.status(200).send('Hello');
+    res.status(200).send('Hello World');
 });
 
 app.use(SETTINGS.PATH.BLOGS, blogsRouter)
