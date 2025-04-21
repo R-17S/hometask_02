@@ -7,19 +7,17 @@ import {testingRouter} from "./routes/testing/app";
 
 
 
-const app = express();
+export const app = express();
 app.use(express.json())
 app.use(cors())
 
 // Роут для главной страницы
 app.get('/', (req: Request, res: Response) => {
-    res.status(204);
+    res.status(200).send('Hello');
 });
-app.get('/favicon.ico', (req: Request, res: Response) => {
-    res.status(204);
-});
+
 app.use(SETTINGS.PATH.BLOGS, blogsRouter)
 app.use(SETTINGS.PATH.POSTS, postsRouter)
 app.use(SETTINGS.PATH.TESTING, testingRouter)
-export  default app
+
 
