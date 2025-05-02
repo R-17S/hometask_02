@@ -1,31 +1,20 @@
 import {BlogDbTypes} from "../../db/blog-type";
-import {BlogInputModel, BlogViewModel} from "../../models/blogTypes";
+import {BlogInputModel} from "../../models/blogTypes";
 import {blogsCollection} from "../../db/mongoDB";
 import {ObjectId} from "mongodb";
 
 
 
 export const blogsRepository = {
-    async getAllBlogs(): Promise<BlogViewModel[]> {
-        const result = await blogsCollection.find().toArray();
-        return  result.map(this.mapToBlogViewModel);
+    async getAllBlogs(): Promise<BlogDbTypes[]> {
+        return blogsCollection.find().toArray();
     },
 
-    async getBlogById(id: string): Promise<BlogViewModel | null>  {
-        const result = await blogsCollection.findOne({ _id: new ObjectId(id) });
-        if (!result) return null;
-        return  this.mapToBlogViewModel(result)
+    async getBlogById(id: string): Promise<BlogDbTypes | null>  {
+        return blogsCollection.findOne({ _id: new ObjectId(id) });
     },
 
-    async createBlog(input: BlogInputModel): Promise<ObjectId> {
-        const newBlog = {
-            _id: new ObjectId(),
-            name: input.name,
-            description: input.description,
-            websiteUrl: input.websiteUrl,
-            createdAt: new Date(),
-            isMembership: false
-        }
+    async createBlog(newBlog: BlogDbTypes): Promise<ObjectId> {
         const result = await blogsCollection.insertOne(newBlog);
         return result.insertedId
     },
@@ -43,14 +32,4 @@ export const blogsRepository = {
         return result.deletedCount === 1
     },
 
-    mapToBlogViewModel(input: BlogDbTypes): BlogViewModel {
-        return {
-            id: input._id.toString(),
-            name: input.name,
-            description: input.description,
-            websiteUrl: input.websiteUrl,
-            createdAt: input.createdAt,
-            isMembership: input.isMembership
-        };
-    }
 };

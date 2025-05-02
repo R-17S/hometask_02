@@ -1,7 +1,7 @@
 import {Request, Response} from "express";
-import {blogsRepository} from "../blog-repositories";
+import {blogsService} from "../blog-service";
 
 export const deleteBlogHandler = async (req: Request<{id: string}>, res: Response) => {
-    await blogsRepository.deleteBlog(req.params.id);
+    await blogsService.deleteBlog(req.params.id);
     res.sendStatus(204);
 };
