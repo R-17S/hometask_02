@@ -16,3 +16,19 @@ export type BlogViewModel = {
     isMembership: boolean;
 };
 
+
+export type BlogQueryParams = {
+    searchNameTerm?: string | null;
+    pageNumber?: number;
+    pageSize?: number;
+    sortBy?: string;
+    sortDirection?: 'asc' | 'desc';
+};
+
+export type PaginatedViewBlogs = {
+    pagesCount: number;
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    items: BlogViewModel[];
+};

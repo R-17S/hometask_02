@@ -6,10 +6,6 @@ import {ObjectId} from "mongodb";
 
 
 export const blogsRepository = {
-    async getAllBlogs(): Promise<BlogDbTypes[]> {
-        return blogsCollection.find().toArray();
-    },
-
     async getBlogById(id: string): Promise<BlogDbTypes | null>  {
         return blogsCollection.findOne({ _id: new ObjectId(id) });
     },

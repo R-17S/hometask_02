@@ -6,11 +6,6 @@ import {blogsRepository} from "./blog-repositories";
 
 
 export const blogsService = {
-    async getAllBlogs(): Promise<BlogViewModel[]> {
-        const result = await blogsRepository.getAllBlogs();
-        return  result.map(this.mapToBlogViewModel);
-    },
-
     async getBlogById(id: string): Promise<BlogViewModel | null>  {
         const result = await blogsRepository.getBlogById(id);
         if (!result) return null;

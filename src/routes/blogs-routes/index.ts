@@ -6,9 +6,14 @@ import {createBlogHandler} from "./handlers/createBlogHandler";
 import {updateBlogHandler} from "./handlers/updateBlogHandler";
 import {deleteBlogHandler} from "./handlers/deleteBlogHandler";
 import {authMiddleware} from "../../middlewares/autorization-middleware";
+import {getPostsByBlogIdHandler} from "./handlers/getPostsByBlogIdHandler";
+
 
 
 export const blogsRouter = Router();
+
+// Роут для получения постов блога
+blogsRouter.get('/:id/posts', blogExistsValidator, getPostsByBlogIdHandler);
 
 // Роуты  для главной blogs
 blogsRouter.get('/', getBlogsHandler);
