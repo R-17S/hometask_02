@@ -1,17 +1,11 @@
 import {BlogDbTypes} from "../../db/blog-type";
 import {BlogInputModel, BlogViewModel} from "../../models/blogTypes";
 import {ObjectId} from "mongodb";
-import {blogsRepository} from "./blog-repositories";
+import {blogsRepository} from "./repositories/blog-repositories";
 
 
 
 export const blogsService = {
-    async getBlogById(id: string): Promise<BlogViewModel | null>  {
-        const result = await blogsRepository.getBlogById(id);
-        if (!result) return null;
-        return  this.mapToBlogViewModel(result)
-    },
-
     async createBlog(input: BlogInputModel): Promise<ObjectId> {
         const newBlog = {
             _id: new ObjectId(),

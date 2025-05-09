@@ -1,10 +1,10 @@
 import {body} from "express-validator";
 import {NextFunction, Request, Response} from "express";
-import {blogsRepository} from "../blog-repositories";
 import {inputErrorsResult} from "../../../middlewares/errors-middleware";
 import {authMiddleware} from "../../../middlewares/autorization-middleware";
 import {ObjectId} from "mongodb";
 import {ErrorsType} from "../../../models/errorsType";
+import {blogsQueryRepository} from "../repositories/blog-query-repository";
 
 export const blogInputValidator = [
     body ('name')
@@ -32,7 +32,7 @@ export const blogExistsValidator = async  (req: Request<{id: string}>, res: Resp
         res.status(400).json({errorsMessage: [{field: 'id', message: 'Invalid blog ID'}]});
         return;
     }
-    const blog = await blogsRepository.getBlogById(req.params.id);
+    const blog = await blogsQueryRepository.getBlogById(req.params.id);
     if (!blog) {
         res.status(404).json({errorsMessage: [{field: 'id', message: 'Blog not found'}]});
         return;

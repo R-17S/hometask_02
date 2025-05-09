@@ -32,3 +32,9 @@ export type PaginatedViewPosts = {
     totalCount: number;
     items: PostViewModel[];
 }
+
+export type PostByBlogIdInputModel = {
+    title: string,
+    shortDescription: string,
+    content: string,
+}

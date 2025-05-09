@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
 import {BlogQueryParams, PaginatedViewBlogs} from "../../../models/blogTypes";
-import {blogsQueryRepository} from "../blog-queryRepositories";
+import {blogsQueryRepository} from "../repositories/blog-query-repository";
 
 export const getBlogsHandler = async (req: Request<{},{},{}, BlogQueryParams>, res: Response<PaginatedViewBlogs>) => {
     const blogs = await blogsQueryRepository.getAllBlogs({

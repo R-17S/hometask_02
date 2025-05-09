@@ -1,6 +1,7 @@
-import {BlogQueryParams, BlogViewModel, PaginatedViewBlogs} from "../../models/blogTypes";
-import {BlogDbTypes} from "../../db/blog-type";
-import {blogsCollection} from "../../db/mongoDB";
+import {BlogQueryParams, BlogViewModel, PaginatedViewBlogs} from "../../../models/blogTypes";
+import {BlogDbTypes} from "../../../db/blog-type";
+import {blogsCollection} from "../../../db/mongoDB";
+import {ObjectId} from "mongodb";
 
 export const blogsQueryRepository = {
     async getAllBlogs(params: BlogQueryParams): Promise<PaginatedViewBlogs> {
@@ -39,6 +40,12 @@ export const blogsQueryRepository = {
             totalCount,
             items: blogs.map(this.mapToBlogViewModel),
         };
+    },
+
+    async getBlogById(id: string): Promise<BlogViewModel | null>  {
+        const result = await blogsCollection.findOne({ _id: new ObjectId(id) });
+        if (!result) return null;
+        return this.mapToBlogViewModel(result);
     },
 
     mapToBlogViewModel(blog: BlogDbTypes): BlogViewModel {
