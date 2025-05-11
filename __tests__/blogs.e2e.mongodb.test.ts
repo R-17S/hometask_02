@@ -1,11 +1,9 @@
-
 import {BlogInputModel} from "../src/models/blogTypes";
 import {req} from "./datasets/test-client";
 import {SETTINGS} from "../src/settings";
-import {authToken, createString, dataset1} from "./datasets/datasets";
-import {blogsCollection, runDb} from "../src/db/mongoDB";
+import {authToken, blog1, createString, dataset1, dataset2} from "./datasets/datasets";
+import {blogsCollection, postsCollection, runDb} from "../src/db/mongoDB";
 import {ObjectId} from "mongodb";
-
 
 
 describe('/blogs', () => {
@@ -65,7 +63,7 @@ describe('/blogs', () => {
             isMembership: false
         });
 
-        const blogInDb = await blogsCollection.findOne({ _id: ObjectId.createFromHexString(res.body.id) });
+        const blogInDb = await blogsCollection.findOne({_id: ObjectId.createFromHexString(res.body.id)});
         expect(blogInDb).not.toBeNull();
     });
 
@@ -120,7 +118,13 @@ describe('/blogs', () => {
             .get(SETTINGS.PATH.BLOGS)
             .expect(200);
 
-        expect(res.body).toEqual([]);
+        expect(res.body).toEqual({
+            pagesCount: 0,
+            page: 1,
+            pageSize: 10,
+            totalCount: 0,
+            items: expect.arrayContaining([])
+        });
     });
 
     it('should get not empty array', async () => {
@@ -140,11 +144,17 @@ describe('/blogs', () => {
             isMembership: dataset1.blogs[0].isMembership
         };
 
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0]).toEqual(expectedBlog);
+        // expect(res.body).toHaveLength(1);
+        expect(res.body).toEqual({
+            pagesCount: 1,
+            page: 1,
+            pageSize: 10,
+            totalCount: 1,
+            items: expect.arrayContaining([expectedBlog])
+        });
     });
 
-    it ('shouldn\'t get find 400', async () => {
+    it('shouldn\'t get find 400', async () => {
 
         const res = await req
             .get(SETTINGS.PATH.BLOGS + '/1')
@@ -191,7 +201,7 @@ describe('/blogs', () => {
         expect(res.body).toEqual(expectedBlog)
     });
 
-    it ('should delete', async () => {
+    it('should delete', async () => {
         await blogsCollection.deleteMany({});
         await blogsCollection.insertMany(dataset1.blogs)
 
@@ -204,7 +214,7 @@ describe('/blogs', () => {
         expect(blogInDb).toBe(0);
     });
 
-    it ('shouldn\'t delete', async () => {
+    it('shouldn\'t delete', async () => {
 
         const res = await req
             .delete(SETTINGS.PATH.BLOGS + '/1')
@@ -355,4 +365,170 @@ describe('/blogs', () => {
 
         expect(res.text).toEqual('Not authorized')
     });
+
+    it('should get return 200 and paginated posts', async () => {
+        await blogsCollection.deleteMany({});
+        await postsCollection.deleteMany({});
+        await blogsCollection.insertMany(dataset2.blogs);
+        await postsCollection.insertMany(dataset2.posts);
+
+        const testBlogId = dataset2.blogs[0]._id;
+        const response = await req
+            .get(`/blogs/${testBlogId}/posts`)
+            .query({
+                pageNumber: 1,
+                pageSize: 10,
+                sortBy: 'createdAt',
+                sortDirection: 'desc'
+            })
+            .expect(200);
+
+        expect(response.body).toEqual({
+            pagesCount: 1,
+            page: 1,
+            pageSize: 10,
+            totalCount: 1,
+            items: expect.arrayContaining([
+                expect.objectContaining({
+                    title: 'Post 1',
+                    shortDescription: 'Short 1',
+                    content: 'Content 1',
+                    blogId: blog1._id.toString(),
+                    blogName: 'Blog 1',
+                }),
+            ])
+        });
+    });
+
+    it('should get return 404 if blog not found', async () => {
+        const nonExistentId = new ObjectId();
+        const res = await req
+            .get(`/blogs/${nonExistentId}/posts`)
+            .expect(404);
+
+        expect(res.body.errorsMessage.length).toEqual(1);
+        expect(res.body.errorsMessage[0].field).toEqual('id');
+        expect(res.body.errorsMessage[0].message).toEqual('Blog not found');
+    });
+
+    it('shouldn\'t get find 400', async () => {
+
+        const res = await req
+            .get(`/blogs/${1}/posts`)
+            .expect(400)
+
+        expect(res.body.errorsMessage.length).toEqual(1);
+        expect(res.body.errorsMessage[0].field).toEqual('id');
+        expect(res.body.errorsMessage[0].message).toEqual('Invalid blog ID');
+    });
+
+    it('should apply pagination correctly', async () => {
+        await blogsCollection.deleteMany({});
+        await postsCollection.deleteMany({});
+        await blogsCollection.insertMany(dataset2.blogs);
+        // Создаем 15 тестовых постов
+        const posts = Array.from({length: 15}, (_, i) => ({
+            _id: new ObjectId(),
+            title: `Post ${i}`,
+            content: `Content ${i}`,
+            shortDescription: `Short ${i}`,
+            blogId: blog1._id.toString(),
+            blogName: blog1.name,
+            createdAt: new Date(2023, 0, i + 1)
+        }));
+        await postsCollection.insertMany(posts);
+
+        const response = await req
+            .get(`/blogs/${dataset2.blogs[0]._id}/posts`)
+            .query({
+                pageNumber: 2,
+                pageSize: 5,
+                sortBy: 'createdAt',
+                sortDirection: 'asc'
+            })
+            .expect(200);
+
+        expect(response.body).toEqual({
+            pagesCount: 3, // 15 постов / 5 на странице = 3 страницы
+            page: 2,
+            pageSize: 5,
+            totalCount: 15,
+            items: expect.arrayContaining([
+                expect.objectContaining({title: 'Post 5'}),
+                expect.objectContaining({title: 'Post 6'}),
+                expect.objectContaining({title: 'Post 7'}),
+                expect.objectContaining({title: 'Post 8'}),
+                expect.objectContaining({title: 'Post 9'})
+            ])
+        });
+    });
+
+    it('should create post for existing blog', async () => {
+        const newPostData = {
+            title: 'New Post',
+            shortDescription: 'Short description',
+            content: 'Post content'
+        };
+
+        const res = await req
+            .post(`/blogs/${dataset2.blogs[0]._id}/posts`)
+            .set('Authorization', `Basic ${authToken}`)
+            .send(newPostData)
+            .expect(201);
+
+        expect(res.body).toEqual({
+            id: expect.any(String),
+            title: newPostData.title,
+            shortDescription: newPostData.shortDescription,
+            content: newPostData.content,
+            blogId: dataset2.blogs[0]._id.toString(),
+            blogName: dataset2.blogs[0].name,
+            createdAt: expect.any(String)
+        });
+    });
+
+    it('shouldn\'t create 401 not authorized', async () => {
+
+        const newPostData = {
+            title: 'New Post',
+            shortDescription: 'Short description',
+            content: 'Post content'
+        };
+
+        const res = await req
+            .post(SETTINGS.PATH.BLOGS)
+            .send(newPostData)
+            .expect(401);
+
+        expect(res.text).toBe('Not authorized')
+
+        console.log(res.text)
+
+        const blogInDb = await blogsCollection.countDocuments({})
+        expect(blogInDb).toBe(2);
+    });
+
+    it('shouldn\'t create 400 bad validation', async () => {
+
+        const incorrectPost = {
+            title: createString(31),
+            shortDescription: createString(101),
+            content: createString(1001),
+        };
+
+        const res = await req
+            .post(SETTINGS.PATH.BLOGS)
+            .set('Authorization', `Basic ${authToken}`)
+            .send(incorrectPost)
+            .expect(400)
+
+        expect(res.body.errorsMessages.length).toEqual(3);
+        expect(res.body.errorsMessages[0].field).toEqual('name');
+        expect(res.body.errorsMessages[1].field).toEqual('description');
+        expect(res.body.errorsMessages[2].field).toEqual('websiteUrl');
+
+        const blogInDb = await blogsCollection.countDocuments({});
+        expect(blogInDb).toBe(2);
+    });
 });
+
