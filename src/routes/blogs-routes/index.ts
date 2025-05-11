@@ -16,7 +16,7 @@ export const blogsRouter = Router();
 
 // Роут для получения постов блога
 blogsRouter.get('/:id/posts', blogExistsValidator, getPostsByBlogIdHandler);
-blogsRouter.post('/:id/posts', ...overallBasePostValidation, createPostByBlogIdHandler);
+blogsRouter.post('/:id/posts', blogExistsValidator, ...overallBasePostValidation, createPostByBlogIdHandler);
 
 // Роуты  для главной blogs
 blogsRouter.get('/', getBlogsHandler);

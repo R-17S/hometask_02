@@ -6,7 +6,7 @@ export const getPostsByBlogIdHandler = async (req: Request<{id:string},{},{},Pos
     const postByBlogId = await postQueryRepository.getPostsByBlogId(req.params.id,
         {
             pageNumber: Number(req.query.pageNumber) || 1,
-            pageSize: Number(req.query.pageSize) || 1,
+            pageSize: Number(req.query.pageSize) || 10,
             sortBy: req.query.sortBy || 'createdAt',
             sortDirection: req.query.sortDirection === 'asc'? 'asc': 'desc',
         }
