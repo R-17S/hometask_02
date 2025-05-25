@@ -18,14 +18,14 @@ export type PostViewModel = {
     createdAt: Date;
 }
 
-export type PostQueryParams = {
+export type PostInputQuery = {
     pageNumber?: number;
     pageSize?: number;
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
 };
 
-export type PaginatedViewPosts = {
+export type PostsViewPaginated = {
     pagesCount: number;
     page: number;
     pageSize: number;

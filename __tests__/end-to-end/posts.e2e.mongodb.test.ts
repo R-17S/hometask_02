@@ -1,9 +1,9 @@
 
-import {authToken, createString, dataset2} from "./datasets/datasets";
-import {PostInputModel} from "../src/models/postTypes";
-import {SETTINGS} from "../src/settings";
-import {req} from "./datasets/test-client";
-import {blogsCollection, postsCollection, runDb} from "../src/db/mongoDB";
+import {authToken, createString, dataset2} from "../datasets/datasets";
+import {PostInputModel} from "../../src/models/postTypes";
+import {SETTINGS} from "../../src/settings";
+import {req} from "../datasets/test-client";
+import {blogsCollection, postsCollection, runDb} from "../../src/db/mongoDB";
 import {ObjectId} from "mongodb";
 
 
@@ -114,7 +114,13 @@ describe('/posts', () => {
             .get(SETTINGS.PATH.POSTS)
             .expect(200)
 
-        expect(res.body.length).toEqual(0)
+        expect(res.body).toEqual({
+            pagesCount: 0,
+            page: 1,
+            pageSize: 10,
+            totalCount: 0,
+            items: []
+        });
     });
 
     it('should get not empty array', async () => {
@@ -134,8 +140,17 @@ describe('/posts', () => {
             blogName: dataset2.posts[0].blogName,
             createdAt: dataset2.posts[0].createdAt.toISOString(),
         }
-        expect(res.body).toHaveLength(1)
-        expect(res.body[0]).toEqual(expectedPost);
+
+        expect(res.body).toEqual({
+            pagesCount: 1,
+            page: 1,
+            pageSize: 10,
+            totalCount: 1,
+            items: [expectedPost]
+        });
+        // Дополнительные проверки (если нужно)
+        expect(res.body.items.length).toBe(1); // Проверяем длину массива items
+        expect(res.body.totalCount).toBe(1);  // Проверяем общее количество
     });
 
     it ('shouldn\'t get find 400', async () => {

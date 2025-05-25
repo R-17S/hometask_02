@@ -3,7 +3,7 @@ import {NextFunction, Response, Request} from "express";
 import {authMiddleware} from "../../../middlewares/autorization-middleware";
 import {inputErrorsResult} from "../../../middlewares/errors-middleware";
 import {ObjectId} from "mongodb";
-import {ErrorsType} from "../../../models/errorsType";
+import {ErrorsTypeValidation} from "../../../models/errorsType";
 import {blogsQueryRepository} from "../../blogs-routes/repositories/blog-query-repository";
 import {postQueryRepository} from "../repositories/post-query-repository";
 
@@ -45,7 +45,7 @@ export const postInputValidation = [
     }).withMessage('No blog found at existing blogId'),
 ];
 
-export const postExistsValidation = async (req: Request<{id: string}>, res: Response<ErrorsType | {}>, next: NextFunction) => {
+export const postExistsValidation = async (req: Request<{id: string}>, res: Response<ErrorsTypeValidation | {}>, next: NextFunction) => {
     if (!ObjectId.isValid(req.params.id)) {
         res.status(400).json({errorsMessage: [{field: 'id', message: 'Invalid post ID'}]});
         return;

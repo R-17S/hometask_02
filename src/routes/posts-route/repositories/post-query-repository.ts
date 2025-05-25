@@ -1,11 +1,11 @@
-import {PaginatedViewPosts, PostQueryParams, PostViewModel} from "../../../models/postTypes";
+import {PostsViewPaginated, PostInputQuery, PostViewModel} from "../../../models/postTypes";
 import {postsCollection} from "../../../db/mongoDB";
 import {PostDbTypes} from "../../../db/post-type";
 import {ObjectId} from "mongodb";
 
 
 export const postQueryRepository = {
-    async getPostsByBlogId(id: string, params: PostQueryParams): Promise<PaginatedViewPosts> {
+    async getPostsByBlogId(id: string, params: PostInputQuery): Promise<PostsViewPaginated> {
         const {
             pageNumber = 1,
             pageSize = 1,
@@ -34,7 +34,7 @@ export const postQueryRepository = {
         };
     },
 
-    async getAllPosts(params: PostQueryParams): Promise<PaginatedViewPosts> {
+    async getAllPosts(params: PostInputQuery): Promise<PostsViewPaginated> {
         const {
             pageNumber = 1,
             pageSize = 10,
@@ -61,7 +61,7 @@ export const postQueryRepository = {
         };
     },
 
-    async getPostById(id: string): Promise<PostViewModel | null > {
+    async getPostById(id: string): Promise<PostViewModel | null> {
         const result = await postsCollection.findOne({_id: new ObjectId(id)});
         if (!result) return null;
         return this.mapToPostViewModel(result);

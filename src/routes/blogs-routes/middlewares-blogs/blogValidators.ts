@@ -3,7 +3,7 @@ import {NextFunction, Request, Response} from "express";
 import {inputErrorsResult} from "../../../middlewares/errors-middleware";
 import {authMiddleware} from "../../../middlewares/autorization-middleware";
 import {ObjectId} from "mongodb";
-import {ErrorsType} from "../../../models/errorsType";
+import {ErrorsTypeValidation} from "../../../models/errorsType";
 import {blogsQueryRepository} from "../repositories/blog-query-repository";
 
 export const blogInputValidator = [
@@ -27,7 +27,7 @@ export const blogInputValidator = [
         .matches(/^https:\/\/([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$/).withMessage('WebsiteUrl must be a valid URL')
     ];
 
-export const blogExistsValidator = async  (req: Request<{id: string}>, res: Response<ErrorsType | {}>, next: NextFunction) => {
+export const blogExistsValidator = async  (req: Request<{id: string}>, res: Response<ErrorsTypeValidation | {}>, next: NextFunction) => {
     if (!ObjectId.isValid(req.params.id)) {
         res.status(400).json({errorsMessage: [{field: 'id', message: 'Invalid blog ID'}]});
         return;

@@ -1,10 +1,10 @@
-import {BlogQueryParams, BlogViewModel, PaginatedViewBlogs} from "../../../models/blogTypes";
+import {BlogInputQuery, BlogViewModel, BlogsViewPaginated} from "../../../models/blogTypes";
 import {BlogDbTypes} from "../../../db/blog-type";
 import {blogsCollection} from "../../../db/mongoDB";
 import {ObjectId} from "mongodb";
 
 export const blogsQueryRepository = {
-    async getAllBlogs(params: BlogQueryParams): Promise<PaginatedViewBlogs> {
+    async getAllBlogs(params: BlogInputQuery): Promise<BlogsViewPaginated> {
         const {
             searchNameTerm = null,
             pageNumber = 1,
@@ -30,7 +30,7 @@ export const blogsQueryRepository = {
                 .sort(sortOptions)
                 .skip(skip)
                 .limit(pageSize)
-                .toArray(),
+                .toArray()
         ]);
 
         return  {

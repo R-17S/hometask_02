@@ -1,8 +1,8 @@
-import {BlogInputModel} from "../src/models/blogTypes";
-import {req} from "./datasets/test-client";
-import {SETTINGS} from "../src/settings";
-import {authToken, blog1, createString, dataset1, dataset2} from "./datasets/datasets";
-import {blogsCollection, postsCollection, runDb} from "../src/db/mongoDB";
+import {BlogInputModel} from "../../src/models/blogTypes";
+import {req} from "../datasets/test-client";
+import {SETTINGS} from "../../src/settings";
+import {authToken, blog1, createString, dataset1, dataset2} from "../datasets/datasets";
+import {blogsCollection, postsCollection, runDb} from "../../src/db/mongoDB";
 import {ObjectId} from "mongodb";
 
 

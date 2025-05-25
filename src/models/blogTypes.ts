@@ -17,15 +17,23 @@ export type BlogViewModel = {
 };
 
 
-export type BlogQueryParams = {
+export type BlogInputQuery = {
     searchNameTerm?: string | null;
     pageNumber?: number;
     pageSize?: number;
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
 };
+//
+// export type PaginationQueryResult = {
+//     searchNameTerm: string | null;
+//     pageNumber: number;
+//     pageSize: number;
+//     sortBy: string;
+//     sortDirection: 'asc' | 'desc';
+// };
 
-export type PaginatedViewBlogs = {
+export type BlogsViewPaginated = {
     pagesCount: number;
     page: number;
     pageSize: number;

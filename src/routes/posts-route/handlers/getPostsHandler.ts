@@ -1,8 +1,8 @@
 import {Request, Response} from "express";
-import {PaginatedViewPosts, PostQueryParams} from "../../../models/postTypes";
+import {PostsViewPaginated, PostInputQuery} from "../../../models/postTypes";
 import {postQueryRepository} from "../repositories/post-query-repository";
 
-export const getPostsHandler = async (req:  Request<{},{},{},PostQueryParams>, res: Response<PaginatedViewPosts>) => {
+export const getPostsHandler = async (req:  Request<{},{},{},PostInputQuery>, res: Response<PostsViewPaginated>) => {
     const posts = await postQueryRepository.getAllPosts({
         pageNumber: Number(req.query.pageNumber) || 1,
         pageSize: Number(req.query.pageSize) || 10,

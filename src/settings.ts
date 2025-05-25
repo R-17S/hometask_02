@@ -6,6 +6,8 @@ export const SETTINGS = {
     PATH: {
         BLOGS: '/blogs',
         POSTS: '/posts',
+        USERS: '/users',
+        AUTH: '/auth',
         TESTING: '/testing',
     },
     ADMIN: process.env.ADMIN || 'admin:qwerty',
@@ -15,6 +17,7 @@ export const SETTINGS = {
         COLLECTION: {
             BLOGS: 'blogs',
             POSTS: 'posts',
+            USERS: 'users',
         },
     }
 }
