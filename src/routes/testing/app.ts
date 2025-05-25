@@ -1,6 +1,6 @@
-import {setDB} from "../../db/db";
+
 import {Router, Request, Response} from "express";
-import {blogsCollection, postsCollection} from "../../db/mongoDB";
+import {blogsCollection, postsCollection, usersCollection} from "../../db/mongoDB";
 
 
 export const testingRouter = Router();
@@ -8,8 +8,9 @@ export const testingRouter = Router();
 testingRouter.delete('/all-data', async (req: Request, res: Response) => {
     // setDB()
     await  Promise.all([
-        postsCollection.deleteMany({}),
         blogsCollection.deleteMany({}),
+        postsCollection.deleteMany({}),
+        usersCollection.deleteMany({}),
     ])
     res.status(204).end()
 });
