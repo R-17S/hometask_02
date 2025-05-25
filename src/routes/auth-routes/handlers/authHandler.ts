@@ -8,7 +8,7 @@ export const authController = async (req: Request<{},{},AuthInputModel>, res: Re
         const user = await authService.checkCredentials(req.body);
 
         if ('errorsMessage' in user) {
-            res.status(400).json(user);
+            res.status(401).json(user);
             return
         }
         res.sendStatus(204);
