@@ -12,6 +12,7 @@ export const SETTINGS = {
     },
     ADMIN: process.env.ADMIN || 'admin:qwerty',
     MONGO_URL: process.env.MONGO_URL || 'mongodb://localhost:27017',
+    JWT_SECRET: process.env.JWT_SECRET || 'super-secret-key',
     DB: {
         NAME: process.env.DB_NAME || 'blog-platform',
         COLLECTION: {

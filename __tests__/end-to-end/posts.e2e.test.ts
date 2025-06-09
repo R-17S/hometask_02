@@ -1,9 +1,9 @@
-import {db, setDB} from "../src/db/db";
-import {authToken, createString, dataset1, dataset2} from "./datasets/datasets";
-import {PostInputModel} from "../src/models/postTypes";
-import {SETTINGS} from "../src/settings";
-import {req} from "./datasets/test-client";
-import {BlogInputModel} from "../src/models/blogTypes";
+import {db, setDB} from "../../src/db/db";
+import {authToken, createString, dataset1, dataset2} from "../datasets/datasets";
+import {PostInputModel} from "../../src/models/postTypes";
+import {SETTINGS} from "../../src/settings";
+import {req} from "../datasets/test-client";
+
 
 
 describe('/posts', () => {
@@ -17,7 +17,7 @@ describe('/posts', () => {
             title: 'Post 1',
             shortDescription: 'Short 1',
             content: 'Content 1',
-            blogId: dataset1.blogs[0].id,
+            blogId: dataset1.blogs[0]._id.toString(),
         };
         const res = await req
             .post(SETTINGS.PATH.POSTS)
@@ -42,7 +42,7 @@ describe('/posts', () => {
             title: 'Post 1',
             shortDescription: 'Short 1',
             content: 'Content 1',
-            blogId: dataset1.blogs[0].id,
+            blogId: dataset1.blogs[0]._id.toString(),
         };
         const res = await req
             .post(SETTINGS.PATH.POSTS)
@@ -117,7 +117,7 @@ describe('/posts', () => {
         setDB(dataset2)
 
         const res = await req
-            .get(SETTINGS.PATH.POSTS + '/' + dataset2.posts[0].id)
+            .get(SETTINGS.PATH.POSTS + '/' + dataset2.posts[0]._id)
             .expect(200)
 
         console.log(res.body)
@@ -128,7 +128,7 @@ describe('/posts', () => {
         setDB(dataset2)
 
         const res = await req
-            .delete(SETTINGS.PATH.POSTS + '/' + dataset2.posts[0].id)
+            .delete(SETTINGS.PATH.POSTS + '/' + dataset2.posts[0]._id)
             .set('Authorization', `Basic ${authToken}`)
             .expect(204)
 
@@ -152,7 +152,7 @@ describe('/posts', () => {
         setDB(dataset2)
 
         const res = await req
-            .delete(SETTINGS.PATH.POSTS + '/' + dataset2.posts[0].id)
+            .delete(SETTINGS.PATH.POSTS + '/' + dataset2.posts[0]._id)
             //.set('Authorization', `Basic ${authToken}`)
             .expect(401)
 
@@ -165,11 +165,11 @@ describe('/posts', () => {
             title: 'Post 15',
             shortDescription: 'Short 15',
             content: 'Content 15',
-            blogId: dataset2.blogs[1].id,
+            blogId: dataset2.blogs[1]._id.toString(),
         };
 
         const res = await req
-            .put(SETTINGS.PATH.POSTS + '/' + dataset2.posts[0].id)
+            .put(SETTINGS.PATH.POSTS + '/' + dataset2.posts[0]._id)
             .set('Authorization', `Basic ${authToken}`)
             .send(post)
             .expect(204)
@@ -185,7 +185,7 @@ describe('/posts', () => {
             title: 'Post 16',
             shortDescription: 'Short 16',
             content: 'Content 16',
-            blogId: dataset2.blogs[1].id,
+            blogId: dataset2.blogs[1]._id.toString(),
         };
 
         const res = await req
@@ -207,7 +207,7 @@ describe('/posts', () => {
         };
 
         const res = await req
-            .put(SETTINGS.PATH.POSTS + '/' + dataset2.posts[0].id)
+            .put(SETTINGS.PATH.POSTS + '/' + dataset2.posts[0]._id)
             .set('Authorization', `Basic ${authToken}`)
             .send(post)
             .expect(400)
@@ -227,11 +227,11 @@ describe('/posts', () => {
             title: 'Post 16',
             shortDescription: 'Short 16',
             content: 'Content 16',
-            blogId: dataset2.blogs[1].id,
+            blogId: dataset2.blogs[1]._id.toString(),
         };
 
         const res = await req
-            .put(SETTINGS.PATH.POSTS + '/' + dataset2.posts[0].id)
+            .put(SETTINGS.PATH.POSTS + '/' + dataset2.posts[0]._id)
             //.set('Authorization', `Basic ${authToken}`)
             .send(post)
             .expect(401)

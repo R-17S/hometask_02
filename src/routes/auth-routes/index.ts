@@ -8,3 +8,4 @@ export const authRouter = Router();
 
 // Роуты  для главной users
 authRouter.post('/', ...overallAuthValidation, authController);
+authRouter.get('/', ...overallAuthValidation, authController);

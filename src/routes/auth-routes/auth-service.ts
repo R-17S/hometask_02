@@ -3,10 +3,11 @@ import {authRepository} from "./repositories/auth-repositories";
 import bcrypt from "bcrypt";
 import {AuthInputModel} from "../../models/authType";
 import {ErrorType} from "../../models/errorsType";
+import {UserDbTypes} from "../../db/user-type";
 
 
 export const authService = {
-    async checkCredentials(input: AuthInputModel): Promise< ErrorType | { success: true }> {
+    async checkCredentials(input: AuthInputModel): Promise<ErrorType | UserDbTypes> {
         const user = await authRepository.findByLoginOrEmail(input.loginOrEmail);
         if (!user) {
             return {
@@ -20,6 +21,6 @@ export const authService = {
                 errorsMessage: [{field: "Password", message: 'Invalid password'}]
             };
         }
-        return {success: true};
+        return user;
     }
 };

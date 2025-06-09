@@ -1,8 +1,8 @@
-import {db, setDB} from "../src/db/db";
-import {BlogInputModel} from "../src/models/blogTypes";
-import {req} from "./datasets/test-client";
-import {SETTINGS} from "../src/settings";
-import {authToken, createString, dataset1} from "./datasets/datasets";
+import {db, setDB} from "../../src/db/db";
+import {BlogInputModel} from "../../src/models/blogTypes";
+import {req} from "../datasets/test-client";
+import {SETTINGS} from "../../src/settings";
+import {authToken, createString, dataset1} from "../datasets/datasets";
 
 
 describe('/blogs', () => {
@@ -117,7 +117,7 @@ describe('/blogs', () => {
         setDB(dataset1)
 
         const res = await req
-            .get(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
+            .get(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0]._id)
             .expect(200) // проверка на ошибку
 
         console.log(res.body)
@@ -129,7 +129,7 @@ describe('/blogs', () => {
         setDB(dataset1)
 
         const res = await req
-            .delete(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
+            .delete(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0]._id)
             .set('Authorization', `Basic ${authToken}`)
             .expect(204)
 
@@ -153,7 +153,7 @@ describe('/blogs', () => {
         setDB(dataset1)
 
         const res = await req
-            .delete(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
+            .delete(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0]._id)
             //.set('Authorization', `Basic ${authToken}`)
             .expect(401) // проверка на ошибку
 
@@ -169,7 +169,7 @@ describe('/blogs', () => {
         }
 
         const res = await req
-            .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
+            .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0]._id)
             .set('Authorization', `Basic ${authToken}`)
             .send(blog)
             .expect(204) // проверка на ошибку
@@ -205,7 +205,7 @@ describe('/blogs', () => {
         }
 
         const res = await req
-            .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
+            .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0]._id)
             .set('Authorization', `Basic ${authToken}`)
             .send(blog)
             .expect(400) // проверка на ошибку
@@ -229,7 +229,7 @@ describe('/blogs', () => {
         }
 
         const res = await req
-            .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
+            .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0]._id)
             .set('Authorization', `Basic ${authToken}` + 'error')
             .send(blog)
             .expect(401) // проверка на ошибку
