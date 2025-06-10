@@ -1,11 +1,11 @@
 import {Router} from "express";
 import {overallAuthValidation} from "./middleware-users/authValidators";
-import {authController} from "./handlers/authHandler";
+import {authHandler} from "./handlers/authHandler";
 
 
 export const authRouter = Router();
 
 
 // Роуты  для главной users
-authRouter.post('/', ...overallAuthValidation, authController);
-authRouter.get('/', ...overallAuthValidation, authController);
+authRouter.post('/login', ...overallAuthValidation, authHandler);
+authRouter.get('/me', ...overallAuthValidation, authHandler);

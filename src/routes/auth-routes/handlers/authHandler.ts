@@ -5,7 +5,7 @@ import {ErrorType} from "../../../models/errorsType";
 import {jwtService} from "../application/jwt-service";
 
 
-export const authController = async (req: Request<{},{},AuthInputModel>, res: Response<ErrorType | AuthViewModel>) => {
+export const authHandler = async (req: Request<{},{},AuthInputModel>, res: Response<ErrorType | AuthViewModel>) => {
         // const { loginOrEmail, password } = req.body;
         const user = await authService.checkCredentials(req.body);
 
@@ -14,7 +14,7 @@ export const authController = async (req: Request<{},{},AuthInputModel>, res: Re
             return
         }
 
-        if (user) {
+        if (user) {// переделать ЛОГику
             const token = await jwtService.createJWT(user);
             res.status(200).json({
                 accessToken: token
