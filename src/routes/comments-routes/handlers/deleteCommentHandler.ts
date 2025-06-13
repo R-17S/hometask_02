@@ -3,22 +3,21 @@ import {Request, Response} from "express";
 
 
 export const deleteCommentHandler = async (req: Request<{ commentId: string }>, res: Response) => {
-    const commentId = req.params.commentId;
-    const userId = req.userId // Предполагается, что пользователь добавлен в req при аутентификации
-    if (userId !== undefined) {
-        return res.status(400).send('Иди наухй')
+    if (!req.userId) {
+        res.sendStatus(401);
+        return
     }
-    // Проверка прав доступа (может ли пользователь удалить этот комментарий)
-    const canDelete = await commentsService.checkCommentOwnership(commentId, userId);
-    if (!canDelete) {
-        return res.sendStatus(403); // Forbidden
+    const userId = req.userId as string;
+    const canDelete = await commentsService.checkCommentOwnership(req.params.commentId, userId);
+    if (canDelete === false) {
+        res.sendStatus(403);
+        return
     }
-
-    // Удаление комментария
-    const isDeleted = await commentsService.deleteComment(commentId);
-    if (!isDeleted) {
-        return res.sendStatus(404); // Not Found
+    if (canDelete === null) {
+        res.sendStatus(404);
+        return
     }
 
-    res.sendStatus(204); // No Content (успешное удаление)
+    const isDeleted = await commentsService.deleteComment(req.params.commentId);
+    res.sendStatus(204);
 };

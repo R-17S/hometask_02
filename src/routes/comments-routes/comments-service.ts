@@ -26,8 +26,9 @@ export const commentsService = {
         return await commentsRepository.updateComment(id, input);
     },
 
-    async checkCommentOwnership(commentId: string, userId: string) {
+    async checkCommentOwnership(commentId: string, userId: string): Promise<boolean | null> {
         const comment = await commentsRepository.getCommentById(commentId);
+        if (!comment) return null
         return comment?.commentatorInfo.userId === userId;
     },
 

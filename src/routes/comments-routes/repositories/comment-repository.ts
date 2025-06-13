@@ -19,8 +19,8 @@ export const commentsRepository = {
         return result.modifiedCount === 1;
     },
 
-    async getCommentById(id: string) {
-        return await commentsCollection.findOne<CommentViewModel>({ _id: new ObjectId(id) });
+    async getCommentById(commentId: string) {
+        return await commentsCollection.findOne({ _id: new ObjectId(commentId) });
     },
 
     async deleteComment(id: string) {
