@@ -40,6 +40,14 @@ export const blogExistsValidator = async  (req: Request<{id: string}>, res: Resp
     next();
 };
 
+export const blogIdValidator = async (req: Request<{blogId: string}>, res: Response<ErrorsTypeValidation | {}>, next: NextFunction) => {
+    if (!ObjectId.isValid(req.params.blogId)) {
+        res.status(400).json({errorsMessage: [{field: 'blogId', message: 'Invalid blogId ID'}]});
+        return;
+    }
+    next();
+};
+
 export const overallBlogValidation = [
     authMiddleware,
     ...blogInputValidator,

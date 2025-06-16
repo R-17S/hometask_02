@@ -1,5 +1,5 @@
 import {Router} from "express";
-import {blogExistsValidator, overallBlogValidation} from "./middlewares-blogs/blogValidators";
+import {blogExistsValidator, blogIdValidator, overallBlogValidation} from "./middlewares-blogs/blogValidators";
 import {getBlogsHandler} from "./handlers/getBlogsHandler";
 import {getBlogHandler} from "./handlers/getBlogHandler";
 import {createBlogHandler} from "./handlers/createBlogHandler";
@@ -15,8 +15,8 @@ import {createPostByBlogIdHandler} from "./handlers/createPostByBlogIdHandler";
 export const blogsRouter = Router();
 
 // Роут для получения постов блога
-blogsRouter.get('/:id/posts', blogExistsValidator, getPostsByBlogIdHandler);
-blogsRouter.post('/:id/posts', blogExistsValidator, ...overallBasePostValidation, createPostByBlogIdHandler);
+blogsRouter.get('/:blogId/posts', blogIdValidator, getPostsByBlogIdHandler);
+blogsRouter.post('/:blogId/posts', blogIdValidator, ...overallBasePostValidation, createPostByBlogIdHandler);
 
 // Роуты  для главной blogs
 blogsRouter.get('/', getBlogsHandler);

@@ -5,9 +5,13 @@ import {commentQueryRepository} from "../../comments-routes/repositories/comment
 
 
 
-export const createCommentByPostIdHandler = async (req: Request<{postId: string},{},{},CommentInputModel>, res: Response<CommentViewModel | null>) => {
+
+export const createCommentByPostIdHandler = async (req: Request<{postId: string},{},CommentInputModel>, res: Response<CommentViewModel | null>) => {
     const newComment = await commentsService.createComment(req.body, req.params.postId);
-    if (!newComment) return undefined
+    if (!newComment)  {
+        res.sendStatus(404);
+        return
+    }
     const newCommentId = await commentQueryRepository.getCommentById(newComment.toString());
-    res.status(201).send({newCommentId})
+    res.status(201).send(newCommentId)
 }

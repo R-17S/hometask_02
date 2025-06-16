@@ -2,6 +2,8 @@ import {BlogDbTypes} from "../../db/blog-type";
 import {BlogInputModel, BlogViewModel} from "../../models/blogTypes";
 import {ObjectId} from "mongodb";
 import {blogsRepository} from "./repositories/blog-repositories";
+import {postsQueryRepository} from "../posts-route/repositories/posts-query-repository";
+import {blogsQueryRepository} from "./repositories/blog-query-repository";
 
 
 
@@ -25,6 +27,11 @@ export const blogsService = {
     async deleteBlog(id: string) {
         return await blogsRepository.deleteBlog(id);
     },
+
+    async checkBlogExists(blogId: string): Promise<boolean> {
+        return await blogsQueryRepository.blogExists(blogId);
+    },
+
 
     mapToBlogViewModel(input: BlogDbTypes): BlogViewModel {
         return {

@@ -3,20 +3,21 @@ import { CommentInputModel } from "../../models/commentTypes";
 import {commentsRepository} from "./repositories/comment-repository";
 import {commentQueryRepository} from "./repositories/comment-query-repository";
 import {ObjectId} from "mongodb";
+import {postsQueryRepository} from "../posts-route/repositories/posts-query-repository";
 
 export const commentsService = {
     async createComment(input: CommentInputModel, postId: string): Promise<ObjectId | undefined> {
-        const comment = await commentQueryRepository.getCommentById(postId);
+        const comment = await postsQueryRepository.postExists(postId);
         if (!comment) return undefined;
 
         const newComment = {
             _id: new ObjectId(),
             content: input.content,
             commentatorInfo: {
-                userId: input.commentatorInfo.userId,
-                userLogin: input.commentatorInfo.userLogin,
+                userId: '4558358',
+                userLogin: 'dndnf'
             },
-            createdAt: input.createdAt
+            createdAt: new Date(),
         }
 
         return await commentsRepository.createComment(newComment);

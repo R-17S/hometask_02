@@ -1,9 +1,16 @@
 import {Request, Response} from "express";
 import {PostsViewPaginated, PostInputQuery} from "../../../models/postTypes";
-import {postQueryRepository} from "../../posts-route/repositories/post-query-repository";
+import {postsQueryRepository} from "../../posts-route/repositories/posts-query-repository";
+import {blogsService} from "../blog-service";
 
-export const getPostsByBlogIdHandler = async (req: Request<{id:string},{},{},PostInputQuery>, res: Response<PostsViewPaginated>) => {
-    const postByBlogId = await postQueryRepository.getPostsByBlogId(req.params.id,
+export const getPostsByBlogIdHandler = async (req: Request<{blogId:string},{},{},PostInputQuery>, res: Response<PostsViewPaginated>) => {
+    const  blogExists = await blogsService.checkBlogExists(req.params.blogId);
+    if (!blogExists) {
+        res.sendStatus(404);
+        return;
+    }
+
+    const postByBlogId = await postsQueryRepository.getPostsByBlogId(req.params.blogId,
         {
             pageNumber: Number(req.query.pageNumber) || 1,
             pageSize: Number(req.query.pageSize) || 10,
@@ -11,11 +18,6 @@ export const getPostsByBlogIdHandler = async (req: Request<{id:string},{},{},Pos
             sortDirection: req.query.sortDirection === 'asc'? 'asc': 'desc',
         }
     );
-
-    if (!postByBlogId) {
-        res.sendStatus(404);
-        return
-    }
 
     res.status(200).send(postByBlogId)
 }

@@ -1,10 +1,10 @@
 import {PostsViewPaginated, PostInputQuery, PostViewModel} from "../../../models/postTypes";
-import {postsCollection} from "../../../db/mongoDB";
+import {blogsCollection, postsCollection} from "../../../db/mongoDB";
 import {PostDbTypes} from "../../../db/post-type";
 import {ObjectId} from "mongodb";
 
 
-export const postQueryRepository = {
+export const postsQueryRepository = {
     async getPostsByBlogId(id: string, params: PostInputQuery): Promise<PostsViewPaginated> {
         const {
             pageNumber = 1,
@@ -67,16 +67,21 @@ export const postQueryRepository = {
         return this.mapToPostViewModel(result);
     },
 
-        mapToPostViewModel(input: PostDbTypes): PostViewModel {
-            return {
-                id: input._id.toString(),
-                title: input.title,
-                shortDescription: input.shortDescription,
-                content: input.content,
-                blogId: input.blogId,
-                blogName: input.blogName,
-                createdAt: input.createdAt
-            }
+    async postExists(postId: string): Promise<boolean> {
+        const result = await postsCollection.countDocuments({_id: new ObjectId(postId)});
+        return  result > 0;
+    },
 
+
+    mapToPostViewModel(input: PostDbTypes): PostViewModel {
+        return {
+            id: input._id.toString(),
+            title: input.title,
+            shortDescription: input.shortDescription,
+            content: input.content,
+            blogId: input.blogId,
+            blogName: input.blogName,
+            createdAt: input.createdAt
         }
+    }
 };

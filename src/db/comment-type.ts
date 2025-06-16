@@ -8,5 +8,5 @@ export type CommentDbTypes = {
         userId: string;
         userLogin: string;
     };
-    createdAt: string;
+    createdAt: Date;
 };

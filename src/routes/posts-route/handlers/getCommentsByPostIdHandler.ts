@@ -1,8 +1,15 @@
 import {Request, Response} from "express";
 import {CommentInputQuery, CommentViewPaginated} from "../../../models/commentTypes";
 import {commentQueryRepository} from "../../comments-routes/repositories/comment-query-repository";
+import {postsService} from "../post-service";
 
 export const getCommentsByPostIdHandler = async (req: Request<{postId: string},{},{},CommentInputQuery>, res: Response<CommentViewPaginated>) => {
+    const  postExists = await postsService.checkPostExists(req.params.postId);
+    if (!postExists) {
+        res.sendStatus(404);
+        return
+    }
+
     const commentByPostId = await  commentQueryRepository.getCommentsByPostId(req.params.postId,
         {
             pageNumber: Number(req.query.pageNumber) || 1,
@@ -11,11 +18,6 @@ export const getCommentsByPostIdHandler = async (req: Request<{postId: string},{
             sortDirection: req.query.sortDirection === 'asc' ? 'asc' : 'desc'
         }
     );
-
-    if (!commentByPostId) {
-        res.sendStatus(404);
-        return
-    }
 
     res.status(200).json(commentByPostId);
 };

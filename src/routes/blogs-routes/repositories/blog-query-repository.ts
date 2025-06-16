@@ -48,6 +48,11 @@ export const blogsQueryRepository = {
         return this.mapToBlogViewModel(result);
     },
 
+    async blogExists(blogId: string): Promise<boolean> {
+        const result = await blogsCollection.countDocuments({_id: new ObjectId(blogId)});
+        return  result > 0;
+    },
+
     mapToBlogViewModel(blog: BlogDbTypes): BlogViewModel {
         return {
             id: blog._id.toString(),

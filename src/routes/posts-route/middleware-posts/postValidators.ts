@@ -5,7 +5,7 @@ import {inputErrorsResult} from "../../../middlewares/errors-middleware";
 import {ObjectId} from "mongodb";
 import {ErrorsTypeValidation} from "../../../models/errorsType";
 import {blogsQueryRepository} from "../../blogs-routes/repositories/blog-query-repository";
-import {postQueryRepository} from "../repositories/post-query-repository";
+import {postsQueryRepository} from "../repositories/posts-query-repository";
 
 
 export const basePostInputValidation = [
@@ -45,14 +45,22 @@ export const postInputValidation = [
     }).withMessage('No blog found at existing blogId'),
 ];
 
-export const postExistsValidation = async (req: Request<{id: string}>, res: Response<ErrorsTypeValidation | {}>, next: NextFunction) => {
+export const postExistsValidator = async (req: Request<{id: string}>, res: Response<ErrorsTypeValidation | {}>, next: NextFunction) => {
     if (!ObjectId.isValid(req.params.id)) {
         res.status(400).json({errorsMessage: [{field: 'id', message: 'Invalid post ID'}]});
         return;
     }
-    const post = await postQueryRepository.getPostById(req.params.id);
+    const post = await postsQueryRepository.getPostById(req.params.id);
     if (!post) {
         res.status(404).json({errorsMessage:[ {field: 'id', message: 'Post not found'}]});
+        return;
+    }
+    next();
+};
+
+export const postIdValidator = async (req: Request<{postId: string}>, res: Response<ErrorsTypeValidation | {}>, next: NextFunction) => {
+    if (!ObjectId.isValid(req.params.postId)) {
+        res.status(400).json({errorsMessage: [{field: 'postId', message: 'Invalid postId ID'}]});
         return;
     }
     next();
