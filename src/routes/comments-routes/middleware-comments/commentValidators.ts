@@ -3,16 +3,14 @@ import {ErrorsTypeValidation} from "../../../models/errorsType";
 import {Request, Response, NextFunction} from "express";
 import {ObjectId} from "mongodb";
 import {commentsRepository} from "../repositories/comment-repository";
-import {authMiddleware} from "../../../middlewares/autorization-middleware";
 import {inputErrorsResult} from "../../../middlewares/errors-middleware";
-import {postInputValidation} from "../../posts-route/middleware-posts/postValidators";
 
 export const commentInputValidation = [
     body('comment')
-        .isString().withMessage('Title must be a string')
+        .isString().withMessage('Сomment must be a string')
         .trim()
-        .notEmpty().withMessage('Title must be a string')
-        .isLength({min: 1, max: 30}).withMessage('Title must be no longer than 30 characters'),
+        .notEmpty().withMessage('Сomment must be a string')
+        .isLength({min: 20, max: 300}).withMessage('Сomment must be no longer than 30 characters'),
 ];
 
 export const commentExistsValidation = async (req: Request<{id: string}>,res: Response<ErrorsTypeValidation | {}>, next: NextFunction) => {
@@ -31,7 +29,6 @@ export const commentExistsValidation = async (req: Request<{id: string}>,res: Re
 
 
 export const overallCommentValidation = [
-    authMiddleware,
     ...commentInputValidation,
     inputErrorsResult
 ];

@@ -10,7 +10,7 @@ export type CommentViewModel = {
         userId: string;
         userLogin: string;
     };
-    createdAt: string;
+    createdAt: Date;
 };
 
 export type CommentInputQuery = {

@@ -11,7 +11,6 @@ export const updateCommentHandler = async (req: Request<{ commentId: string }, {
         return;
     }
     const userId = req.userId as string;
-
     const canEdit = await commentsService.checkCommentOwnership(req.params.commentId, userId);
     if (canEdit === false) {
         res.sendStatus(403); //  Проверка прав доступа (403)

@@ -6,8 +6,13 @@ import {commentQueryRepository} from "../../comments-routes/repositories/comment
 
 
 
-export const createCommentByPostIdHandler = async (req: Request<{postId: string},{},CommentInputModel>, res: Response<CommentViewModel | null>) => {
-    const newComment = await commentsService.createComment(req.body, req.params.postId);
+export const createCommentByPostIdHandler = async (req: Request<{postId: string},{},CommentInputModel>, res: Response<CommentViewModel | null | {error: string}>) => {
+    if (!req.userId) {
+        res.status(401).json({error: 'Not authorized'});
+        return
+    }
+    const newComment = await commentsService.createComment(req.body, req.params.postId, req.userId);
+
     if (!newComment)  {
         res.sendStatus(404);
         return

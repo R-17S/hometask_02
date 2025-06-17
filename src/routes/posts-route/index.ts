@@ -8,6 +8,8 @@ import {authMiddleware} from "../../middlewares/autorization-middleware";
 import {deletePostHandler} from "./handlers/deletePostHandler";
 import {getCommentsByPostIdHandler} from "./handlers/getCommentsByPostIdHandler";
 import {createCommentByPostIdHandler} from "./handlers/createCommentByPostIdHandler";
+import {overallCommentValidation} from "../comments-routes/middleware-comments/commentValidators";
+import {authTokenMiddleware} from "../auth-routes/middleware-users/authTokenMiddleware";
 
 
 
@@ -15,7 +17,7 @@ export const postsRouter = Router();
 
 // Роут для получения комментов поста
 postsRouter.get('/:postId/comments', postIdValidator, getCommentsByPostIdHandler);
-postsRouter.post('/:postId/comments', postIdValidator, createCommentByPostIdHandler);
+postsRouter.post('/:postId/comments', authTokenMiddleware, postIdValidator, ...overallCommentValidation, createCommentByPostIdHandler);
 
 // Роуты  для главной posts
 postsRouter.get('/', getPostsHandler);

@@ -4,18 +4,22 @@ import {commentsRepository} from "./repositories/comment-repository";
 import {commentQueryRepository} from "./repositories/comment-query-repository";
 import {ObjectId} from "mongodb";
 import {postsQueryRepository} from "../posts-route/repositories/posts-query-repository";
+import {authRepository} from "../auth-routes/repositories/auth-repositories";
 
 export const commentsService = {
-    async createComment(input: CommentInputModel, postId: string): Promise<ObjectId | undefined> {
+    async createComment(input: CommentInputModel, postId: string, userId: string): Promise<ObjectId | undefined> {
         const comment = await postsQueryRepository.postExists(postId);
         if (!comment) return undefined;
+
+        const user = await authRepository.findUserById(userId);
+        if (!user) return undefined;
 
         const newComment = {
             _id: new ObjectId(),
             content: input.content,
             commentatorInfo: {
-                userId: '4558358',
-                userLogin: 'dndnf'
+                userId: user.userId,
+                userLogin: user.login
             },
             createdAt: new Date(),
         }
