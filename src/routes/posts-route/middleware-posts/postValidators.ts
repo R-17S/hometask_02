@@ -1,6 +1,6 @@
 import {body} from "express-validator";
 import {NextFunction, Response, Request} from "express";
-import {authMiddleware} from "../../../middlewares/autorization-middleware";
+import {authBasicMiddleware} from "../../../middlewares/autorization-middleware";
 import {inputErrorsResult} from "../../../middlewares/errors-middleware";
 import {ObjectId} from "mongodb";
 import {ErrorsTypeValidation} from "../../../models/errorsType";
@@ -67,13 +67,13 @@ export const postIdValidator = async (req: Request<{postId: string}>, res: Respo
 };
 
 export const overallPostValidation = [
-    authMiddleware,
+    authBasicMiddleware,
     ...postInputValidation,
     inputErrorsResult
 ];
 
 export const overallBasePostValidation = [
-    authMiddleware,
+    authBasicMiddleware,
     ...basePostInputValidation,
     inputErrorsResult
 ];

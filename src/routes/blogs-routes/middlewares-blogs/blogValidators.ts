@@ -1,7 +1,7 @@
 import {body} from "express-validator";
 import {NextFunction, Request, Response} from "express";
 import {inputErrorsResult} from "../../../middlewares/errors-middleware";
-import {authMiddleware} from "../../../middlewares/autorization-middleware";
+import {authBasicMiddleware} from "../../../middlewares/autorization-middleware";
 import {ObjectId} from "mongodb";
 import {ErrorsTypeValidation} from "../../../models/errorsType";
 import {blogsQueryRepository} from "../repositories/blog-query-repository";
@@ -49,7 +49,7 @@ export const blogIdValidator = async (req: Request<{blogId: string}>, res: Respo
 };
 
 export const overallBlogValidation = [
-    authMiddleware,
+    authBasicMiddleware,
     ...blogInputValidator,
     inputErrorsResult
 ]

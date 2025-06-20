@@ -4,12 +4,12 @@ import {overallPostValidation, postExistsValidator, postIdValidator} from "./mid
 import {getPostHandler} from "./handlers/getPostHandler";
 import {createPostHandler} from "./handlers/createPostHandler";
 import {updatePostHandler} from "./handlers/updatePostHandler";
-import {authMiddleware} from "../../middlewares/autorization-middleware";
+import {authBasicMiddleware} from "../../middlewares/autorization-middleware";
 import {deletePostHandler} from "./handlers/deletePostHandler";
 import {getCommentsByPostIdHandler} from "./handlers/getCommentsByPostIdHandler";
 import {createCommentByPostIdHandler} from "./handlers/createCommentByPostIdHandler";
 import {overallCommentValidation} from "../comments-routes/middleware-comments/commentValidators";
-import {authTokenMiddleware} from "../auth-routes/middleware-users/authTokenMiddleware";
+import {authJwtMiddleware} from "../auth-routes/middleware-users/authJwtMiddleware";
 
 
 
@@ -17,7 +17,7 @@ export const postsRouter = Router();
 
 // Роут для получения комментов поста
 postsRouter.get('/:postId/comments', postIdValidator, getCommentsByPostIdHandler);
-postsRouter.post('/:postId/comments', authTokenMiddleware, postIdValidator, ...overallCommentValidation, createCommentByPostIdHandler);
+postsRouter.post('/:postId/comments', authJwtMiddleware, postIdValidator, ...overallCommentValidation, createCommentByPostIdHandler);
 
 // Роуты  для главной posts
 postsRouter.get('/', getPostsHandler);
@@ -32,6 +32,6 @@ postsRouter.put('/:id', postExistsValidator, ...overallPostValidation, updatePos
     // postsRepositories.updatePost2(req.params.id, req.body)
     // res.sendStatus(200)
 // });
-postsRouter.delete('/:id', authMiddleware, postExistsValidator, deletePostHandler);
+postsRouter.delete('/:id', authBasicMiddleware, postExistsValidator, deletePostHandler);
 
 

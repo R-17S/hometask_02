@@ -2,6 +2,7 @@ import {UsersViewPaginated, UserInputQuery, UserViewModel} from "../../../models
 import {UserDbTypes} from "../../../db/user-type";
 import {usersCollection} from "../../../db/mongoDB";
 import {ObjectId} from "mongodb";
+import {UserAuthViewModel} from "../../../models/authType";
 
 export const usersQueryRepository = {
     async getAllUsers(params: UserInputQuery): Promise<UsersViewPaginated> {
@@ -60,5 +61,19 @@ export const usersQueryRepository = {
             email: user.email,
             createdAt: user.createdAt
         };
+    },
+
+    async findUserById(userId: string): Promise<UserAuthViewModel | null> {
+        const result = await usersCollection.findOne({ _id: new ObjectId(userId) });
+        if (!result) return null;
+        return this.mapToAuthUserViewModel(result);
+    },
+
+    mapToAuthUserViewModel (user: UserDbTypes): UserAuthViewModel {
+        return {
+            email: user.email,
+            login: user.login,
+            userId: user._id.toString()
+        }
     },
 };

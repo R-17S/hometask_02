@@ -1,5 +1,5 @@
 import {body} from "express-validator";
-import {authMiddleware} from "../../../middlewares/autorization-middleware";
+import {authBasicMiddleware} from "../../../middlewares/autorization-middleware";
 import {inputErrorsResult} from "../../../middlewares/errors-middleware";
 import {NextFunction, Request, Response} from "express";
 import {ErrorsTypeValidation} from "../../../models/errorsType";
@@ -32,7 +32,7 @@ export const userExistsValidator = async  (req: Request<{id: string}>, res: Resp
 };
 
 export const overallUserValidation = [
-    authMiddleware,
+    authBasicMiddleware,
     ...userInputValidator,
     inputErrorsResult
 ]

@@ -22,5 +22,11 @@ export const usersRepository = {
         return user.login === loginOrEmail? 'login' : 'email';
     },
 
+    async findByLoginOrEmail(loginOrEmail: string): Promise<UserDbTypes | null> {
+        return usersCollection.findOne({
+            $or: [{ login: loginOrEmail }, { email: loginOrEmail }]
+        });
+    },
+
 
 };
