@@ -3,7 +3,7 @@ import { Request } from 'express';
 
 export const paginationQueryBlog = (req: Request) => {
     return {
-        searchNameTerm: req.query.searchNameTerm? String(req.query.searchNameTerm) : null,
+        searchNameTerm: req.query.searchNameTerm? String(req.query.searchNameTerm) : null, //придёт 0 что делать ?
         pageNumber: req.query.pageNumber ? +req.query.pageNumber : 1,
         pageSize: req.query.pageSize ? +req.query.pageSize : 10,
         sortBy: req.query.sortBy ? req.query.sortBy.toString() : 'createdAt',

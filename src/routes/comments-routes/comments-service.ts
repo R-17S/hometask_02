@@ -20,6 +20,7 @@ export const commentsService = {
                 userId: user.userId,
                 userLogin: user.login
             },
+            postId,
             createdAt: new Date(),
         }
 
