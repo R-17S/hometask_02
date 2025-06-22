@@ -1,10 +1,12 @@
 
-import {authToken, createString, dataset2} from "../datasets/datasets";
+import {authToken, createString, dataset2, dataset4, post1, user1, user2} from "../datasets/datasets";
 import {PostInputModel} from "../../src/models/postTypes";
 import {SETTINGS} from "../../src/settings";
 import {req} from "../datasets/test-client";
-import {blogsCollection, postsCollection, runDb} from "../../src/db/mongoDB";
+import {blogsCollection, commentsCollection, postsCollection, runDb, usersCollection} from "../../src/db/mongoDB";
 import {ObjectId} from "mongodb";
+import {jwtService} from "../../src/routes/auth-routes/application/jwt-service";
+import {UserDbTypes} from "../../src/db/user-type";
 
 
 describe('/posts', () => {
@@ -366,4 +368,185 @@ describe('/posts', () => {
         console.log(res.text)
         expect(res.text).toEqual('Not authorized')
     });
+
+    it('get should  return 200 and paginated comment', async () => {
+        await postsCollection.deleteMany({});
+        await usersCollection.deleteMany({});
+        await commentsCollection.deleteMany({});
+        await postsCollection.insertMany(dataset4.posts);
+        await usersCollection.insertMany(dataset4.users);
+        await commentsCollection.insertMany(dataset4.comments);
+
+        const testPostId = dataset4.posts[0]._id;
+        const res = await req
+            .get(`/posts/${testPostId}/comments`)
+            .query({
+                pageNumber: 1,
+                pageSize: 10,
+                sortBy: 'createdAt',
+                sortDirection: 'desc'
+            })
+            .expect(200);
+
+        expect(res.body).toEqual({
+            pagesCount: 1,
+            page: 1,
+            pageSize: 10,
+            totalCount: 2,
+            items: expect.arrayContaining([
+                expect.objectContaining({
+                    id: expect.any(String),
+                    content: 'This is first comment content for post 1',
+                    commentatorInfo: {
+                        userId: user1._id.toString(),
+                        userLogin: user1.login
+                    }
+                }),
+                expect.objectContaining({
+                    content: 'Another comment for post 1 with different author',
+                    commentatorInfo: {
+                        userId: user2._id.toString(),
+                        userLogin: user2.login
+                    }
+                })
+            ])
+        });
+    });
+
+    it('get should return 404 if post not found', async () => {
+        const nonExistentId = new ObjectId();
+        const res = await req
+            .get(`/posts/${nonExistentId}/comments`)
+            .expect(404);
+
+        expect(res.body.errorsMessage).toEqual([{
+            field: 'postId',
+            message: 'Post not found'
+        }]);
+    });
+
+    it('get should return 400 if postId is invalid', async () => {
+
+        const res = await req
+            .get(`/posts/${11325745}/comments`)
+            .expect(400)
+
+        expect(res.body.errorsMessage).toEqual([{
+            field: 'postId',
+            message: 'Invalid postId ID'
+        }]);
+    });
+
+    it('get should return 200 and paginated comments', async () => {
+        await postsCollection.deleteMany({});
+        await usersCollection.deleteMany({});
+        await commentsCollection.deleteMany({});
+        await postsCollection.insertMany(dataset4.posts);
+        await usersCollection.insertMany(dataset4.users);
+        // Создаем 15 тестовых коментов
+        const comments = Array.from({length: 15}, (_, i) => ({
+            _id: new ObjectId(),
+            content: `This is comment ${i}`,
+            commentatorInfo: {
+                userId: user1._id.toString(),
+                userLogin: user1.login
+            },
+            postId: post1._id.toString(),
+            createdAt: new Date(2023, 0, i + 1)
+        }));
+        await commentsCollection.insertMany(comments);
+
+        const res = await req
+            .get(`/posts/${dataset4.posts[0]._id}/comments`)
+            .query({
+                pageNumber: 2,
+                pageSize: 5,
+                sortBy: 'createdAt',
+                sortDirection: 'asc'
+            })
+            .expect(200);
+
+        expect(res.body).toEqual({
+            pagesCount: 3, // 15 постов / 5 на странице = 3 страницы
+            page: 2,
+            pageSize: 5,
+            totalCount: 15,
+            items: expect.arrayContaining([
+                expect.objectContaining({content: 'This is comment 5'}),
+                expect.objectContaining({content: 'This is comment 6'}),
+                expect.objectContaining({content: 'This is comment 7'}),
+                expect.objectContaining({content: 'This is comment 8'}),
+                expect.objectContaining({content: 'This is comment 9'}),
+            ])
+        });
+    });
+
+    it('create should comment for existing post', async () => {
+        const newCommentData = {
+            content: 'Valid comment length is 20 characters'
+        };
+        const testComment  = dataset4.comments[0];
+        const token = await jwtService.createJWT({
+            _id: new ObjectId(testComment.commentatorInfo.userId),
+            login: testComment.commentatorInfo.userLogin
+        } as UserDbTypes);
+
+        const res = await req
+            .post(`/posts/${dataset4.posts[0]._id}/comments`)
+            .set('Authorization', `Bearer ${token}`)
+            .send(newCommentData)
+            .expect(201);
+
+        expect(res.body).toEqual({
+            id: expect.any(String),
+            content: newCommentData.content,
+            commentatorInfo: {
+                userId: user1._id.toString(),
+                userLogin: user1.login
+            },
+            createdAt: expect.any(String)
+        });
+    });
+
+    it('create should return 401 without authorization header', async () => {
+
+        const newCommentData = {
+            content: 'Comment content'
+        };
+
+        const res = await req
+            .post(SETTINGS.PATH.POSTS)
+            .send(newCommentData)
+            .expect(401);
+
+        expect(res.text).toBe('Not authorized')
+
+        console.log(res.text)
+    });
+
+    it('create should return 400 for invalid comment data', async () => {
+
+        const incorrectPost = {
+            content: createString(301),
+        };
+
+        const testComment  = dataset4.comments[0];
+        const token = await jwtService.createJWT({
+            _id: new ObjectId(testComment.commentatorInfo.userId),
+            login: testComment.commentatorInfo.userLogin
+        } as UserDbTypes);
+
+        const res = await req
+            .post(`/posts/${dataset4.posts[0]._id}/comments`)
+            .set('Authorization', `Bearer ${token}`)
+            .send(incorrectPost)
+            .expect(400)
+
+        expect(res.body.errorsMessages.length).toEqual(1);
+        expect(res.body.errorsMessages).toEqual([{
+            field: 'content',
+            message: 'Comment must be no longer than 300 characters and shorter than 20'
+        }]);
+    });
+
 });

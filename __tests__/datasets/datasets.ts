@@ -10,17 +10,7 @@ import {UserDbTypes} from "../../src/db/user-type";
 const authString = `${admin_Username}:${admin_Password}`;
 export const authToken = Buffer.from(authString).toString('base64');
 
-// const hashPasswordDataSet = async (plainPassword: string): Promise<string> => {
-//     const salt = await bcrypt.genSalt(10);
-//     return await bcrypt.hash(plainPassword, salt);
-// };
-//
-// (async () => {
-//     console.log(await hashPasswordDataSet('password1'));
-//     console.log(await hashPasswordDataSet('password2'));
-//     console.log(await hashPasswordDataSet('password3'));
-//     console.log(await hashPasswordDataSet('password4'));
-// })();
+
 
 export const createString = (length: number) => {
     let string = "";
@@ -120,20 +110,75 @@ export const user4: UserDbTypes = {
     createdAt: new Date()
 } as const;
 
+export const comment1 = {
+    _id: new ObjectId(),
+    content: 'This is first comment content for post 1',
+    commentatorInfo: {
+        userId: user1._id.toString(),
+        userLogin: user1.login
+    },
+    postId: post1._id.toString(),
+    createdAt: new Date(new Date().setDate(new Date().getDate() - 3)) // 3 дня назад
+} as const;
+
+export const comment2 = {
+    _id: new ObjectId(),
+    content: 'Another comment for post 1 with different author',
+    commentatorInfo: {
+        userId: user2._id.toString(),
+        userLogin: user2.login
+    },
+    postId: post1._id.toString(),
+    createdAt: new Date(new Date().setHours(new Date().getHours() - 2)) // 2 часа назад
+} as const;
+
+export const comment3 = {
+    _id: new ObjectId(),
+    content: 'First comment for post 3 with maximum length comment. ' +
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit...',
+    commentatorInfo: {
+        userId: user3._id.toString(),
+        userLogin: user3.login
+    },
+    postId: post3._id.toString(),
+    createdAt: new Date()
+} as const;
+
+export const comment4 = {
+    _id: new ObjectId(),
+    content: 'Old comment for post 2 from user4',
+    commentatorInfo: {
+        userId: user4._id.toString(),
+        userLogin: user4.login
+    },
+    postId: post2._id.toString(),
+    createdAt: new Date(new Date().setMonth(new Date().getMonth() - 1)) // 1 месяц назад
+} as const;
+
 export const dataset1: dbType = {
     blogs: [blog1],
     posts: [],
-    users: []
+    users: [],
+    comments: []
 } as const
 
 export const dataset2: dbType = {
     blogs: [blog1, blog2],
     posts: [post1],
-    users: []
+    users: [],
+    comments: []
 } as const
 
 export const dataset3: dbType = {
     blogs: [blog1, blog2],
     posts: [post1, post2, post3, post4],
-    users: [user1, user2, user3, user4]
+    users: [user1, user2, user3, user4],
+    comments: []
+} as const;
+
+export const dataset4: dbType = {
+    blogs: [blog1, blog2],
+    posts: [post1, post2, post3, post4],
+    users: [user1, user2, user3, user4],
+    comments: [comment1, comment2, comment3, comment4]
 } as const;

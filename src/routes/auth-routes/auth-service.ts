@@ -1,5 +1,4 @@
 
-import {authRepository} from "./repositories/auth-repositories";
 import bcrypt from "bcrypt";
 import {AuthInputModel} from "../../models/authType";
 import {ErrorType} from "../../models/errorsType";

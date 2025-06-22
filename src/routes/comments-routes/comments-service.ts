@@ -1,10 +1,8 @@
 
 import { CommentInputModel } from "../../models/commentTypes";
 import {commentsRepository} from "./repositories/comment-repository";
-import {commentQueryRepository} from "./repositories/comment-query-repository";
 import {ObjectId} from "mongodb";
 import {postsQueryRepository} from "../posts-route/repositories/posts-query-repository";
-import {authRepository} from "../auth-routes/repositories/auth-repositories";
 import {usersQueryRepository} from "../users-routes/repositories/user-query-repository";
 
 export const commentsService = {

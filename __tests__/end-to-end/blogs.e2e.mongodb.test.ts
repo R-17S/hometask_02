@@ -278,7 +278,7 @@ describe('/blogs', () => {
         });
 
         //expect(dataset1.blogs[0]).toEqual({...dataset1.blogs[0], ...blog})
-    }, 20000);
+    });
 
     it('shouldn\'t update 400', async () => {
         await blogsCollection.deleteMany({});
@@ -366,7 +366,7 @@ describe('/blogs', () => {
         expect(res.text).toEqual('Not authorized')
     });
 
-    it('should get return 200 and paginated posts', async () => {
+    it('get should return 200 and paginated posts', async () => {
         await blogsCollection.deleteMany({});
         await postsCollection.deleteMany({});
         await blogsCollection.insertMany(dataset2.blogs);
@@ -395,34 +395,35 @@ describe('/blogs', () => {
                     content: 'Content 1',
                     blogId: blog1._id.toString(),
                     blogName: 'Blog 1',
+                    //createdAt: expect.any(String)
                 }),
             ])
         });
     });
 
-    it('should get return 404 if blog not found', async () => {
+    it('get should return 404 if blog not found', async () => {
         const nonExistentId = new ObjectId();
         const res = await req
             .get(`/blogs/${nonExistentId}/posts`)
             .expect(404);
 
         expect(res.body.errorsMessage.length).toEqual(1);
-        expect(res.body.errorsMessage[0].field).toEqual('id');
+        expect(res.body.errorsMessage[0].field).toEqual('blogId');
         expect(res.body.errorsMessage[0].message).toEqual('Blog not found');
     });
 
-    it('shouldn\'t get find 400', async () => {
+    it('get should return 400 if blogId is invalid', async () => {
 
         const res = await req
             .get(`/blogs/${1}/posts`)
             .expect(400)
 
         expect(res.body.errorsMessage.length).toEqual(1);
-        expect(res.body.errorsMessage[0].field).toEqual('id');
-        expect(res.body.errorsMessage[0].message).toEqual('Invalid blog ID');
+        expect(res.body.errorsMessage[0].field).toEqual('blogId');
+        expect(res.body.errorsMessage[0].message).toEqual('Invalid blogId ID');
     });
 
-    it('should apply pagination correctly', async () => {
+    it('get should apply pagination correctly', async () => {
         await blogsCollection.deleteMany({});
         await postsCollection.deleteMany({});
         await blogsCollection.insertMany(dataset2.blogs);
@@ -463,7 +464,7 @@ describe('/blogs', () => {
         });
     });
 
-    it('should create post for existing blog', async () => {
+    it('create should post for existing blog', async () => {
         const newPostData = {
             title: 'New Post',
             shortDescription: 'Short description',
@@ -487,7 +488,7 @@ describe('/blogs', () => {
         });
     });
 
-    it('shouldn\'t create 401 not authorized', async () => {
+    it('create should return 401 without authorization header', async () => {
 
         const newPostData = {
             title: 'New Post',
@@ -508,7 +509,7 @@ describe('/blogs', () => {
         expect(blogInDb).toBe(2);
     });
 
-    it('shouldn\'t create 400 bad validation', async () => {
+    it('create should return 400 for invalid post data', async () => {
 
         const incorrectPost = {
             title: createString(31),

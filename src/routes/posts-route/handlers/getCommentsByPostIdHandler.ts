@@ -2,11 +2,12 @@ import {Request, Response} from "express";
 import {CommentInputQuery, CommentViewPaginated} from "../../../models/commentTypes";
 import {commentQueryRepository} from "../../comments-routes/repositories/comment-query-repository";
 import {postsService} from "../post-service";
+import {ErrorType} from "../../../models/errorsType";
 
-export const getCommentsByPostIdHandler = async (req: Request<{postId: string},{},{},CommentInputQuery>, res: Response<CommentViewPaginated>) => {
+export const getCommentsByPostIdHandler = async (req: Request<{postId: string},{},{},CommentInputQuery>, res: Response<CommentViewPaginated | ErrorType>) => {
     const  postExists = await postsService.checkPostExists(req.params.postId);
     if (!postExists) {
-        res.sendStatus(404);
+        res.status(404).json({errorsMessage:[ {field: 'postId', message: 'Post not found'}]});
         return
     }
 

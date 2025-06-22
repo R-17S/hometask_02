@@ -6,6 +6,7 @@ import {postsRouter} from "./routes/posts-route";
 import {testingRouter} from "./routes/testing/app";
 import {usersRouter} from "./routes/users-routes";
 import {authRouter} from "./routes/auth-routes";
+import {commentsRoutes} from "./routes/comments-routes";
 
 
 
@@ -22,6 +23,7 @@ app.use(SETTINGS.PATH.BLOGS, blogsRouter)
 app.use(SETTINGS.PATH.POSTS, postsRouter)
 app.use(SETTINGS.PATH.USERS, usersRouter)
 app.use(SETTINGS.PATH.AUTH, authRouter)
+app.use(SETTINGS.PATH.COMMENTS, commentsRoutes)
 app.use(SETTINGS.PATH.TESTING, testingRouter)
 
 

@@ -2,11 +2,12 @@ import {Request, Response} from "express";
 import {PostsViewPaginated, PostInputQuery} from "../../../models/postTypes";
 import {postsQueryRepository} from "../../posts-route/repositories/posts-query-repository";
 import {blogsService} from "../blog-service";
+import {ErrorType} from "../../../models/errorsType";
 
-export const getPostsByBlogIdHandler = async (req: Request<{blogId:string},{},{},PostInputQuery>, res: Response<PostsViewPaginated>) => {
+export const getPostsByBlogIdHandler = async (req: Request<{blogId:string},{},{},PostInputQuery>, res: Response<PostsViewPaginated | ErrorType>) => {
     const  blogExists = await blogsService.checkBlogExists(req.params.blogId);
     if (!blogExists) {
-        res.sendStatus(404);
+        res.status(404).json({errorsMessage: [{field: 'blogId', message: 'Blog not found'}]});
         return;
     }
 
