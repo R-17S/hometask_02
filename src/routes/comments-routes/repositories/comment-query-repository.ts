@@ -12,7 +12,7 @@ export const commentQueryRepository = {
             sortDirection = 'desc',
         } = params;
 
-        const filter = {postId: new ObjectId(id)};
+        const filter = {postId:id};
         const [totalCount, comments] = await Promise.all([
             commentsCollection.countDocuments(filter),
             commentsCollection

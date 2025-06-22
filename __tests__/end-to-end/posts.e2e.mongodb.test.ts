@@ -387,6 +387,7 @@ describe('/posts', () => {
                 sortDirection: 'desc'
             })
             .expect(200);
+        console.log(res.body);
 
         expect(res.body).toEqual({
             pagesCount: 1,

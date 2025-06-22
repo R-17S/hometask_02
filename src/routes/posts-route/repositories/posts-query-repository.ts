@@ -1,5 +1,5 @@
 import {PostsViewPaginated, PostInputQuery, PostViewModel} from "../../../models/postTypes";
-import {blogsCollection, postsCollection} from "../../../db/mongoDB";
+import {postsCollection} from "../../../db/mongoDB";
 import {PostDbTypes} from "../../../db/post-type";
 import {ObjectId} from "mongodb";
 
