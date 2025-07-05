@@ -1,10 +1,11 @@
-import {CommentInputQuery, CommentViewModel, CommentViewPaginated} from "../../../models/commentTypes";
+import {CommentPaginationQueryResult, CommentViewModel, CommentViewPaginated} from "../../../models/commentTypes";
 import {commentsCollection} from "../../../db/mongoDB";
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 import {CommentDbTypes} from "../../../db/comment-type";
+import {NotFoundException} from "../../../helper/exceptions";
 
 export const commentQueryRepository = {
-    async  getCommentsByPostId (id: string, params: CommentInputQuery): Promise<CommentViewPaginated> {
+    async  getCommentsByPostId (id: string, params: CommentPaginationQueryResult): Promise<CommentViewPaginated> {
         const {
             pageNumber = 1,
             pageSize = 10,
@@ -32,13 +33,13 @@ export const commentQueryRepository = {
         };
     },
 
-    async getCommentById(id: string): Promise<CommentViewModel | null> {
+    async getCommentByIdOrError(id: string): Promise<CommentViewModel> {
         const result = await commentsCollection.findOne({_id: new ObjectId(id)})
-        if (!result) return null;
+        if (!result) throw new NotFoundException("Comment not found");
         return this.mapToCommentViewModel(result);
     },
 
-    mapToCommentViewModel(input: CommentDbTypes): CommentViewModel {
+    mapToCommentViewModel(input: WithId<CommentDbTypes>): CommentViewModel {
         return {
             id: input._id.toString(),
             content: input.content,

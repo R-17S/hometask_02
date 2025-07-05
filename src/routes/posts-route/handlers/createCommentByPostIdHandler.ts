@@ -1,22 +1,15 @@
-import {Request, Response} from "express";
+import {NextFunction, Request, Response} from "express";
 import {CommentInputModel, CommentViewModel} from "../../../models/commentTypes";
 import {commentsService} from "../../comments-routes/comments-service";
 import {commentQueryRepository} from "../../comments-routes/repositories/comment-query-repository";
 
 
-
-
-export const createCommentByPostIdHandler = async (req: Request<{postId: string},{},CommentInputModel>, res: Response<CommentViewModel | null | {error: string}>) => {
-    if (!req.userId) {
-        res.status(401).json({error: 'Not authorized'});
-        return
+export const createCommentByPostIdHandler = async (req: Request<{postId: string},{},CommentInputModel>, res: Response<CommentViewModel | {error: string}>, next: NextFunction) => {
+    try {
+        const newComment = await commentsService.createComment(req.body, req.params.postId, req.userId as string);
+        const commentToView = await commentQueryRepository.getCommentByIdOrError(newComment.toString());
+        res.status(201).json(commentToView);
+    } catch (error) {
+        next(error);
     }
-    const newComment = await commentsService.createComment(req.body, req.params.postId, req.userId);
-
-    if (!newComment)  {
-        res.sendStatus(404);
-        return
-    }
-    const newCommentId = await commentQueryRepository.getCommentById(newComment.toString());
-    res.status(201).send(newCommentId)
-}
+};

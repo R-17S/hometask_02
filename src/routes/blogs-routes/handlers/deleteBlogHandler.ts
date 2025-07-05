@@ -1,7 +1,11 @@
-import {Request, Response} from "express";
+import {NextFunction, Request, Response} from "express";
 import {blogsService} from "../blog-service";
 
-export const deleteBlogHandler = async (req: Request<{id: string}>, res: Response) => {
-    await blogsService.deleteBlog(req.params.id);
-    res.sendStatus(204);
+export const deleteBlogHandler = async (req: Request<{id: string}>, res: Response, next:NextFunction) => {
+    try {
+        await blogsService.deleteBlog(req.params.id);
+        res.sendStatus(204);
+    } catch (error) {
+        next(error);
+    }
 };

@@ -1,18 +1,19 @@
-import {UsersViewPaginated, UserInputQuery, UserViewModel} from "../../../models/userTypes";
+import {UsersViewPaginated, UserViewModel, UserPaginationQueryResult} from "../../../models/userTypes";
 import {UserDbTypes} from "../../../db/user-type";
 import {usersCollection} from "../../../db/mongoDB";
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 import {UserAuthViewModel} from "../../../models/authType";
+import {NotFoundException} from "../../../helper/exceptions";
 
 export const usersQueryRepository = {
-    async getAllUsers(params: UserInputQuery): Promise<UsersViewPaginated> {
+    async getAllUsers(params: UserPaginationQueryResult): Promise<UsersViewPaginated> {
         const {
-            sortBy = 'createdAt',
-            sortDirection = 'desc',
-            pageNumber = 1,
-            pageSize = 10,
-            searchLoginTerm = null,
-            searchEmailTerm = null,
+            sortBy,
+            sortDirection,
+            pageNumber,
+            pageSize,
+            searchLoginTerm,
+            searchEmailTerm,
         } = params;
 
         const filter: any = {};
@@ -54,7 +55,7 @@ export const usersQueryRepository = {
         return this.mapToUserViewModel(result);
     },
 
-    mapToUserViewModel(user: UserDbTypes): UserViewModel {
+    mapToUserViewModel(user: WithId<UserDbTypes>): UserViewModel {
         return {
             id: user._id.toString(),
             login: user.login,
@@ -63,13 +64,13 @@ export const usersQueryRepository = {
         };
     },
 
-    async findUserById(userId: string): Promise<UserAuthViewModel | null> {
+    async findUserById(userId: string): Promise<UserAuthViewModel> {
         const result = await usersCollection.findOne({ _id: new ObjectId(userId) });
-        if (!result) return null;
+        if (!result) throw new NotFoundException("User not found");
         return this.mapToAuthUserViewModel(result);
     },
 
-    mapToAuthUserViewModel (user: UserDbTypes): UserAuthViewModel {
+    mapToAuthUserViewModel (user: WithId<UserDbTypes>): UserAuthViewModel {
         return {
             email: user.email,
             login: user.login,

@@ -19,10 +19,17 @@ export type PostViewModel = {
 }
 
 export type PostInputQuery = {
-    pageNumber?: number;
-    pageSize?: number;
+    pageNumber?: string;
+    pageSize?: string;
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
+};
+
+export type PostPaginationQueryResult = {
+    pageNumber: number;
+    pageSize: number;
+    sortBy: string;
+    sortDirection: 'asc' | 'desc';
 };
 
 export type PostsViewPaginated = {

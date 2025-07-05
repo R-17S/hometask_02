@@ -4,7 +4,7 @@ import {inputErrorsResult} from "../../../middlewares/errors-middleware";
 import {NextFunction, Request, Response} from "express";
 import {ErrorsTypeValidation} from "../../../models/errorsType";
 import {ObjectId} from "mongodb";
-import {usersQueryRepository} from "../repositories/user-query-repository";
+import {usersRepository} from "../repositories/user-repositories";
 
 
 export const userInputValidator = [
@@ -23,7 +23,7 @@ export const userExistsValidator = async  (req: Request<{id: string}>, res: Resp
         res.status(400).json({errorsMessage: [{field: 'id', message: 'Invalid user ID'}]});
         return;
     }
-    const blog = await usersQueryRepository.getUserById(req.params.id);
+    const blog = await usersRepository.userExists(req.params.id);
     if (!blog) {
         res.status(404).json({errorsMessage: [{field: 'id', message: 'User not found'}]});
         return;

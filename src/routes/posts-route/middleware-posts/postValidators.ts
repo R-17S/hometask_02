@@ -4,8 +4,8 @@ import {authBasicMiddleware} from "../../../middlewares/autorization-middleware"
 import {inputErrorsResult} from "../../../middlewares/errors-middleware";
 import {ObjectId} from "mongodb";
 import {ErrorsTypeValidation} from "../../../models/errorsType";
-import {blogsQueryRepository} from "../../blogs-routes/repositories/blog-query-repository";
 import {postsQueryRepository} from "../repositories/posts-query-repository";
+import {blogsService} from "../../blogs-routes/blog-service";
 
 
 export const basePostInputValidation = [
@@ -37,11 +37,7 @@ export const postInputValidation = [
     .isString().withMessage('BlogId must be a string')
     .trim()
     .custom(async blogId => {
-        const blog = await blogsQueryRepository.getBlogById(blogId);
-        if (!blog) {
-            throw new Error('Blog not found');
-        }
-        return true;
+       await blogsService.checkBlogExists(blogId);
     }).withMessage('No blog found at existing blogId'),
 ];
 
@@ -50,7 +46,7 @@ export const postExistsValidator = async (req: Request<{id: string}>, res: Respo
         res.status(400).json({errorsMessage: [{field: 'id', message: 'Invalid post ID'}]});
         return;
     }
-    const post = await postsQueryRepository.getPostById(req.params.id);
+    const post = await postsQueryRepository.getPostByIdOrError(req.params.id);
     if (!post) {
         res.status(404).json({errorsMessage:[ {field: 'id', message: 'Post not found'}]});
         return;

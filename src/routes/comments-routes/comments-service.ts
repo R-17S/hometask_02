@@ -2,19 +2,21 @@
 import { CommentInputModel } from "../../models/commentTypes";
 import {commentsRepository} from "./repositories/comment-repository";
 import {ObjectId} from "mongodb";
-import {postsQueryRepository} from "../posts-route/repositories/posts-query-repository";
 import {usersQueryRepository} from "../users-routes/repositories/user-query-repository";
+import {postsRepository} from "../posts-route/repositories/post-repositories";
+import {ForbiddenException, NotFoundException} from "../../helper/exceptions";
+
+
 
 export const commentsService = {
-    async createComment(input: CommentInputModel, postId: string, userId: string): Promise<ObjectId | undefined> {
-        const comment = await postsQueryRepository.postExists(postId);
-        if (!comment) return undefined;
+    async createComment(input: CommentInputModel, postId: string, userId: string): Promise<ObjectId> {
+        const postExists = await postsRepository.postExists(postId);
+        if (!postExists) throw new NotFoundException("Post not found");
 
         const user = await usersQueryRepository.findUserById(userId);
-        if (!user) return undefined;
+        if (!user) throw new NotFoundException("User not found");
 
         const newComment = {
-            _id: new ObjectId(),
             content: input.content,
             commentatorInfo: {
                 userId: user.userId,
@@ -25,16 +27,17 @@ export const commentsService = {
         }
 
         return await commentsRepository.createComment(newComment);
+
     },
 
     async updateComment(id: string, input: CommentInputModel) {
         return await commentsRepository.updateComment(id, input);
     },
 
-    async checkCommentOwnership(commentId: string, userId: string): Promise<boolean | null> {
+    async checkCommentOwnership(commentId: string, userId: string): Promise<void> {
         const comment = await commentsRepository.getCommentById(commentId);
-        if (!comment) return null
-        return comment?.commentatorInfo.userId === userId;
+        if (!comment) throw new NotFoundException("Comment not found"); // Комментарий не найден
+        if (comment.commentatorInfo.userId !== userId) throw new ForbiddenException('If try edit the comment that is not your own');  //  Проверка прав доступа (403)
     },
 
     async deleteComment(id: string) {

@@ -24,14 +24,6 @@ postsRouter.get('/', getPostsHandler);
 postsRouter.get('/:id', postExistsValidator, getPostHandler);
 postsRouter.post('/', ...overallPostValidation, createPostHandler);
 postsRouter.put('/:id', postExistsValidator, ...overallPostValidation, updatePostHandler );
-// postsRouter.put('/:id', (req:  Request<{id: string},{},PostInputModel>, res: Response<PostViewModel>) => {
-    // const foundBlog = blogsRepository.getBlogById(req.body.blogId);
-    // if(!foundBlog) return res.sendStatus(404)
-    // const foundPost = postsRepositories.getPostById(req.params.id);
-    // if(!foundBlog) return res.sendStatus(404)
-    // postsRepositories.updatePost2(req.params.id, req.body)
-    // res.sendStatus(200)
-// });
 postsRouter.delete('/:id', authBasicMiddleware, postExistsValidator, deletePostHandler);
 
 

@@ -1,10 +1,9 @@
 
 import { Request } from 'express';
-import {BlogInputQuery, BlogPaginationQueryResult} from "../models/blogTypes";
+import {PostInputQuery, PostPaginationQueryResult} from "../models/postTypes";
 
-export const paginationQueryBlog = (req: Request<{},{},{}, BlogInputQuery>): BlogPaginationQueryResult => {
+export const paginationQueryPost = (req: Request<{},{},{}, PostInputQuery>): PostPaginationQueryResult => {
     return {
-        searchNameTerm: req.query.searchNameTerm ? String(req.query.searchNameTerm) : null,
         pageNumber: req.query.pageNumber ? Number(req.query.pageNumber) : 1,
         pageSize: req.query.pageSize ? Number(req.query.pageSize) : 10,
         sortBy: req.query.sortBy ? String(req.query.sortBy) : 'createdAt',

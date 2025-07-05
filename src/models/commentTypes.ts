@@ -14,11 +14,19 @@ export type CommentViewModel = {
 };
 
 export type CommentInputQuery = {
-    pageNumber?: number;
-    pageSize?: number;
+    pageNumber?: string;
+    pageSize?: string;
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
 };
+
+export type CommentPaginationQueryResult = {
+    pageNumber: number;
+    pageSize: number;
+    sortBy: string;
+    sortDirection: 'asc' | 'desc';
+};
+
 
 export type CommentViewPaginated = {
     pagesCount: number;

@@ -1,5 +1,5 @@
-import { ObjectId } from "mongodb";
-import {CommentInputModel, CommentViewModel} from "../../../models/commentTypes";
+import {ObjectId} from "mongodb";
+import {CommentInputModel} from "../../../models/commentTypes";
 import {commentsCollection} from "../../../db/mongoDB";
 import {CommentDbTypes} from "../../../db/comment-type";
 

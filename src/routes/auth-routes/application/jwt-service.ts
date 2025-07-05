@@ -1,9 +1,10 @@
 import {UserDbTypes} from "../../../db/user-type";
 import {SETTINGS} from "../../../settings";
 import jwt from 'jsonwebtoken';
+import {WithId} from "mongodb";
 
 export const jwtService =  {
-    async createJWT(user: UserDbTypes) {
+    async createJWT(user: WithId<UserDbTypes>) {
         return jwt.sign({userId: user._id}, SETTINGS.JWT_SECRET, { expiresIn: '1h' })
     },
 

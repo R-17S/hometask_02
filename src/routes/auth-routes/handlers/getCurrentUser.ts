@@ -5,7 +5,7 @@ import {usersQueryRepository} from "../../users-routes/repositories/user-query-r
 export const getCurrentUser = async (req: Request, res: Response<UserAuthViewModel | { error: string }>) => {
     try {
         if (!req.userId) {
-            res.status(401).json({error: 'Not authorized'});
+            res.status(500).json({error: 'Not authorized'});
             return
         }
         // Even though authJwtMiddleware validates the token and sets userId,

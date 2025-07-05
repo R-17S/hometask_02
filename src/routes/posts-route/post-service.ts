@@ -2,18 +2,17 @@ import {PostByBlogIdInputModel, PostInputModel} from "../../models/postTypes";
 import {ObjectId} from "mongodb";
 import {postsRepository} from "./repositories/post-repositories";
 import {blogsQueryRepository} from "../blogs-routes/repositories/blog-query-repository";
-import {postsQueryRepository} from "./repositories/posts-query-repository";
+import {NotFoundException} from "../../helper/exceptions";
+
 
 
 export const postsService = {
-    async createPost(input: PostInputModel | PostByBlogIdInputModel, blogId?: string): Promise<ObjectId | undefined> {
+    async createPost(input: PostInputModel | PostByBlogIdInputModel, blogId?: string): Promise<ObjectId> {
         const effectiveBlogId = 'blogId' in input ? input.blogId : blogId;
-        if (!effectiveBlogId) return undefined;
-        const blog = await blogsQueryRepository.getBlogById(effectiveBlogId)
-        if (!blog) return undefined
+        if (!effectiveBlogId) throw new NotFoundException('Blog ID is required');
+        const blog = await blogsQueryRepository.getBlogByIdOrError(effectiveBlogId)
 
         const newPost = {
-            _id: new ObjectId(),
             title: input.title,
             shortDescription: input.shortDescription,
             content: input.content,
@@ -33,7 +32,8 @@ export const postsService = {
         return await postsRepository.deletePost(id);
     },
 
-    async checkPostExists(postId: string): Promise<boolean> {
-        return await postsQueryRepository.postExists(postId);
+    async checkPostExists(postId: string): Promise<void> {
+        const result = await postsRepository.postExists(postId);
+        if (!result) throw new NotFoundException('Post not found');
     },
 }

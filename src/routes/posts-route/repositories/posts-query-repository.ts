@@ -1,16 +1,17 @@
-import {PostsViewPaginated, PostInputQuery, PostViewModel} from "../../../models/postTypes";
+import {PostsViewPaginated, PostViewModel, PostPaginationQueryResult} from "../../../models/postTypes";
 import {postsCollection} from "../../../db/mongoDB";
 import {PostDbTypes} from "../../../db/post-type";
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
+import {NotFoundException} from "../../../helper/exceptions";
 
 
 export const postsQueryRepository = {
-    async getPostsByBlogId(id: string, params: PostInputQuery): Promise<PostsViewPaginated> {
+    async getPostsByBlogId(id: string, params: PostPaginationQueryResult): Promise<PostsViewPaginated> {
         const {
-            pageNumber = 1,
-            pageSize = 1,
-            sortBy = 'createdAt',
-            sortDirection = 'desc',
+            pageNumber,
+            pageSize,
+            sortBy,
+            sortDirection,
         } = params;
 
         const filter = {blogId: id};
@@ -34,7 +35,7 @@ export const postsQueryRepository = {
         };
     },
 
-    async getAllPosts(params: PostInputQuery): Promise<PostsViewPaginated> {
+    async getAllPosts(params: PostPaginationQueryResult): Promise<PostsViewPaginated> {
         const {
             pageNumber = 1,
             pageSize = 10,
@@ -61,19 +62,15 @@ export const postsQueryRepository = {
         };
     },
 
-    async getPostById(id: string): Promise<PostViewModel | null> {
+    async getPostByIdOrError(id: string): Promise<PostViewModel> {
         const result = await postsCollection.findOne({_id: new ObjectId(id)});
-        if (!result) return null;
+        if (!result) throw new NotFoundException('Post not found');
         return this.mapToPostViewModel(result);
     },
 
-    async postExists(postId: string): Promise<boolean> {
-        const result = await postsCollection.countDocuments({_id: new ObjectId(postId)});
-        return  result > 0;
-    },
 
 
-    mapToPostViewModel(input: PostDbTypes): PostViewModel {
+    mapToPostViewModel(input: WithId<PostDbTypes>): PostViewModel {
         return {
             id: input._id.toString(),
             title: input.title,

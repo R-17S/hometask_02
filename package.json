@@ -9,7 +9,7 @@
     "watch": "tsc -w",
     "jest": "jest",
     "jest:coverage": "jest -i --coverage",
-    "generate-hashes": "ts-node generate-hashes.ts"
+    "generate-hashes": "ts-node ./__tests__/datasets/generate-hashes.ts"
   },
   "dependencies": {
     "@types/jest": "^29.5.14",

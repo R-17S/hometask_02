@@ -20,11 +20,14 @@ export const postsRepository = {
     },
 
     async deletePost(id: string) {
-    const result = await postsCollection.deleteOne({_id: new ObjectId(id)});
-    return result.deletedCount === 1;
+        const result = await postsCollection.deleteOne({_id: new ObjectId(id)});
+        return result.deletedCount === 1;
     },
 
-
+    async postExists(postId: string): Promise<boolean> {
+        const result = await postsCollection.countDocuments({_id: new ObjectId(postId)});
+        return  result > 0;
+    },
 
     // updatePost2(id: string, input: PostInputModel) {
     //     const blog = blogsRepository.getBlogById(input.blogId)!;

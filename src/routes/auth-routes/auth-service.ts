@@ -4,10 +4,11 @@ import {AuthInputModel} from "../../models/authType";
 import {ErrorType} from "../../models/errorsType";
 import {UserDbTypes} from "../../db/user-type";
 import {usersRepository} from "../users-routes/repositories/user-repositories";
+import {WithId} from "mongodb";
 
 
 export const authService = {
-    async checkCredentials(input: AuthInputModel): Promise<ErrorType | UserDbTypes> {
+    async checkCredentials(input: AuthInputModel): Promise<ErrorType | WithId<UserDbTypes>> {
         const user = await usersRepository.findByLoginOrEmail(input.loginOrEmail);
         if (!user) {
             return {

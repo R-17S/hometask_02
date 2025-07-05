@@ -1,12 +1,16 @@
 import {usersCollection} from "../../../db/mongoDB";
 import {UserDbTypes} from "../../../db/user-type";
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
+import {NotFoundException} from "../../../helper/exceptions";
 
 
 export const usersRepository = {
-    async createUser(newUser: UserDbTypes): Promise<UserDbTypes> {
-        await usersCollection.insertOne(newUser);
-        return newUser;
+    async createUser(newUser: UserDbTypes): Promise<WithId<UserDbTypes>> {
+        const result = await usersCollection.insertOne(newUser);
+        return {
+            ...newUser,
+            _id: result.insertedId
+        };
     },
 
     async deleteUser(id:string) {
@@ -14,19 +18,23 @@ export const usersRepository = {
         return result.deletedCount === 1;
     },
 
-    async isUserExist(loginOrEmail: string): Promise<'login' | 'email' | null> {
+    async isUserExistOrError(loginOrEmail: string): Promise<'login' | 'email'> {
         const user = await usersCollection.findOne({
             $or : [{login: loginOrEmail}, {email: loginOrEmail}]
         });
-        if (!user) return null;
+        if (!user) throw new NotFoundException('User not found');
         return user.login === loginOrEmail? 'login' : 'email';
     },
 
-    async findByLoginOrEmail(loginOrEmail: string): Promise<UserDbTypes | null> {
+    async findByLoginOrEmail(loginOrEmail: string): Promise<WithId<UserDbTypes> | null> {
         return usersCollection.findOne({
             $or: [{ login: loginOrEmail }, { email: loginOrEmail }]
         });
     },
 
+    async userExists(id: string): Promise<boolean> {
+        const result = await usersCollection.countDocuments({_id: new ObjectId(id)});
+        return  result > 0;
+    },
 
 };

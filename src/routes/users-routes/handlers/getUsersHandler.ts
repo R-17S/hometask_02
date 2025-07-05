@@ -1,16 +1,15 @@
-import {Request, Response} from "express";
+import {NextFunction, Request, Response} from "express";
 import {UsersViewPaginated, UserInputQuery} from "../../../models/userTypes";
 import {usersQueryRepository} from "../repositories/user-query-repository";
+import {paginationQueryUser} from "../../../pagination/user-pagination";
 
 
-export const getUsersHandler = async (req: Request<{},{},{},UserInputQuery>, res: Response<UsersViewPaginated>) => {
-    const users = await usersQueryRepository.getAllUsers({
-        sortBy: req.query.sortBy || 'createdAt',
-        sortDirection: req.query.sortDirection === 'asc'? 'asc': 'desc',
-        pageNumber: Number(req.query.pageNumber) || 1,
-        pageSize: Number(req.query.pageSize) || 10,
-        searchLoginTerm: req.query.searchLoginTerm || null,
-        searchEmailTerm: req.query.searchEmailTerm || null,
-    });
-    res.status(200).json(users);
+export const getUsersHandler = async (req: Request<{},{},{},UserInputQuery>, res: Response<UsersViewPaginated>, next:NextFunction) => {
+    try {
+        const {sortBy, sortDirection, pageNumber, pageSize, searchLoginTerm, searchEmailTerm} = paginationQueryUser(req);
+        const users = await usersQueryRepository.getAllUsers({sortBy, sortDirection, pageNumber, pageSize, searchLoginTerm, searchEmailTerm,});
+        res.status(200).json(users);
+    } catch (error) {
+        next(error);
+    }
 }

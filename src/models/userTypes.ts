@@ -16,10 +16,19 @@ export type UserViewModel = {
 export type UserInputQuery = {
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
-    pageNumber?: number;
-    pageSize?: number;
+    pageNumber?: string;
+    pageSize?: string;
     searchLoginTerm?: string | null;
     searchEmailTerm?: string | null;
+};
+
+export type UserPaginationQueryResult = {
+    sortBy: string;
+    sortDirection: 'asc' | 'desc';
+    pageNumber: number;
+    pageSize: number;
+    searchLoginTerm: string | null;
+    searchEmailTerm: string | null;
 };
 
 export type UsersViewPaginated = {

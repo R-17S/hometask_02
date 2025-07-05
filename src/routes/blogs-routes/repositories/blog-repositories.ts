@@ -24,4 +24,9 @@ export const blogsRepository = {
         return result.deletedCount === 1
     },
 
+    async blogExists(id: string): Promise<boolean> {
+        const result = await blogsCollection.countDocuments({_id: new ObjectId(id)});
+        return  result > 0;
+    },
+
 };

@@ -1,4 +1,4 @@
-import express, {Request, Response} from "express";
+import express, { Request, Response} from "express";
 import cors from "cors"
 import {SETTINGS} from "./settings";
 import {blogsRouter} from "./routes/blogs-routes";
@@ -7,6 +7,7 @@ import {testingRouter} from "./routes/testing/app";
 import {usersRouter} from "./routes/users-routes";
 import {authRouter} from "./routes/auth-routes";
 import {commentsRoutes} from "./routes/comments-routes";
+import {HttpException} from "./helper/exceptions";
 
 
 
@@ -25,5 +26,16 @@ app.use(SETTINGS.PATH.USERS, usersRouter)
 app.use(SETTINGS.PATH.AUTH, authRouter)
 app.use(SETTINGS.PATH.COMMENTS, commentsRoutes)
 app.use(SETTINGS.PATH.TESTING, testingRouter)
+app.use((error: unknown, res: Response) => {
+    if (error instanceof HttpException) {
+        res.status(error.status).send(error.message)
+        return
+    }
+
+    console.error('Internal Server Error', error);
+    res.sendStatus(500)
+    return
+});
+
 
 

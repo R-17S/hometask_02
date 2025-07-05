@@ -1,35 +1,24 @@
 import {UserInputModel, UserViewModel} from "../../models/userTypes";
-import {ObjectId} from "mongodb";
+import {WithId} from "mongodb";
 import {UserDbTypes} from "../../db/user-type";
 import {usersRepository} from "./repositories/user-repositories";
-import {ErrorType} from "../../models/errorsType";
 import bcrypt from "bcrypt";
+import {BadRequestException} from "../../helper/exceptions";
 
 
 
 export const usersService = {
-    async createUser(input: UserInputModel): Promise<UserViewModel | ErrorType> {
-        const loginExists = await usersRepository.isUserExist(input.login);
-        const emailExists = await usersRepository.isUserExist(input.email);
+    async createUser(input: UserInputModel): Promise<UserViewModel> {
+        const loginExists = await usersRepository.isUserExistOrError(input.login);
+        const emailExists = await usersRepository.isUserExistOrError(input.email);
 
-        const errors: ErrorType['errorsMessage'] = [];
-
-        if (loginExists) {
-            errors.push({field: 'login', message: 'login should be unique'});
-        }
-        if (emailExists) {
-            errors.push({field: 'email', message: 'email should be unique'});
-        }
-
-        if (errors.length > 0) {
-            return { errorsMessage: errors };
-        }
+        if (loginExists) throw new BadRequestException('Login should be unique')
+        if (emailExists) throw new BadRequestException('Email should be unique')
 
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(input.password, salt);
 
         const newUser = {
-            _id: new ObjectId(),
             login: input.login,
             password: passwordHash,
             email: input.email,
@@ -44,7 +33,7 @@ export const usersService = {
         return await usersRepository.deleteUser(id);
     },
 
-    mapToUserViewModel(user: UserDbTypes): UserViewModel {
+    mapToUserViewModel(user: WithId<UserDbTypes>): UserViewModel {
         return {
             id: user._id.toString(),
             login: user.login,

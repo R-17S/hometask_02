@@ -19,19 +19,19 @@ export type BlogViewModel = {
 
 export type BlogInputQuery = {
     searchNameTerm?: string | null;
-    pageNumber?: number;
-    pageSize?: number;
+    pageNumber?: string;
+    pageSize?: string;
     sortBy?: string;
-    sortDirection?: 'asc' | 'desc';
+    sortDirection?: string;
 };
-//
-// export type PaginationQueryResult = {
-//     searchNameTerm: string | null;
-//     pageNumber: number;
-//     pageSize: number;
-//     sortBy: string;
-//     sortDirection: 'asc' | 'desc';
-// };
+
+export type BlogPaginationQueryResult = {
+    searchNameTerm: string | null;
+    pageNumber: number;
+    pageSize: number;
+    sortBy: string;
+    sortDirection: 'asc' | 'desc';
+};
 
 export type BlogsViewPaginated = {
     pagesCount: number;
