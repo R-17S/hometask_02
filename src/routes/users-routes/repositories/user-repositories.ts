@@ -32,9 +32,44 @@ export const usersRepository = {
         });
     },
 
+    async getUserByLoginOrEmail(login: string, email: string): Promise<UserDbTypes | null> {
+        return usersCollection.findOne({
+            $or: [{ login }, { email }]
+        });
+    },
+
+    async findByConfirmationCode(code: string): Promise<WithId<UserDbTypes> | null> {
+        return usersCollection.findOne({
+            'emailConfirmation.confirmationCode': code
+        });
+    },
+
+    async updateConfirmationStatus(userId: string): Promise<void> {
+        await usersCollection.updateOne(
+            { _id: new ObjectId(userId) },
+            { $set: { 'emailConfirmation.isConfirmed': true } }
+        );
+    },
+
     async userExists(id: string): Promise<boolean> {
         const result = await usersCollection.countDocuments({_id: new ObjectId(id)});
         return  result > 0;
     },
+
+    async findByEmail(email: string): Promise<WithId<UserDbTypes> | null> {
+        return usersCollection.findOne({ email });
+    },
+
+    async updateConfirmationCode(userId: string, newCode: string, newExpirationDate: Date): Promise<void> {
+        await usersCollection.updateOne(
+            { _id: new ObjectId(userId) },
+            {
+                $set: {
+                    'emailConfirmation.confirmationCode': newCode,
+                    'emailConfirmation.expirationDate': newExpirationDate
+                }
+            }
+        );
+    }
 
 };

@@ -3,12 +3,14 @@ import {BlogInputModel, BlogViewModel} from "../../models/blogTypes";
 import {ObjectId, WithId} from "mongodb";
 import {blogsRepository} from "./repositories/blog-repositories";
 import {NotFoundException} from "../../helper/exceptions";
+import {ResultObject} from "../../helper/resultClass";
+import {Result} from "../../helper/resultTypes";
 
 
 
 
 export const blogsService = {
-    async createBlog(input: BlogInputModel): Promise<ObjectId> {
+    async createBlog(input: BlogInputModel): Promise<Result<ObjectId>> {
         const newBlog = {
             name: input.name,
             description: input.description,
@@ -16,12 +18,14 @@ export const blogsService = {
             createdAt: new Date(),
             isMembership: false
         }
-        return await blogsRepository.createBlog(newBlog);
+        const createdId = await blogsRepository.createBlog(newBlog);
+        return ResultObject.Success(createdId);
     },
 
     async updateBlog(id: string, input: BlogInputModel) {
         return await blogsRepository.updateBlog(id, input);
     },
+
 
     async deleteBlog(id: string) {
         return await blogsRepository.deleteBlog(id);

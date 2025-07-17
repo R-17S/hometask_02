@@ -12,6 +12,25 @@ export const authInputValidator = [
         .isLength({ min: 6, max: 20 }).withMessage('Password must be between 6 and 20 characters')
 ];
 
+export const registrationValidator = [
+    body('login')
+        .trim()
+        .notEmpty().withMessage('Login is required')
+        .isLength({ min: 3, max: 10 }).withMessage('Login must be 3-10 characters')
+        .matches(/^[a-zA-Z0-9_-]*$/).withMessage('Login contains invalid characters'),
+
+    body('password')
+        .trim()
+        .notEmpty().withMessage('Password is required')
+        .isLength({ min: 6, max: 20 }).withMessage('Password must be 6-20 characters'),
+
+    body('email')
+        .trim()
+        .notEmpty().withMessage('Email is required')
+        .isEmail().withMessage('Invalid email format')
+        .matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/).withMessage('Email pattern mismatch')
+];
+
 export const overallAuthValidation = [
     //authMiddleware,
     ...authInputValidator,

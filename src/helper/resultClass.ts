@@ -1,5 +1,5 @@
-import {ResultStatus} from "../models/result-status.enum";
-import {ExtensionType, Result} from "../models/resultTypes";
+import {ResultStatus} from "./result-status.enum";
+import {ExtensionType, Result} from "./resultTypes";
 
 
 export class ResultObject {
@@ -32,6 +32,15 @@ export class ResultObject {
     static Forbidden(message: string, extensions: ExtensionType[] = []): Result<null> {
         return {
             status: ResultStatus.Forbidden,
+            errorMessage: message,
+            extensions,
+            data: null
+        };
+    }
+
+    static ServerError(message: string, extensions: ExtensionType[] = []): Result<null> {
+        return {
+            status: ResultStatus.ServerError,
             errorMessage: message,
             extensions,
             data: null

@@ -14,3 +14,19 @@ export type UserAuthViewModel = {
     login: string;
     userId: string;
 };
+
+export type ConfirmRegistrationInputModel = {
+    code: string;
+};
+
+export type ConfirmRegistrationViewModel = {
+    isConfirmed: boolean;
+};
+
+export type ResendConfirmationEmailInputModel = {
+    email: string;
+};
+
+export type ResendConfirmationViewModel = {
+    isEmailResent: boolean;
+};

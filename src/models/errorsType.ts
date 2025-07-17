@@ -8,6 +8,3 @@ export type ErrorsTypeValidation = {
     errorsMessage: {field: FieldNamesType, message: string};
 }
 
-export type ErrorType = {
- errorsMessage: Array<{ field: string, message: string }>
-}

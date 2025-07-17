@@ -49,9 +49,9 @@ export const usersQueryRepository = {
         };
     },
 
-    async getUserById(id: string): Promise<UserViewModel | null>  {
+    async findUserById(id: string): Promise<UserViewModel | null>  {
         const result = await usersCollection.findOne({ _id: new ObjectId(id) });
-        if (!result) return null;
+        if (!result) throw new NotFoundException("User not found");
         return this.mapToUserViewModel(result);
     },
 
@@ -64,7 +64,7 @@ export const usersQueryRepository = {
         };
     },
 
-    async findUserById(userId: string): Promise<UserAuthViewModel> {
+    async getUserByIdOrError(userId: string): Promise<UserAuthViewModel> {
         const result = await usersCollection.findOne({ _id: new ObjectId(userId) });
         if (!result) throw new NotFoundException("User not found");
         return this.mapToAuthUserViewModel(result);

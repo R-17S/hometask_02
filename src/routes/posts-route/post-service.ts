@@ -17,7 +17,7 @@ export const postsService = {
             shortDescription: input.shortDescription,
             content: input.content,
             blogId: effectiveBlogId,
-            blogName: blog.name,
+            blogName: blog.data!.name,
             createdAt: new Date(),
         };
 
