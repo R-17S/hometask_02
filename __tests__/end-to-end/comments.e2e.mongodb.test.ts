@@ -3,7 +3,7 @@ import {dataset3, dataset4} from "../datasets/datasets";
 import {SETTINGS} from "../../src/settings";
 import {req} from "../datasets/test-client";
 import {blogsCollection, commentsCollection, postsCollection, runDb, usersCollection} from "../../src/db/mongoDB";
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 import {jwtService} from "../../src/routes/auth-routes/application/jwt-service";
 import {UserDbTypes} from "../../src/db/user-type";
 import jwt from "jsonwebtoken";
@@ -38,7 +38,7 @@ describe('/comments', () => {
         const token = await jwtService.createJWT({
             _id: new ObjectId(testComment.commentatorInfo.userId),
             login: testComment.commentatorInfo.userLogin
-        } as UserDbTypes);
+        } as WithId<UserDbTypes>);
 
         const res = await req
             .put(`${SETTINGS.PATH.COMMENTS}/${testComment._id.toString()}`)
@@ -67,7 +67,7 @@ describe('/comments', () => {
         const token = await jwtService.createJWT({
             _id: new ObjectId(otherUser._id),
             login: otherUser.login
-        } as UserDbTypes);
+        } as WithId<UserDbTypes>);
 
         await req
             .put(`${SETTINGS.PATH.COMMENTS}/${commentId}`)
@@ -81,7 +81,7 @@ describe('/comments', () => {
         const token = await jwtService.createJWT({
             _id: new ObjectId(user._id),
             login: user.login
-        } as UserDbTypes);
+        } as WithId<UserDbTypes>);
 
         await req
             .put(SETTINGS.PATH.COMMENTS + '/65d33a1b8c7d4e3f1a2b3c99')
@@ -95,7 +95,7 @@ describe('/comments', () => {
         const token = await jwtService.createJWT({
             _id: new ObjectId(commentatorInfo.userId),
             login: commentatorInfo.userLogin
-        } as UserDbTypes);
+        } as WithId<UserDbTypes>);
 
         const response = await req
             .put(`${SETTINGS.PATH.COMMENTS}/${commentId}`)
@@ -107,7 +107,7 @@ describe('/comments', () => {
             errorsMessages: [
                 {
                     field: 'content',
-                    message: 'Comment must be no longer than 20 characters'
+                    message: 'Comment must be no longer than 300 characters and shorter than 20'
                 }
             ]
         });
@@ -159,9 +159,10 @@ describe('/comments', () => {
 
     it('get should return 404 when comment does not exist', async () => {
         const nonExistingCommentId = new ObjectId().toString();
-        await req
+        const res = await req
             .get(`${SETTINGS.PATH.COMMENTS}/${nonExistingCommentId}`)
             .expect(404);
+        console.log(res)
     });
 
     it('get should return 400 when comment id is invalid', async () => {
@@ -191,7 +192,7 @@ describe('/comments', () => {
         const token = await jwtService.createJWT({
             _id: new ObjectId(testComment.commentatorInfo.userId),
             login: testComment.commentatorInfo.userLogin
-        } as UserDbTypes);
+        } as WithId<UserDbTypes>);
 
         await req
             .delete(`${SETTINGS.PATH.COMMENTS}/${testComment._id.toString()}`)
@@ -217,7 +218,7 @@ describe('/comments', () => {
         const token = await jwtService.createJWT({
             _id: new ObjectId(testComment.commentatorInfo.userId),
             login: testComment.commentatorInfo.userLogin
-        } as UserDbTypes);
+        } as WithId<UserDbTypes>);
         const res = await req
             .delete(`${SETTINGS.PATH.COMMENTS}/${invalidCommentId}`)
             .set('Authorization', `Bearer ${token}`)
@@ -240,7 +241,7 @@ describe('/comments', () => {
         const token = await jwtService.createJWT({
             _id: new ObjectId(testComment.commentatorInfo.userId),
             login: testComment.commentatorInfo.userLogin
-        } as UserDbTypes);
+        } as WithId<UserDbTypes>);
         await req
             .delete(`${SETTINGS.PATH.COMMENTS}/${nonExistentId}`)
             .set('Authorization', `Bearer ${token}`)

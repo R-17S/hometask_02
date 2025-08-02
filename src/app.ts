@@ -1,4 +1,4 @@
-import express, { Request, Response} from "express";
+import express, {NextFunction, Request, Response} from "express";
 import cors from "cors"
 import {SETTINGS} from "./settings";
 import {blogsRouter} from "./routes/blogs-routes";
@@ -26,7 +26,7 @@ app.use(SETTINGS.PATH.USERS, usersRouter)
 app.use(SETTINGS.PATH.AUTH, authRouter)
 app.use(SETTINGS.PATH.COMMENTS, commentsRoutes)
 app.use(SETTINGS.PATH.TESTING, testingRouter)
-app.use((error: unknown, res: Response) => {
+app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
     if (error instanceof HttpException) {
         res.status(error.status).send(error.message)
         return

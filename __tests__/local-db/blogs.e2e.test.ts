@@ -1,4 +1,4 @@
-import {db, setDB} from "../../src/db/db";
+import {db, setDB} from "./db";
 import {BlogInputModel} from "../../src/models/blogTypes";
 import {req} from "../datasets/test-client";
 import {SETTINGS} from "../../src/settings";

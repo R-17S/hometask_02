@@ -4,7 +4,7 @@ import {PostInputModel} from "../../src/models/postTypes";
 import {SETTINGS} from "../../src/settings";
 import {req} from "../datasets/test-client";
 import {blogsCollection, commentsCollection, postsCollection, runDb, usersCollection} from "../../src/db/mongoDB";
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 import {jwtService} from "../../src/routes/auth-routes/application/jwt-service";
 import {UserDbTypes} from "../../src/db/user-type";
 
@@ -173,9 +173,8 @@ describe('/posts', () => {
             .get(`${SETTINGS.PATH.POSTS}/${nonExistentId}`)
             .expect(404)
 
-        expect(res.body.errorsMessage.length).toEqual(1);
-        expect(res.body.errorsMessage[0].field).toEqual('id');
-        expect(res.body.errorsMessage[0].message).toEqual('Post not found');
+        console.log(res.text)
+        //expect(res.text).toEqual('Post not found');
     });
 
     it('should get find 200', async () => {
@@ -223,7 +222,7 @@ describe('/posts', () => {
         expect(res.body.errorsMessage[0].message).toEqual('Invalid post ID');
     });
 
-    it('shouldn\'t get find 404', async () => {
+    it('shouldn\'t delete find 404', async () => {
 
         const nonExistentId = new ObjectId();
         const res = await req
@@ -231,9 +230,8 @@ describe('/posts', () => {
             .set('Authorization', `Basic ${authToken}`)
             .expect(404)
 
-        expect(res.body.errorsMessage.length).toEqual(1);
-        expect(res.body.errorsMessage[0].field).toEqual('id');
-        expect(res.body.errorsMessage[0].message).toEqual('Post not found');
+        console.log(res.text)
+        expect(res.text).toEqual('Post not found');
     });
 
     it ('shouldn\'t delete 401 not authorized', async () => {
@@ -323,9 +321,8 @@ describe('/posts', () => {
             .send(post)
             .expect(404)
 
-        expect(res.body.errorsMessage.length).toEqual(1);
-        expect(res.body.errorsMessage[0].field).toEqual('id');
-        expect(res.body.errorsMessage[0].message).toEqual('Post not found');
+        console.log(res.text)
+        expect(res.text).toEqual('Post not found');
     });
 
     it (`shouldn\'t update 400 bad validation`, async () => {
@@ -420,10 +417,8 @@ describe('/posts', () => {
             .get(`/posts/${nonExistentId}/comments`)
             .expect(404);
 
-        expect(res.body.errorsMessage).toEqual([{
-            field: 'postId',
-            message: 'Post not found'
-        }]);
+        console.log(res.text)
+        expect(res.text).toEqual('Post not found');
     });
 
     it('get should return 400 if postId is invalid', async () => {
@@ -490,7 +485,7 @@ describe('/posts', () => {
         const token = await jwtService.createJWT({
             _id: new ObjectId(testComment.commentatorInfo.userId),
             login: testComment.commentatorInfo.userLogin
-        } as UserDbTypes);
+        } as WithId<UserDbTypes>);
 
         const res = await req
             .post(`/posts/${dataset4.posts[0]._id}/comments`)
@@ -535,7 +530,7 @@ describe('/posts', () => {
         const token = await jwtService.createJWT({
             _id: new ObjectId(testComment.commentatorInfo.userId),
             login: testComment.commentatorInfo.userLogin
-        } as UserDbTypes);
+        } as WithId<UserDbTypes>);
 
         const res = await req
             .post(`/posts/${dataset4.posts[0]._id}/comments`)

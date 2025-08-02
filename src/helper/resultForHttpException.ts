@@ -6,7 +6,7 @@ import {Response} from "express";
 export function resultForHttpException<T>(res: Response, result: Result<T>) {
     switch (result.status) {
         case ResultStatus.Success:
-            return res.status(201).json(result);
+            return res.status(200).json(result.data);
         case ResultStatus.Unauthorized:
             return res.status(401).json(result);
         case ResultStatus.NotFound:

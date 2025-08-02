@@ -1,6 +1,5 @@
 
 
-
 export type UserDbTypes = {
     login: string;
     email: string;

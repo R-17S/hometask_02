@@ -2,7 +2,7 @@
 import {AuthInputModel} from "../../models/authType";
 import {UserDbTypes} from "../../db/user-type";
 import {usersRepository} from "../users-routes/repositories/user-repositories";
-import {WithId} from "mongodb";
+import {ObjectId, OptionalId, WithId, WithoutId} from "mongodb";
 import {BadRequestException, NotFoundException, UnauthorizedException} from "../../helper/exceptions";
 import {randomUUID} from "node:crypto";
 import {bcryptService} from "./application/bcrypt-service";

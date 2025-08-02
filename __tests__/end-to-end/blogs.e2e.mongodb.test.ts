@@ -406,10 +406,10 @@ describe('/blogs', () => {
         const res = await req
             .get(`/blogs/${nonExistentId}/posts`)
             .expect(404);
+        console.log(res.text)
 
-        expect(res.body.errorsMessage.length).toEqual(1);
-        expect(res.body.errorsMessage[0].field).toEqual('blogId');
-        expect(res.body.errorsMessage[0].message).toEqual('Blog not found');
+
+        expect(res.text).toEqual('Blog not found');
     });
 
     it('get should return 400 if blogId is invalid', async () => {

@@ -21,7 +21,7 @@ describe('/auth', () => {
             _id: new ObjectId(),
             login: correctUser.loginOrEmail,
             email: 'testuser@example.com',
-            password: passwordHash,
+            passwordHash: passwordHash,
             createdAt: new Date()
         });
     });

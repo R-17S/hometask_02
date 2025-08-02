@@ -1,5 +1,6 @@
 
 
+
 export type PostDbTypes = {
     title: string;
     shortDescription: string;
@@ -7,4 +8,4 @@ export type PostDbTypes = {
     blogId: string;
     blogName: string;
     createdAt: Date;
-}
+};

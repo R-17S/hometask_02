@@ -33,6 +33,7 @@
     "@types/node": "^22.13.11",
     "@types/nodemailer": "^6.4.17",
     "date-fns": "^4.1.0",
+    "mongodb-memory-server": "^10.1.4",
     "nodemailer": "^7.0.5",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",

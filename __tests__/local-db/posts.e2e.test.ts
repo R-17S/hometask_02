@@ -1,4 +1,4 @@
-import {db, setDB} from "../../src/db/db";
+import {db, setDB} from "./db";
 import {authToken, createString, dataset1, dataset2} from "../datasets/datasets";
 import {PostInputModel} from "../../src/models/postTypes";
 import {SETTINGS} from "../../src/settings";

@@ -2,11 +2,10 @@ import {BlogViewModel, BlogsViewPaginated, BlogPaginationQueryResult} from "../.
 import {blogsCollection} from "../../../db/mongoDB";
 import {ObjectId, WithId} from "mongodb";
 import {BlogDbTypes} from "../../../db/blog-type";
-import {Result} from "../../../helper/resultTypes";
-import {ResultObject} from "../../../helper/resultClass";
+import {NotFoundException} from "../../../helper/exceptions";
 
 export const blogsQueryRepository = {
-    async getAllBlogs(params: BlogPaginationQueryResult): Promise<Result<BlogsViewPaginated>> {
+    async getAllBlogs(params: BlogPaginationQueryResult): Promise<BlogsViewPaginated> {
         const {
             searchNameTerm,
             pageNumber,
@@ -35,29 +34,20 @@ export const blogsQueryRepository = {
                 .toArray()
         ]);
 
-        return ResultObject.Success({
+        return {
             pagesCount: Math.ceil(totalCount / pageSize),
             page: pageNumber,
             pageSize,
             totalCount,
             items: blogs.map(this.mapToBlogViewModel),
-        });
+        };
     },
 
-    async getBlogByIdOrError(id: string): Promise<Result<BlogViewModel | null>>  {
+    async getBlogByIdOrError(id: string): Promise<BlogViewModel> {
         const result = await blogsCollection.findOne({ _id: new ObjectId(id) });
-        if (!result) {
-            return ResultObject.NotFound(
-                'Blog not found',
-                [{ field: 'id', message: 'Blog with this id does not exist' }]
-            );
-
-        }
-        return ResultObject.Success(this.mapToBlogViewModel(result));
-
+        if (!result) throw new NotFoundException('Blog not found');
+        return this.mapToBlogViewModel(result);
     },
-
-
 
     mapToBlogViewModel(blog: WithId<BlogDbTypes>): BlogViewModel {
         return {

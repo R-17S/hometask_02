@@ -2,7 +2,6 @@ import {UserInputModel, UserViewModel} from "../../models/userTypes";
 import {WithId} from "mongodb";
 import {UserDbTypes} from "../../db/user-type";
 import {usersRepository} from "./repositories/user-repositories";
-import bcrypt from "bcrypt";
 import {BadRequestException} from "../../helper/exceptions";
 import {bcryptService} from "../auth-routes/application/bcrypt-service";
 

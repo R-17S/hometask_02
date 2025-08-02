@@ -1,10 +1,9 @@
 import {BlogDbTypes} from "../../src/db/blog-type";
 import {PostDbTypes} from "../../src/db/post-type";
-import {dbType} from "../../src/db/db";
 import {admin_Password, admin_Username} from "../../src/middlewares/autorization-middleware";
 import {ObjectId, WithId} from "mongodb";
 import {UserDbTypes} from "../../src/db/user-type";
-
+import {CommentDbTypes} from "../../src/db/comment-type";
 
 
 const authString = `${admin_Username}:${admin_Password}`;
@@ -78,7 +77,7 @@ export const post4: WithId<PostDbTypes> = {
     createdAt: new Date()
 } as const;
 
-export const user1: WithId<UserDbTypes> = {
+export const user1: WithId<UserDbTypes>= {
     _id: new ObjectId(),
     login: 'user1',
     email: 'user1@example.com',
@@ -110,7 +109,7 @@ export const user4: WithId<UserDbTypes> = {
     createdAt: new Date()
 } as const;
 
-export const comment1 = {
+export const comment1: WithId<CommentDbTypes> = {
     _id: new ObjectId(),
     content: 'This is first comment content for post 1',
     commentatorInfo: {
@@ -121,7 +120,7 @@ export const comment1 = {
     createdAt: new Date(new Date().setDate(new Date().getDate() - 3)) // 3 дня назад
 } as const;
 
-export const comment2 = {
+export const comment2: WithId<CommentDbTypes> = {
     _id: new ObjectId(),
     content: 'Another comment for post 1 with different author',
     commentatorInfo: {
@@ -132,7 +131,7 @@ export const comment2 = {
     createdAt: new Date(new Date().setHours(new Date().getHours() - 2)) // 2 часа назад
 } as const;
 
-export const comment3 = {
+export const comment3: WithId<CommentDbTypes> = {
     _id: new ObjectId(),
     content: 'First comment for post 3 with maximum length comment. ' +
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit...',
@@ -144,7 +143,7 @@ export const comment3 = {
     createdAt: new Date()
 } as const;
 
-export const comment4 = {
+export const comment4: WithId<CommentDbTypes> = {
     _id: new ObjectId(),
     content: 'Old comment for post 2 from user4',
     commentatorInfo: {
@@ -155,28 +154,28 @@ export const comment4 = {
     createdAt: new Date(new Date().setMonth(new Date().getMonth() - 1)) // 1 месяц назад
 } as const;
 
-export const dataset1: dbType = {
+export const dataset1 = {
     blogs: [blog1],
     posts: [],
     users: [],
     comments: []
 } as const
 
-export const dataset2: dbType = {
+export const dataset2 = {
     blogs: [blog1, blog2],
     posts: [post1],
     users: [],
     comments: []
 } as const
 
-export const dataset3: dbType = {
+export const dataset3 = {
     blogs: [blog1, blog2],
     posts: [post1, post2, post3, post4],
     users: [user1, user2, user3, user4],
     comments: []
 } as const;
 
-export const dataset4: dbType = {
+export const dataset4 = {
     blogs: [blog1, blog2],
     posts: [post1, post2, post3, post4],
     users: [user1, user2, user3, user4],

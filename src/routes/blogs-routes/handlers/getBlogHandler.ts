@@ -1,19 +1,13 @@
-import {Request, Response} from "express";
+import {NextFunction, Request, Response} from "express";
 import {BlogViewModel} from "../../../models/blogTypes";
 import {blogsQueryRepository} from "../repositories/blog-query-repository";
-import {resultForHttpException} from "../../../helper/resultForHttpException";
-import {ResultObject} from "../../../helper/resultClass";
 
-export const getBlogHandler = async (req: Request<{id: string}>, res: Response<BlogViewModel>) => {
+
+export const getBlogHandler = async (req: Request<{id: string}>, res: Response<BlogViewModel>, next:NextFunction) => {
     try {
         const foundBlog = await blogsQueryRepository.getBlogByIdOrError(req.params.id);
-        resultForHttpException(res, foundBlog);
+        res.status(200).send(foundBlog);
     } catch (error) {
-        const errorResult = ResultObject.ServerError(
-            'Get failed',
-            [{field: null, message: 'Database error'}]
-        );
-        resultForHttpException(res, errorResult);
-
+        next(error);
     }
 };

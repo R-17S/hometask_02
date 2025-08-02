@@ -7,6 +7,7 @@ import {SETTINGS} from "../settings";
 import {CommentDbTypes} from "./comment-type";
 dotenv.config();
 
+
 export let blogsCollection: Collection<BlogDbTypes>
 export let postsCollection: Collection<PostDbTypes>
 export let usersCollection: Collection<UserDbTypes>

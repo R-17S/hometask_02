@@ -2,6 +2,8 @@ import {NextFunction, Request, Response} from 'express';
 import {PostByBlogIdInputModel, PostViewModel} from "../../../models/postTypes";
 import {postsService} from "../../posts-route/post-service";
 import {postsQueryRepository} from "../../posts-route/repositories/posts-query-repository";
+import {ResultStatus} from "../../../helper/result-status.enum";
+import {resultForHttpException} from "../../../helper/resultForHttpException";
 
 export const createPostByBlogIdHandler = async (req: Request<{blogId:string},{},PostByBlogIdInputModel>, res: Response<PostViewModel>, next:NextFunction) => {
     try {

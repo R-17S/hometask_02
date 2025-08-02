@@ -43,7 +43,7 @@ describe('/users', () => {
         expect(userInDb).not.toBeNull();
         expect(userInDb?.login).toBe(newUser.login);
         expect(userInDb?.email).toBe(newUser.email);
-        expect(bcrypt.compareSync(newUser.password, userInDb!.password)).toBe(true); // Проверяем хеш пароля, а чё делать если  вдруг украли
+        expect(bcrypt.compareSync(newUser.password, userInDb!.passwordHash)).toBe(true); // Проверяем хеш пароля, а чё делать если  вдруг украли
     });
 
 
@@ -108,18 +108,7 @@ describe('/users', () => {
             .send(newUser)
             .expect(400);
 
-        expect(res.body).toEqual({
-            errorsMessage: expect.arrayContaining([
-                expect.objectContaining({
-                    field: 'login',
-                    message: expect.stringContaining('login should be unique')
-                }),
-                expect.objectContaining({
-                    field: 'email',
-                    message: expect.stringContaining('email should be unique')
-                })
-            ])
-        });
+        expect(res.text).toMatch(/should be unique/); // Проверяем, что в тексте есть эта фраза
     });
 
     it ('should get empty array', async () => {

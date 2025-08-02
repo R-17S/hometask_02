@@ -3,7 +3,7 @@ import {ObjectId} from "mongodb";
 import {postsRepository} from "./repositories/post-repositories";
 import {blogsQueryRepository} from "../blogs-routes/repositories/blog-query-repository";
 import {NotFoundException} from "../../helper/exceptions";
-
+import {PostDbTypes} from "../../db/post-type";
 
 
 export const postsService = {
@@ -12,12 +12,12 @@ export const postsService = {
         if (!effectiveBlogId) throw new NotFoundException('Blog ID is required');
         const blog = await blogsQueryRepository.getBlogByIdOrError(effectiveBlogId)
 
-        const newPost = {
+        const newPost: PostDbTypes = {
             title: input.title,
             shortDescription: input.shortDescription,
             content: input.content,
             blogId: effectiveBlogId,
-            blogName: blog.data!.name,
+            blogName: blog.name,
             createdAt: new Date(),
         };
 

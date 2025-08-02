@@ -1,7 +1,7 @@
-import {BlogDbTypes} from "./blog-type";
-import {PostDbTypes} from "./post-type";
-import {UserDbTypes} from "./user-type";
-import {CommentDbTypes} from "./comment-type";
+import {BlogDbTypes} from "../../src/db/blog-type";
+import {PostDbTypes} from "../../src/db/post-type";
+import {UserDbTypes} from "../../src/db/user-type";
+import {CommentDbTypes} from "../../src/db/comment-type";
 
 export type dbType = {
     blogs: BlogDbTypes[],
