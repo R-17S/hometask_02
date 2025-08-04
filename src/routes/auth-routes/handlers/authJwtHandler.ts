@@ -1,16 +1,11 @@
-import {NextFunction, Request, Response} from 'express';
+import {Request, Response} from 'express';
 import {authService} from "../auth-service";
-import {AuthInputModel, AuthViewModel} from "../../../models/authType";
-import {jwtService} from "../application/jwt-service";
+import {AuthInputModel} from "../../../models/authType";
+import {resultForHttpException} from "../../../helper/resultForHttpException";
+import {Result} from "../../../helper/resultTypes";
 
 
-export const authJwtHandler = async (req: Request<{},{},AuthInputModel>, res: Response<AuthViewModel>, next:NextFunction) => {
-    try {
-        const authResult = await authService.checkCredentials(req.body);
-        const token = await jwtService.createJWT(authResult);
-        res.status(200).json({accessToken: token});
-        return;
-    } catch (error) {
-        next(error);
-    }
+export const authJwtHandler = async (req: Request<{},{},AuthInputModel>, res: Response<Result<{ accessToken: string } | null>>) => {
+    const result = await authService.loginWithToken(req.body);
+    resultForHttpException(res, result);
 };

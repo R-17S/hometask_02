@@ -64,10 +64,9 @@ export const usersQueryRepository = {
         };
     },
 
-    async getUserByIdOrError(userId: string): Promise<UserAuthViewModel> {
+    async getUserById(userId: string): Promise<UserAuthViewModel | null> {
         const result = await usersCollection.findOne({ _id: new ObjectId(userId) });
-        if (!result) throw new NotFoundException("User not found");
-        return this.mapToAuthUserViewModel(result);
+        return result ? this.mapToAuthUserViewModel(result) : null;
     },
 
     mapToAuthUserViewModel (user: WithId<UserDbTypes>): UserAuthViewModel {

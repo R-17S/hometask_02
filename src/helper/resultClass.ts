@@ -38,6 +38,15 @@ export class ResultObject {
         };
     }
 
+    static BadRequest(message: string, extensions: ExtensionType[] = []): Result<null> {
+        return {
+            status: ResultStatus.BadRequest,
+            errorMessage: message,
+            extensions,
+            data: null
+        };
+    }
+
     static ServerError(message: string, extensions: ExtensionType[] = []): Result<null> {
         return {
             status: ResultStatus.ServerError,

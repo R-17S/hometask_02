@@ -13,7 +13,7 @@ export const commentsService = {
         const postExists = await postsRepository.postExists(postId);
         if (!postExists) throw new NotFoundException("Post not found");
 
-        const user = await usersQueryRepository.getUserByIdOrError(userId);
+        const user = await usersQueryRepository.getUserById(userId);
         if (!user) throw new NotFoundException("User not found");
 
         const newComment = {

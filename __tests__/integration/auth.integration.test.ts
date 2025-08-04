@@ -3,8 +3,7 @@ import {authService} from "../../src/routes/auth-routes/auth-service";
 import {runDb, usersCollection} from "../../src/db/mongoDB";
 import {MongoMemoryServer} from "mongodb-memory-server";
 import {testFactoryUser} from "../datasets/integration-helpers";
-import {BadRequestException} from "../../src/helper/exceptions";
-import {ObjectId} from "mongodb";
+
 
 describe('AUTH-INTEGRATION', () => {
     let mongoServer: MongoMemoryServer;
@@ -32,10 +31,13 @@ describe('AUTH-INTEGRATION', () => {
             const { login, email, password } = testFactoryUser.createUserDto();
             const result = await authService.registerUser(login, password, email);
 
-            // 🔍 Проверка result
-            expect(result).toBeDefined();
-            expect(result.email).toBe(email);
-            expect(result.passwordHash).not.toBe(password);
+            // 🔍 Проверка на успешный статус
+            expect(result.status).toBe('Success');
+            expect(result.data).toBeDefined();
+
+            // ✅ Проверка содержимого
+            expect(result.data?.email).toBe(email);
+            expect(result.data?.passwordHash).not.toBe(password);
 
             // ✅ Проверка отправки email
             expect(nodemailerService.sendEmail).toBeCalled();
@@ -49,12 +51,17 @@ describe('AUTH-INTEGRATION', () => {
 
         it('should not register user twice', async () => {
             const {login, password, email} = testFactoryUser.createUserDto();
-            await  authService.registerUser(login, password, email);
+            // ⏩ Первая регистрация проходит успешно
+            const firstResult = await authService.registerUser(login, password, email);
+            expect(firstResult.status).toBe('Success');
 
+            // ⛔ Попытка зарегистрироваться второй раз
+            const secondResult = await authService.registerUser(login, password, email);
 
-            await expect( authService.registerUser(login, password, email))
-                .rejects
-                .toThrow('Login already exists');
+            expect(secondResult.status).toBe('BadRequest');
+            expect(secondResult.extensions).toEqual([
+                { field: 'Login', message: 'Already exists' }
+            ]);
 
             const count = await usersCollection.countDocuments({$or: [{login}, {email}]});
             expect(count).toBe(1);
@@ -66,9 +73,13 @@ describe('AUTH-INTEGRATION', () => {
 
         // ветка if для невалидного кода
         it('should reject invalid confirmation code', async () => {
-            await expect(confirmEmailUseCase('invalid_code_123'))
-                .rejects
-                .toThrow("Invalid confirmation code");
+            const result = await confirmEmailUseCase('invalid_code_123');
+
+            expect(result.status).toBe('NotFound');
+            expect(result.extensions).toContainEqual({
+                field: 'code',
+                message: 'Invalid confirmation code'
+            });
         });
 
         // ветка if для просроченного кода
@@ -85,10 +96,14 @@ describe('AUTH-INTEGRATION', () => {
                 expirationDate: new Date(), // Код уже недействителен!
             });
 
-            // 2. Пытаемся подтвердить email с просроченным кодом
-            await expect(confirmEmailUseCase(code))
-                .rejects
-                .toThrow('Confirmation code expired');
+            const result = await confirmEmailUseCase(code);
+
+            //  Ожидаем BadRequest
+            expect(result.status).toBe('BadRequest');
+            expect(result.extensions).toContainEqual({
+                field: 'code',
+                message: 'Code expired'
+            });
         });
 
         // ветка if если у нас маил уже подтверждён
@@ -104,9 +119,13 @@ describe('AUTH-INTEGRATION', () => {
                 isConfirmed: true,
             });
 
-            await expect(confirmEmailUseCase(code))
-                .rejects
-                .toThrow('Email already confirmed');
+            const result = await confirmEmailUseCase(code);
+
+            expect(result.status).toBe('BadRequest');
+            expect(result.extensions).toContainEqual({
+                field: 'code',
+                message: 'Email already confirmed'
+            });
         });
 
 

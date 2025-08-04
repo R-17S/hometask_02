@@ -2,33 +2,55 @@
 import {AuthInputModel} from "../../models/authType";
 import {UserDbTypes} from "../../db/user-type";
 import {usersRepository} from "../users-routes/repositories/user-repositories";
-import {ObjectId, OptionalId, WithId, WithoutId} from "mongodb";
-import {BadRequestException, NotFoundException, UnauthorizedException} from "../../helper/exceptions";
+import {WithId} from "mongodb";
 import {randomUUID} from "node:crypto";
 import {bcryptService} from "./application/bcrypt-service";
 import {emailExamples} from "../../helper/email-templates";
 import {nodemailerService} from "./application/nodemailer-service";
 import {add} from "date-fns";
+import {ResultObject} from "../../helper/resultClass";
+import {Result} from "../../helper/resultTypes";
+import {ResultStatus} from "../../helper/result-status.enum";
+import {jwtService} from "./application/jwt-service";
 
 
 export const authService = {
-    async checkCredentials(input: AuthInputModel): Promise<WithId<UserDbTypes>> {
-        const user = await usersRepository.findByLoginOrEmail(input.loginOrEmail);
-        if (!user) throw new BadRequestException('Invalid login or email');
+    async loginWithToken(input: AuthInputModel): Promise<Result<{ accessToken: string } | null>> {
+        const credentialCheck = await this.checkCredentials(input);
 
-        const validPassword = await bcryptService.checkPassword(input.password, user.passwordHash);
-        if (!validPassword) throw new UnauthorizedException('Invalid password');
+        if (credentialCheck.status !== ResultStatus.Success) {
+            return ResultObject.Unauthorized('User is not authorized', [
+                { field: 'loginOrEmail or password', message: 'No such user' }
+            ]); // отдаем ошибку наверх
+        }
 
-        return user;
+        const user = credentialCheck.data!;
+        const accessToken = await jwtService.createJWT(user);
+
+        return ResultObject.Success({ accessToken });
     },
 
+    async checkCredentials(input: AuthInputModel): Promise<Result<WithId<UserDbTypes> | null>> {
+        const user = await usersRepository.findByLoginOrEmail(input.loginOrEmail);
+        if (!user) return ResultObject.NotFound('User not found', [
+            { field: 'loginOrEmail', message: 'No such user' }
+        ]);
 
-    async registerUser(login: string, password: string, email: string): Promise<UserDbTypes> {
+        const validPassword = await bcryptService.checkPassword(input.password, user.passwordHash);
+        if (!validPassword) return ResultObject.Unauthorized('User is not authorized', [
+            { field: 'Password', message: 'Invalid password' }
+        ]);
+
+        return ResultObject.Success(user)
+    },
+
+    async registerUser(login: string, password: string, email: string): Promise<Result<WithId<UserDbTypes> | null>> {
         const user = await usersRepository.getUserByLoginOrEmail(login, email);
-        if (user) throw new BadRequestException(user.login === login
+        if (user) return ResultObject.BadRequest(user.login === login
             ? 'Login already exists'
-            : 'Email already exists');
-        //проверить существует ли уже юзер с таким логином или почтой и если да - не регистрировать
+            : 'Email already exists', [
+            { field: user.login === login ? 'Login' : 'Email', message: 'Already exists' }
+        ]);//проверить существует ли уже юзер с таким логином или почтой и если да - не регистрировать
 
         const passwordHash = await bcryptService.generateHash(password)//создать хэш пароля
 
@@ -46,7 +68,7 @@ export const authService = {
                 isConfirmed: false
             }
         };
-        await usersRepository.createUser(newUser); // сохранить юзера в базе данных
+        const createdUser = await usersRepository.createUser(newUser); // сохранить юзера в базе данных
 
 //отправку сообщения лучше обернуть в try-catch, чтобы при ошибке(например отвалиться отправка) приложение не падало
         try {
@@ -57,31 +79,41 @@ export const authService = {
         } catch (e: unknown) {
             console.error('Send email error', e); //залогировать ошибку при отправке сообщения
         }
-        return newUser;
+        return ResultObject.Success(createdUser);
     },
 
-    async confirmRegistration(code: string): Promise<boolean> {
+    async confirmRegistration(code: string): Promise<Result<null>> {
         // 1. Находим пользователя по code
         const user = await usersRepository.findByConfirmationCode(code);
 
         // 2. Проверяем нашелся ли он вообще, не стоит ли  у него статус true и активен ли ещё code
-        if (!user) throw new NotFoundException('Invalid confirmation code');
-        if (user.emailConfirmation!.isConfirmed) throw new BadRequestException('Email already confirmed');
-        if (user.emailConfirmation!.expirationDate < new Date()) throw new BadRequestException('Confirmation code expired');
+        if (!user) return ResultObject.NotFound('User not found', [{ field: 'code', message: 'Invalid confirmation code' }]);
+        if (user.emailConfirmation!.isConfirmed) return ResultObject.BadRequest('Email already confirmed', [
+                { field: 'code', message: 'Email already confirmed' }
+        ]);
+        if (user.emailConfirmation!.expirationDate < new Date()) return ResultObject.BadRequest('Confirmation code expired', [
+                { field: 'code', message: 'Code expired' }
+        ]);
 
         // 3. Обновляем статус с false на true
         await usersRepository.updateConfirmationStatus(user._id.toString());
 
-        return true;
+        return ResultObject.Success(null);
     },
 
-    async resendConfirmationEmail(email: string): Promise<boolean> {
+    async resendConfirmationEmail(email: string): Promise<Result<null>> {
         // 1. Находим пользователя по email
         const user = await usersRepository.findByEmail(email);
 
         // 2. Проверяем нашелся ли он вообще, не стоит ли  у него статус true
-        if (!user) throw new NotFoundException('User with this email not found');
-        if (user.emailConfirmation!.isConfirmed) throw new BadRequestException('Email already confirmed');
+        if (!user) return ResultObject.NotFound('User with this email not found', [
+            { field: 'email', message: 'No user with this email' }
+        ]);
+
+        if (user.emailConfirmation!.isConfirmed) return ResultObject.BadRequest('Email already confirmed', [
+            { field: 'email', message: 'User already confirmed' }
+        ]);
+
 
         // 3. Генерируем новый код
         const newConfirmationCode = randomUUID();
@@ -100,6 +132,6 @@ export const authService = {
         } catch (e: unknown) {
             console.error('Send email error', e); //залогировать ошибку при отправке сообщения
         }
-        return true;
+        return ResultObject.Success(null);
     }
 };

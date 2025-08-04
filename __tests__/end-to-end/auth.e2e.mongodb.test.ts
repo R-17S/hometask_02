@@ -30,11 +30,11 @@ describe('/auth', () => {
         await usersCollection.deleteMany({});
     });
 
-    it('should return 204 on successful auth', async () => {
+    it('should return 200 on successful auth', async () => {
         await req
             .post('/auth/login')
             .send(correctUser)
-            .expect(204);
+            .expect(200);
     });
 
 
@@ -42,32 +42,32 @@ describe('/auth', () => {
         const res = await req
             .post('/auth/login')
             .send({
-                loginOrEmail: 'nonexistent',
+                loginOrEmail: '   ',
                 password: correctUser.password
             })
             .expect(400);
 
         expect(res.body).toEqual({
-            errorsMessage: [{
-                field: "Login or Email",
-                message: "Invalid login or email"
+            errorsMessages: [{
+                field: "loginOrEmail",
+                message: "Login or email is required"
             }]
         });
     });
 
-    it('should return 400 with error for invalid password', async () => {
+    it('should return 401 with error for invalid password', async () => {
         const res = await req
             .post('/auth/login')
             .send({
                 loginOrEmail: correctUser.loginOrEmail,
                 password: 'wrongpassword'
             })
-            .expect(400);
+            .expect(401);
 
         expect(res.body).toEqual({
             errorsMessage: [{
-                field: "Password",
-                message: "Invalid password"
+                field: "loginOrEmail or password",
+                message: "No such user"
             }]
         });
     });

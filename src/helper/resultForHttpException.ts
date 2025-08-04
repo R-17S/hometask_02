@@ -8,13 +8,13 @@ export function resultForHttpException<T>(res: Response, result: Result<T>) {
         case ResultStatus.Success:
             return res.status(200).json(result.data);
         case ResultStatus.Unauthorized:
-            return res.status(401).json(result);
+            return res.status(401).json({ errorsMessage: result.extensions });
         case ResultStatus.NotFound:
             return res.status(404).json({ errorsMessage: result.extensions });
         case ResultStatus.Forbidden:
             return res.status(403).json({ errorsMessage: result.extensions });
         case ResultStatus.BadRequest:
-            return res.status(400).json(result);
+            return res.status(400).json({ errorsMessage: result.extensions });
         default:
             return res.status(500).json(result);
     }
