@@ -36,3 +36,8 @@ export const overallAuthValidation = [
     ...authInputValidator,
     inputErrorsResult
 ]
+
+export const overallregistrationValidator = [
+    registrationValidator,
+    inputErrorsResult
+]

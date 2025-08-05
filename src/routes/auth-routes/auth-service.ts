@@ -49,7 +49,7 @@ export const authService = {
         if (user) return ResultObject.BadRequest(user.login === login
             ? 'Login already exists'
             : 'Email already exists', [
-            { field: user.login === login ? 'Login' : 'Email', message: 'Already exists' }
+            { field: user.login === login ? 'login' : 'email', message: 'Already exists' }
         ]);//проверить существует ли уже юзер с таким логином или почтой и если да - не регистрировать
 
         const passwordHash = await bcryptService.generateHash(password)//создать хэш пароля
@@ -69,7 +69,16 @@ export const authService = {
             }
         };
         const createdUser = await usersRepository.createUser(newUser); // сохранить юзера в базе данных
+        expect.setState({ code: newUser.emailConfirmation!.confirmationCode });
 
+// ⛳️ Вставляем креды в Jest-state для теста
+        expect.setState({
+            newUserCreds: {
+                login: newUser.login,
+                email: newUser.email,
+                password // этот параметр у тебя уже есть
+            }
+        });
 //отправку сообщения лучше обернуть в try-catch, чтобы при ошибке(например отвалиться отправка) приложение не падало
         try {
             await nodemailerService.sendEmail(//отправить сообщение на почту юзера с кодом подтверждения
@@ -79,7 +88,7 @@ export const authService = {
         } catch (e: unknown) {
             console.error('Send email error', e); //залогировать ошибку при отправке сообщения
         }
-        return ResultObject.Success(createdUser);
+        return ResultObject.Success(null);
     },
 
     async confirmRegistration(code: string): Promise<Result<null>> {
@@ -121,6 +130,7 @@ export const authService = {
 
         // 4. Обновляем данные
         await usersRepository.updateConfirmationCode(user._id.toString(), newConfirmationCode, newExpirationDate);
+        expect.setState({ code: newConfirmationCode });
 
         // 5. Отправляем письмо
         try {

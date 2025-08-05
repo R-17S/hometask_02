@@ -7,7 +7,7 @@ import {WithId} from "mongodb";
 import {UserDbTypes} from "../../../db/user-type";
 
 
-export const registrationHandler = async (req:Request<{},{},UserInputModel>, res:Response<Result<WithId<UserDbTypes> | null>>) => {
+export const registrationHandler = async (req:Request<{},{},UserInputModel>, res:Response<Result<null>>) => {
     const { login, password, email } = req.body;
     const newUser = await authService.registerUser(login, password, email);
     resultForHttpException(res, newUser);

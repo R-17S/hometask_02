@@ -6,15 +6,17 @@ import {Response} from "express";
 export function resultForHttpException<T>(res: Response, result: Result<T>) {
     switch (result.status) {
         case ResultStatus.Success:
-            return res.status(200).json(result.data);
+            return result.data === null
+                ? res.sendStatus(204)
+                : res.status(200).json(result.data);
         case ResultStatus.Unauthorized:
-            return res.status(401).json({ errorsMessage: result.extensions });
+            return res.status(401).json({ errorsMessages: result.extensions });
         case ResultStatus.NotFound:
-            return res.status(404).json({ errorsMessage: result.extensions });
+            return res.status(404).json({ errorsMessages: result.extensions });
         case ResultStatus.Forbidden:
-            return res.status(403).json({ errorsMessage: result.extensions });
+            return res.status(403).json({ errorsMessages: result.extensions });
         case ResultStatus.BadRequest:
-            return res.status(400).json({ errorsMessage: result.extensions });
+            return res.status(400).json({ errorsMessages: result.extensions });
         default:
             return res.status(500).json(result);
     }

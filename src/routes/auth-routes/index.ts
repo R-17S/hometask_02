@@ -1,5 +1,9 @@
 import {Router} from "express";
-import {overallAuthValidation, registrationValidator} from "./middleware-users/authValidators";
+import {
+    overallAuthValidation,
+    overallregistrationValidator,
+    registrationValidator
+} from "./middleware-users/authValidators";
 import {authJwtHandler} from "./handlers/authJwtHandler";
 import {getCurrentUserHandler} from "./handlers/getCurrentUserHandler";
 import {authJwtMiddleware} from "./middleware-users/authJwtMiddleware";
@@ -15,6 +19,6 @@ export const authRouter = Router();
 authRouter.post('/login', ...overallAuthValidation, authJwtHandler);
 authRouter.get('/me', authJwtMiddleware, getCurrentUserHandler);
 
-authRouter.post('/registration', registrationValidator, registrationHandler);
+authRouter.post('/registration', ...overallregistrationValidator, registrationHandler);
 authRouter.post('/registration-confirmation', confirmRegistrationHandler);
 authRouter.post('/registration-email-resending', resendConfirmationEmailHandler);
