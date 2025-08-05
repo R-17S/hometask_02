@@ -69,16 +69,16 @@ export const authService = {
             }
         };
         const createdUser = await usersRepository.createUser(newUser); // сохранить юзера в базе данных
-        expect.setState({ code: newUser.emailConfirmation!.confirmationCode });
+        // expect.setState({ code: newUser.emailConfirmation!.confirmationCode });
 
 // ⛳️ Вставляем креды в Jest-state для теста
-        expect.setState({
-            newUserCreds: {
-                login: newUser.login,
-                email: newUser.email,
-                password // этот параметр у тебя уже есть
-            }
-        });
+//         expect.setState({
+//             newUserCreds: {
+//                 login: newUser.login,
+//                 email: newUser.email,
+//                 password // этот параметр у тебя уже есть
+//             }
+//         });
 //отправку сообщения лучше обернуть в try-catch, чтобы при ошибке(например отвалиться отправка) приложение не падало
         try {
             await nodemailerService.sendEmail(//отправить сообщение на почту юзера с кодом подтверждения
@@ -96,7 +96,7 @@ export const authService = {
         const user = await usersRepository.findByConfirmationCode(code);
 
         // 2. Проверяем нашелся ли он вообще, не стоит ли  у него статус true и активен ли ещё code
-        if (!user) return ResultObject.NotFound('User not found', [{ field: 'code', message: 'Invalid confirmation code' }]);
+        if (!user) return ResultObject.BadRequest('User not found', [{ field: 'code', message: 'Invalid confirmation code' }]);
         if (user.emailConfirmation!.isConfirmed) return ResultObject.BadRequest('Email already confirmed', [
                 { field: 'code', message: 'Email already confirmed' }
         ]);
@@ -115,7 +115,7 @@ export const authService = {
         const user = await usersRepository.findByEmail(email);
 
         // 2. Проверяем нашелся ли он вообще, не стоит ли  у него статус true
-        if (!user) return ResultObject.NotFound('User with this email not found', [
+        if (!user) return ResultObject.BadRequest('User with this email not found', [
             { field: 'email', message: 'No user with this email' }
         ]);
 
@@ -130,7 +130,7 @@ export const authService = {
 
         // 4. Обновляем данные
         await usersRepository.updateConfirmationCode(user._id.toString(), newConfirmationCode, newExpirationDate);
-        expect.setState({ code: newConfirmationCode });
+        //expect.setState({ code: newConfirmationCode });
 
         // 5. Отправляем письмо
         try {
