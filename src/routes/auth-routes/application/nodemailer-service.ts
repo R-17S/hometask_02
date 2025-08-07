@@ -18,12 +18,6 @@ export const nodemailerService = {
             html: template.replace('{{code}}', code)
         };
 
-        console.log('📤 Отправка письма:', {
-            to,
-            subject: mailOptions.subject,
-            code,
-            previewHtml: mailOptions.html.slice(0, 100) + '...'
-        });
 
         await transporter.sendMail(mailOptions);
     }

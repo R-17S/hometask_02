@@ -3,7 +3,7 @@ import {ErrorsTypeValidation} from "../../../models/errorsType";
 import {Request, Response, NextFunction} from "express";
 import {ObjectId} from "mongodb";
 import {inputErrorsResult} from "../../../middlewares/errors-middleware";
-import {commentQueryRepository} from "../repositories/comment-query-repository";
+import {commentsRepository} from "../repositories/comment-repository";
 
 export const commentInputValidation = [
     body('content')
@@ -19,7 +19,7 @@ export const commentExistsValidation = async (req: Request<{id: string}>,res: Re
         return;
     }
 
-    const comment = await commentQueryRepository.getCommentByIdOrError(req.params.id);
+    const comment = await commentsRepository.CommentExists(req.params.id);
     if (!comment) {
         res.status(404).json({errorsMessage: [{field: 'id', message: 'Comment not found'}]});
         return;

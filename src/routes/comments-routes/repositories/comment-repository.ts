@@ -27,4 +27,9 @@ export const commentsRepository = {
         const result = await commentsCollection.deleteOne({ _id: new ObjectId(id) });
         return result.deletedCount === 1;
     },
+
+    async CommentExists(id: string): Promise<boolean> {
+        const result = await commentsCollection.countDocuments({_id: new ObjectId(id)});
+        return  result > 0;
+    },
 };
