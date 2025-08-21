@@ -144,6 +144,7 @@ export const authService = {
         if (!userId) return ResultObject.Unauthorized('User is not authorized', [
             { field: 'RefreshToken', message: 'Invalid Token' }
         ]);
+        await tokenRepository.save(oldRefreshToken, userId);
 
         const [newAccessToken, newRefreshToken] = await Promise.all([
             jwtService.createAccessToken(userId),
