@@ -6,7 +6,7 @@ import {resultForHttpException} from "../../../helper/resultForHttpException";
 
 
 export const logoutHandler = async (req: Request, res: Response) => {
-    const refreshToken = req.refreshToken; // уже есть из middleware
+    const refreshToken = req.refreshToken;
     const result = await authService.revokeRefreshToken(refreshToken!);
 
     if (result.status !== ResultStatus.Success) {

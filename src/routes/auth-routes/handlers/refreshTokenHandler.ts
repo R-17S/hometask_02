@@ -24,6 +24,6 @@ export const refreshTokenHandler = async (req: Request, res: Response<Result<{ n
 
     resultForHttpException(res, {
         ...result,
-        data:  { newAccessToken }
+        data:  { accessToken: newAccessToken }
     });
 };
