@@ -1,11 +1,14 @@
-import {UserDbTypes} from "../../../db/user-type";
+
 import {SETTINGS} from "../../../settings";
 import jwt from 'jsonwebtoken';
-import {WithId} from "mongodb";
 
 export const jwtService =  {
-    async createJWT(user: WithId<UserDbTypes>) {
-        return jwt.sign({userId: user._id}, SETTINGS.JWT_SECRET, { expiresIn: '1h' })
+    async createAccessToken(userId: string) {
+        return jwt.sign({userId}, SETTINGS.JWT_SECRET, { expiresIn: '10s' })
+    },
+
+    async createRefreshToken(userId: string) {
+        return jwt.sign({userId}, SETTINGS.JWT_SECRET, { expiresIn: '20s' })
     },
 
     async verifyToken(token: string): Promise<{ userId: string } | null> {

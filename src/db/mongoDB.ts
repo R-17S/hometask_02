@@ -5,6 +5,8 @@ import {UserDbTypes} from "./user-type";
 import dotenv from 'dotenv';
 import {SETTINGS} from "../settings";
 import {CommentDbTypes} from "./comment-type";
+import {TokenDbTypes} from "./token-type";
+import {ensureTTLIndex} from "../routes/auth-routes/application/ensureTTLIndex";
 dotenv.config();
 
 
@@ -12,6 +14,7 @@ export let blogsCollection: Collection<BlogDbTypes>
 export let postsCollection: Collection<PostDbTypes>
 export let usersCollection: Collection<UserDbTypes>
 export let commentsCollection: Collection<CommentDbTypes>
+export let tokenCollection: Collection<TokenDbTypes>
 
 export async function runDb(mongoURI: string): Promise<boolean> {
     let client = new MongoClient(SETTINGS.MONGO_URL || mongoURI);
@@ -20,9 +23,11 @@ export async function runDb(mongoURI: string): Promise<boolean> {
     postsCollection = db.collection<PostDbTypes>(SETTINGS.DB.COLLECTION.POSTS);
     usersCollection = db.collection<UserDbTypes>(SETTINGS.DB.COLLECTION.USERS);
     commentsCollection = db.collection<CommentDbTypes>(SETTINGS.DB.COLLECTION.COMMENTS);
+    tokenCollection = db.collection<TokenDbTypes>(SETTINGS.DB.COLLECTION.TOKEN)
     try {
         await client.connect()
         await client.db().command({ ping: 1 })
+        await ensureTTLIndex({ tokenCollection });
         console.log('Successfully connected to MongoDB server')
         return true;
     } catch (error) {

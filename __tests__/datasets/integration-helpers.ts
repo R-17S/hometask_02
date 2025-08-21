@@ -1,8 +1,7 @@
 import {randomUUID} from "crypto";
 import {add} from "date-fns/add";
-import {runDb, usersCollection} from "../../src/db/mongoDB";
-import {UserDbTypes} from "../../src/db/user-type";
-import {WithId} from "mongodb";
+import {usersCollection} from "../../src/db/mongoDB";
+
 
 
 type RegisterUserPayloadType = {

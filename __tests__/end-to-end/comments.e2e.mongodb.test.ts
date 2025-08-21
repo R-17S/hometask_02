@@ -35,7 +35,7 @@ describe('/comments', () => {
         };
 
         // 3. Создаем токен автора комментария
-        const token = await jwtService.createJWT({
+        const token = await jwtService.createAccessToken({
             _id: new ObjectId(testComment.commentatorInfo.userId),
             login: testComment.commentatorInfo.userLogin
         } as WithId<UserDbTypes>);
@@ -64,7 +64,7 @@ describe('/comments', () => {
     it('update should return 403 when trying to update another users comment', async () => {
         const { _id: commentId } = dataset4.comments[0];
         const otherUser = dataset4.users[1];
-        const token = await jwtService.createJWT({
+        const token = await jwtService.createAccessToken({
             _id: new ObjectId(otherUser._id),
             login: otherUser.login
         } as WithId<UserDbTypes>);
@@ -78,7 +78,7 @@ describe('/comments', () => {
 
     it('update should return 404 for non-existent comment', async () => {
         const user = dataset4.users[0];
-        const token = await jwtService.createJWT({
+        const token = await jwtService.createAccessToken({
             _id: new ObjectId(user._id),
             login: user.login
         } as WithId<UserDbTypes>);
@@ -92,7 +92,7 @@ describe('/comments', () => {
 
     it('update should return 400 for invalid comment data', async () => {
         const {_id: commentId, commentatorInfo} = dataset4.comments[0];
-        const token = await jwtService.createJWT({
+        const token = await jwtService.createAccessToken({
             _id: new ObjectId(commentatorInfo.userId),
             login: commentatorInfo.userLogin
         } as WithId<UserDbTypes>);
@@ -189,7 +189,7 @@ describe('/comments', () => {
             _id: new ObjectId() // Генерируем новый ID для изоляции теста
         };
         await commentsCollection.insertOne(testComment);
-        const token = await jwtService.createJWT({
+        const token = await jwtService.createAccessToken({
             _id: new ObjectId(testComment.commentatorInfo.userId),
             login: testComment.commentatorInfo.userLogin
         } as WithId<UserDbTypes>);
@@ -215,7 +215,7 @@ describe('/comments', () => {
     it ('delete should return 400 when commentId is invalid', async () => {
         const invalidCommentId = 'invalidCommentId';
         const testComment  = dataset4.comments[0];
-        const token = await jwtService.createJWT({
+        const token = await jwtService.createAccessToken({
             _id: new ObjectId(testComment.commentatorInfo.userId),
             login: testComment.commentatorInfo.userLogin
         } as WithId<UserDbTypes>);
@@ -238,7 +238,7 @@ describe('/comments', () => {
 
         const nonExistentId = new ObjectId();
         const testComment  = dataset4.comments[0];
-        const token = await jwtService.createJWT({
+        const token = await jwtService.createAccessToken({
             _id: new ObjectId(testComment.commentatorInfo.userId),
             login: testComment.commentatorInfo.userLogin
         } as WithId<UserDbTypes>);

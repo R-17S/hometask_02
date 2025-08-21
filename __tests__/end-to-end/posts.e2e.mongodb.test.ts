@@ -482,7 +482,7 @@ describe('/posts', () => {
             content: 'Valid comment length is 20 characters'
         };
         const testComment  = dataset4.comments[0];
-        const token = await jwtService.createJWT({
+        const token = await jwtService.createAccessToken({
             _id: new ObjectId(testComment.commentatorInfo.userId),
             login: testComment.commentatorInfo.userLogin
         } as WithId<UserDbTypes>);
@@ -527,7 +527,7 @@ describe('/posts', () => {
         };
 
         const testComment  = dataset4.comments[0];
-        const token = await jwtService.createJWT({
+        const token = await jwtService.createAccessToken({
             _id: new ObjectId(testComment.commentatorInfo.userId),
             login: testComment.commentatorInfo.userLogin
         } as WithId<UserDbTypes>);

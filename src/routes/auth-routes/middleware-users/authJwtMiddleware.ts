@@ -17,7 +17,7 @@ export const authJwtMiddleware = async (req: Request, res: Response, next: NextF
         res.status(401).send('Not authorized');
         return
     }
-    // (req as Request & { userId: string }).userId = userId;
+
     req.userId = userId;
     next();
 }

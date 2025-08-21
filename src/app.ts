@@ -8,12 +8,14 @@ import {usersRouter} from "./routes/users-routes";
 import {authRouter} from "./routes/auth-routes";
 import {commentsRoutes} from "./routes/comments-routes";
 import {HttpException} from "./helper/exceptions";
+import cookieParser from "cookie-parser";
 
 
 
 export const app = express();
-app.use(express.json())
-app.use(cors())
+app.use(express.json());
+app.use(cors());
+app.use(cookieParser());
 
 // Роут для главной страницы
 app.get('/', (req: Request, res: Response) => {

@@ -12,10 +12,12 @@ import {ResultObject} from "../../helper/resultClass";
 import {Result} from "../../helper/resultTypes";
 import {ResultStatus} from "../../helper/result-status.enum";
 import {jwtService} from "./application/jwt-service";
+import {tokenRepository} from "./repositories/token-repositories";
+
 
 
 export const authService = {
-    async loginWithToken(input: AuthInputModel): Promise<Result<{ accessToken: string } | null>> {
+    async loginWithToken(input: AuthInputModel): Promise<Result<{ accessToken: string, refreshToken: string } | null>> {
         const credentialCheck = await this.checkCredentials(input);
 
         if (credentialCheck.status !== ResultStatus.Success) {
@@ -24,10 +26,13 @@ export const authService = {
             ]); // отдаем ошибку наверх
         }
 
-        const user = credentialCheck.data!;
-        const accessToken = await jwtService.createJWT(user);
+        const userId = credentialCheck.data!._id.toString();
+        const [accessToken, refreshToken] = await Promise.all([
+            jwtService.createAccessToken(userId),
+            jwtService.createRefreshToken(userId)
+        ])
 
-        return ResultObject.Success({ accessToken });
+        return ResultObject.Success({ accessToken, refreshToken });
     },
 
     async checkCredentials(input: AuthInputModel): Promise<Result<WithId<UserDbTypes> | null>> {
@@ -69,17 +74,7 @@ export const authService = {
             }
         };
         const createdUser = await usersRepository.createUser(newUser); // сохранить юзера в базе данных
-        // expect.setState({ code: newUser.emailConfirmation!.confirmationCode });
 
-// ⛳️ Вставляем креды в Jest-state для теста
-//         expect.setState({
-//             newUserCreds: {
-//                 login: newUser.login,
-//                 email: newUser.email,
-//                 password // этот параметр у тебя уже есть
-//             }
-//         });
-//отправку сообщения лучше обернуть в try-catch, чтобы при ошибке(например отвалиться отправка) приложение не падало
         try {
             await nodemailerService.sendEmail(//отправить сообщение на почту юзера с кодом подтверждения
                 newUser.email,
@@ -130,7 +125,6 @@ export const authService = {
 
         // 4. Обновляем данные
         await usersRepository.updateConfirmationCode(user._id.toString(), newConfirmationCode, newExpirationDate);
-        //expect.setState({ code: newConfirmationCode });
 
         // 5. Отправляем письмо
         try {
@@ -143,5 +137,38 @@ export const authService = {
             console.error('Send email error', e); //залогировать ошибку при отправке сообщения
         }
         return ResultObject.Success(null);
+    },
+
+    async  refreshTokens(oldRefreshToken: string): Promise<Result<{ newAccessToken: string, newRefreshToken: string } | null>> {
+        const userId = await jwtService.getUserIdFromToken(oldRefreshToken);
+        if (!userId) return ResultObject.Unauthorized('User is not authorized', [
+            { field: 'RefreshToken', message: 'Invalid Token' }
+        ]);
+
+        const [newAccessToken, newRefreshToken] = await Promise.all([
+            jwtService.createAccessToken(userId),
+            jwtService.createRefreshToken(userId)
+        ])
+
+        return ResultObject.Success({ newAccessToken, newRefreshToken });
+    },
+
+    async revokeRefreshToken(refreshToken: string): Promise<Result<null>> {
+        const userId = await jwtService.getUserIdFromToken(refreshToken);
+        if (!userId) return ResultObject.Unauthorized('User is not authorized', [
+            { field: 'RefreshToken', message: 'Invalid Token' }
+        ]);
+
+        const isRevoked = await tokenRepository.exists(refreshToken);
+        if (isRevoked) {
+            return ResultObject.Unauthorized('User is not authorized', [
+                { field: 'RefreshToken', message: 'Invalid Token' }
+            ]);
+        }
+
+        await tokenRepository.save(refreshToken, userId);
+        return ResultObject.Success(null);
     }
 };
+
+

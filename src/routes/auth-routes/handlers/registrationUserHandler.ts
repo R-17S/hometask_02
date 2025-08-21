@@ -3,8 +3,7 @@ import {UserInputModel,} from "../../../models/userTypes";
 import {authService} from "../auth-service";
 import {resultForHttpException} from "../../../helper/resultForHttpException";
 import {Result} from "../../../helper/resultTypes";
-import {WithId} from "mongodb";
-import {UserDbTypes} from "../../../db/user-type";
+
 
 
 export const registrationHandler = async (req:Request<{},{},UserInputModel>, res:Response<Result<null>>) => {

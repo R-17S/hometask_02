@@ -37,7 +37,7 @@ export const overallAuthValidation = [
     inputErrorsResult
 ]
 
-export const overallregistrationValidator = [
+export const overallRegistrationValidator = [
     registrationValidator,
     inputErrorsResult
 ]
