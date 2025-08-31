@@ -116,6 +116,7 @@ describe('/users', () => {
 
         const res = await req
             .get(SETTINGS.PATH.USERS)
+            .set('Authorization', `Basic ${authToken}`)
             .expect(200)
 
         expect(res.body).toEqual({
@@ -132,6 +133,7 @@ describe('/users', () => {
 
         const res = await req
             .get(SETTINGS.PATH.USERS)
+            .set('Authorization', `Basic ${authToken}`)
             .expect(200)
 
         console.log(res.body)

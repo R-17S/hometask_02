@@ -3,7 +3,7 @@
 export type UserDbTypes = {
     login: string;
     email: string;
-    passwordHash: string;  // Изменил с password на passwordHash
+    passwordHash: string;
     createdAt: Date;
     emailConfirmation?: {
         confirmationCode: string;

@@ -12,5 +12,5 @@ export async function ensureTTLIndex(collections: {
         { expireAfterSeconds: 60 * 60 * 24 * 30 } // 30 дней
     );
 
-    console.log('✅ Индексы успешно настроены');
+    console.log('✅ TTLIndex успешно настроены');
 }

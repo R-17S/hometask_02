@@ -4,9 +4,9 @@ import {PostInputModel} from "../../src/models/postTypes";
 import {SETTINGS} from "../../src/settings";
 import {req} from "../datasets/test-client";
 import {blogsCollection, commentsCollection, postsCollection, runDb, usersCollection} from "../../src/db/mongoDB";
-import {ObjectId, WithId} from "mongodb";
+import {ObjectId} from "mongodb";
 import {jwtService} from "../../src/routes/auth-routes/application/jwt-service";
-import {UserDbTypes} from "../../src/db/user-type";
+
 
 
 describe('/posts', () => {
@@ -231,7 +231,11 @@ describe('/posts', () => {
             .expect(404)
 
         console.log(res.text)
-        expect(res.text).toEqual('Post not found');
+        expect(res.body).toEqual({
+            errorsMessage: [
+                { field: 'id', message: 'Post not found' }
+            ]
+        });
     });
 
     it ('shouldn\'t delete 401 not authorized', async () => {
@@ -322,7 +326,11 @@ describe('/posts', () => {
             .expect(404)
 
         console.log(res.text)
-        expect(res.text).toEqual('Post not found');
+        expect(res.body).toEqual({
+            errorsMessage: [
+                { field: 'id', message: 'Post not found' }
+            ]
+        });
     });
 
     it (`shouldn\'t update 400 bad validation`, async () => {
@@ -482,10 +490,8 @@ describe('/posts', () => {
             content: 'Valid comment length is 20 characters'
         };
         const testComment  = dataset4.comments[0];
-        const token = await jwtService.createAccessToken({
-            _id: new ObjectId(testComment.commentatorInfo.userId),
-            login: testComment.commentatorInfo.userLogin
-        } as WithId<UserDbTypes>);
+        const token = await jwtService.createAccessToken(testComment.commentatorInfo.userId)
+
 
         const res = await req
             .post(`/posts/${dataset4.posts[0]._id}/comments`)
@@ -527,10 +533,8 @@ describe('/posts', () => {
         };
 
         const testComment  = dataset4.comments[0];
-        const token = await jwtService.createAccessToken({
-            _id: new ObjectId(testComment.commentatorInfo.userId),
-            login: testComment.commentatorInfo.userLogin
-        } as WithId<UserDbTypes>);
+        const token = await jwtService.createAccessToken(testComment.commentatorInfo.userId)
+
 
         const res = await req
             .post(`/posts/${dataset4.posts[0]._id}/comments`)

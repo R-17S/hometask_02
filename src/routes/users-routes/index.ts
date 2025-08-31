@@ -10,6 +10,6 @@ export const usersRouter = Router();
 
 
 // Роуты  для главной users
-usersRouter.get('/', getUsersHandler);
+usersRouter.get('/', authBasicMiddleware, getUsersHandler);
 usersRouter.post('/', ...overallUserValidation, createUserHandler);
 usersRouter.delete('/:id', authBasicMiddleware, userExistsValidator, deleteUserHandler);

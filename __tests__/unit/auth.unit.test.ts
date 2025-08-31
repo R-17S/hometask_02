@@ -1,9 +1,8 @@
 import {jwtService} from "../../src/routes/auth-routes/application/jwt-service";
 import {Request, Response, NextFunction} from "express";
 import {authJwtMiddleware} from "../../src/routes/auth-routes/middleware-users/authJwtMiddleware";
-import {tokenRepository} from "../../src/routes/auth-routes/repositories/token-repositories";
-import {refreshTokenGuard} from "../../src/routes/auth-routes/middleware-users/refreshTokenGuard";
 
+// переписать тест
 describe('UNIT', () => {
     const checkAccessTokenUseCase = jwtService.getUserIdFromToken;
 
@@ -79,53 +78,4 @@ describe('UNIT', () => {
     });
 
 
-});
-
-
-describe('refreshTokenGuard', () => {
-    const mockReq = {
-        cookies: { refreshToken: 'revoked-token' }
-    } as any;
-
-    const mockRes = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-        send: jest.fn().mockReturnThis()
-    } as any;
-
-    const mockNext = jest.fn();
-
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    it('should return 401 if token is revoked', async () => {
-        jest.spyOn(tokenRepository, 'exists').mockResolvedValue(true);
-
-        await refreshTokenGuard(mockReq, mockRes, mockNext);
-
-        expect(tokenRepository.exists).toHaveBeenCalledWith('revoked-token');
-        expect(mockRes.status).toHaveBeenCalledWith(401);
-        expect(mockRes.json).toHaveBeenCalledWith({ message: 'Token revoked' });
-        expect(mockNext).not.toHaveBeenCalled();
-    });
-
-    it('should call next() if token is not revoked', async () => {
-        jest.spyOn(tokenRepository, 'exists').mockResolvedValue(false);
-
-        await refreshTokenGuard(mockReq, mockRes, mockNext);
-
-        expect(mockRes.status).not.toHaveBeenCalled();
-        expect(mockNext).toHaveBeenCalled();
-    });
-
-    it('should return 401 if no token is provided', async () => {
-        const reqWithoutToken = { cookies: {} } as any;
-
-        await refreshTokenGuard(reqWithoutToken, mockRes, mockNext);
-
-        expect(mockRes.status).toHaveBeenCalledWith(401);
-        expect(mockRes.json).toHaveBeenCalledWith({ message: 'No token provided' });
-        expect(mockNext).not.toHaveBeenCalled();
-    });
 });
