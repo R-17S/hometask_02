@@ -9,7 +9,7 @@ import {deletePostHandler} from "./handlers/deletePostHandler";
 import {getCommentsByPostIdHandler} from "./handlers/getCommentsByPostIdHandler";
 import {createCommentByPostIdHandler} from "./handlers/createCommentByPostIdHandler";
 import {overallCommentValidation} from "../comments-routes/middleware-comments/commentValidators";
-import {authJwtMiddleware} from "../auth-routes/middleware-users/authJwtMiddleware";
+import {authJwtMiddleware} from "../auth-routes/middleware-auth/authJwtMiddleware";
 
 
 

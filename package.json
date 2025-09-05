@@ -25,7 +25,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.15.0",
     "supertest": "^7.1.0",
-    "ts-jest": "^29.2.6"
+    "ts-jest": "^29.2.6",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
@@ -35,6 +36,7 @@
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.13.11",
     "@types/nodemailer": "^6.4.17",
+    "@types/uuid": "^10.0.0",
     "date-fns": "^4.1.0",
     "mongodb-memory-server": "^10.1.4",
     "nodemailer": "^7.0.5",

@@ -22,6 +22,8 @@ export const SETTINGS = {
             USERS: 'users',
             COMMENTS: 'comments',
             TOKEN: 'token',
+            SESSION: 'session',
+            REQUESTLOGS: 'request-logs',
         },
     }
 }

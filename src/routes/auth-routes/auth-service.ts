@@ -13,11 +13,15 @@ import {Result} from "../../helper/resultTypes";
 import {ResultStatus} from "../../helper/result-status.enum";
 import {jwtService} from "./application/jwt-service";
 import {tokenRepository} from "./repositories/token-repositories";
+import {v4 as uuidv4} from 'uuid';
+import {sessionsRepository} from "./repositories/session-repositories";
+
+
 
 
 
 export const authService = {
-    async loginWithToken(input: AuthInputModel): Promise<Result<{ accessToken: string, refreshToken: string } | null>> {
+    async loginWithToken(input: AuthInputModel, context: { ip: string, userAgent: string }): Promise<Result<{ accessToken: string, refreshToken: string } | null>> {
         const credentialCheck = await this.checkCredentials(input);
 
         if (credentialCheck.status !== ResultStatus.Success) {
@@ -27,10 +31,23 @@ export const authService = {
         }
 
         const userId = credentialCheck.data!._id.toString();
+        const deviceId = uuidv4();
+        const ip = context.ip;
+        const userAgent = context.userAgent;
         const [accessToken, refreshToken] = await Promise.all([
-            jwtService.createAccessToken(userId),
-            jwtService.createRefreshToken(userId)
+            jwtService.createAccessToken(userId, deviceId),
+            jwtService.createRefreshToken(userId, deviceId)
         ])
+        const date = new Date();
+        await sessionsRepository.createSession({
+            userId,
+            deviceId,
+            ip,
+            deviceTitle: userAgent,
+            issuedAt: date,
+            expiresAt: new Date(date.getTime() + 20_000),
+            lastActiveDate: date
+        });
 
         return ResultObject.Success({ accessToken, refreshToken });
     },
@@ -145,10 +162,11 @@ export const authService = {
             { field: 'RefreshToken', message: 'Invalid Token' }
         ]);
         await tokenRepository.save(oldRefreshToken, userId);
+        const deviceId = uuidv4();
 
         const [newAccessToken, newRefreshToken] = await Promise.all([
-            jwtService.createAccessToken(userId),
-            jwtService.createRefreshToken(userId)
+            jwtService.createAccessToken(userId, deviceId),
+            jwtService.createRefreshToken(userId, deviceId)
         ])
 
         return ResultObject.Success({ newAccessToken, newRefreshToken });

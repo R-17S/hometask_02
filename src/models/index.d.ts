@@ -5,6 +5,10 @@ declare global {
         interface Request {
             userId: string | null;
             refreshToken?: string;
+            context: {
+                ip: string;
+                userAgent: string;
+            };
         }
     }
 }

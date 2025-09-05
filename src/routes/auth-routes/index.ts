@@ -2,24 +2,26 @@ import {Router} from "express";
 import {
     overallAuthValidation,
     overallRegistrationValidator,
-} from "./middleware-users/authValidators";
+} from "./middleware-auth/authValidators";
 import {authJwtHandler} from "./handlers/authJwtHandler";
 import {getCurrentUserHandler} from "./handlers/getCurrentUserHandler";
-import {authJwtMiddleware} from "./middleware-users/authJwtMiddleware";
+import {authJwtMiddleware} from "./middleware-auth/authJwtMiddleware";
 import {registrationHandler} from "./handlers/registrationUserHandler";
 import {confirmRegistrationHandler} from "./handlers/confirmRegistrationHandler";
 import {resendConfirmationEmailHandler} from "./handlers/resendConfirmationEmailHandler";
-import {refreshTokenGuard} from "./middleware-users/refreshTokenGuard";
+import {refreshTokenGuard} from "./middleware-auth/refreshTokenGuard";
 import {refreshTokenHandler} from "./handlers/refreshTokenHandler";
 import {logoutHandler} from "./handlers/logoutHandler";
-import {checkRefreshTokenCookie} from "./middleware-users/checkRefreshTokenCookie";
+import {checkRefreshTokenCookie} from "./middleware-auth/checkRefreshTokenCookie";
+import {rateLimitMiddleware} from "../../middlewares/rateLimit-middleware";
+import {contextMiddleware} from "./middleware-auth/requestContextMiddleware";
 
 
 export const authRouter = Router();
 
 
 // Роуты  для главной users
-authRouter.post('/login', ...overallAuthValidation, authJwtHandler);
+authRouter.post('/login', rateLimitMiddleware, contextMiddleware, ...overallAuthValidation, authJwtHandler);
 authRouter.get('/me', authJwtMiddleware, getCurrentUserHandler);
 
 // Роуты  для registration

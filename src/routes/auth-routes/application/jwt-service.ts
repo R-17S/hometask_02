@@ -3,17 +3,17 @@ import {SETTINGS} from "../../../settings";
 import jwt from 'jsonwebtoken';
 
 export const jwtService =  {
-    async createAccessToken(userId: string) {
-        return jwt.sign({userId}, SETTINGS.JWT_SECRET, { expiresIn: '10s' })
+    async createAccessToken(userId: string, deviceId: string) {
+        return jwt.sign({userId, deviceId }, SETTINGS.JWT_SECRET, { expiresIn: '10s' })
     },
 
-    async createRefreshToken(userId: string) {
-        return jwt.sign({userId}, SETTINGS.JWT_SECRET, { expiresIn: '20s' })
+    async createRefreshToken(userId: string, deviceId: string) {
+        return jwt.sign({userId, deviceId }, SETTINGS.JWT_SECRET, { expiresIn: '20s' })
     },
 
-    async verifyToken(token: string): Promise<{ userId: string } | null> {
+    async verifyToken(token: string): Promise<{ userId: string, deviceId: string } | null> {
         try {
-            return jwt.verify(token, SETTINGS.JWT_SECRET) as { userId: string };
+            return jwt.verify(token, SETTINGS.JWT_SECRET) as { userId: string, deviceId: string};
         } catch (e) {
             return null;
         }

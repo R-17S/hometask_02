@@ -1,6 +1,6 @@
 import {jwtService} from "../../src/routes/auth-routes/application/jwt-service";
 import {Request, Response, NextFunction} from "express";
-import {authJwtMiddleware} from "../../src/routes/auth-routes/middleware-users/authJwtMiddleware";
+import {authJwtMiddleware} from "../../src/routes/auth-routes/middleware-auth/authJwtMiddleware";
 
 // переписать тест
 describe('UNIT', () => {

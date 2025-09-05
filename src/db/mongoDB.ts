@@ -7,6 +7,10 @@ import {SETTINGS} from "../settings";
 import {CommentDbTypes} from "./comment-type";
 import {TokenDbTypes} from "./token-type";
 import {ensureTTLIndex} from "../routes/auth-routes/application/ensureTTLIndex";
+import {SessionDbType} from "./session-type";
+import {RequestLogType} from "../models/requestType";
+
+
 dotenv.config();
 
 
@@ -15,6 +19,8 @@ export let postsCollection: Collection<PostDbTypes>
 export let usersCollection: Collection<UserDbTypes>
 export let commentsCollection: Collection<CommentDbTypes>
 export let tokenCollection: Collection<TokenDbTypes>
+export let sessionsCollection: Collection<SessionDbType>;
+export let requestLogsCollection: Collection<RequestLogType>;
 
 export async function runDb(mongoURI: string): Promise<boolean> {
     let client = new MongoClient(SETTINGS.MONGO_URL || mongoURI);
@@ -23,7 +29,9 @@ export async function runDb(mongoURI: string): Promise<boolean> {
     postsCollection = db.collection<PostDbTypes>(SETTINGS.DB.COLLECTION.POSTS);
     usersCollection = db.collection<UserDbTypes>(SETTINGS.DB.COLLECTION.USERS);
     commentsCollection = db.collection<CommentDbTypes>(SETTINGS.DB.COLLECTION.COMMENTS);
-    tokenCollection = db.collection<TokenDbTypes>(SETTINGS.DB.COLLECTION.TOKEN)
+    tokenCollection = db.collection<TokenDbTypes>(SETTINGS.DB.COLLECTION.TOKEN);
+    sessionsCollection = db.collection<SessionDbType>(SETTINGS.DB.COLLECTION.SESSION);
+    requestLogsCollection = db.collection<RequestLogType>(SETTINGS.DB.COLLECTION.REQUESTLOGS)
     try {
         await client.connect()
         await client.db().command({ ping: 1 })
