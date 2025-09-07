@@ -19,8 +19,7 @@ export const jwtService =  {
         }
     },
 
-    async getUserIdFromToken(token: string): Promise<string | null> {
-        const payload = await this.verifyToken(token);
-        return payload?.userId || null;
+    async getPayloadFromToken(token: string): Promise<{ userId: string; deviceId: string } | null> {
+        return await this.verifyToken(token);
     }
 };

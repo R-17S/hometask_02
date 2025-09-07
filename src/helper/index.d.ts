@@ -3,8 +3,9 @@
 declare global {
     namespace Express {
         interface Request {
-            userId: string | null;
+            userId?: string;
             refreshToken?: string;
+            deviceId?: string;
             context: {
                 ip: string;
                 userAgent: string;

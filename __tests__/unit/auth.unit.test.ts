@@ -4,7 +4,7 @@ import {authJwtMiddleware} from "../../src/routes/auth-routes/middleware-auth/au
 
 // переписать тест
 describe('UNIT', () => {
-    const checkAccessTokenUseCase = jwtService.getUserIdFromToken;
+    const checkAccessTokenUseCase = jwtService.getPayloadFromToken;
 
     it('should not verify noBearer auth', async () => {
         const req = {
@@ -41,11 +41,11 @@ describe('UNIT', () => {
 
         const next = jest.fn();
 
-        jest.spyOn(jwtService, 'getUserIdFromToken').mockResolvedValue(null);
+        jest.spyOn(jwtService, 'getPayloadFromToken').mockResolvedValue(null);
 
         await authJwtMiddleware(req as Request, res as Response, next as NextFunction);
 
-        expect(jwtService.getUserIdFromToken).toHaveBeenCalledWith('valid.token.here');
+        expect(jwtService.getPayloadFromToken).toHaveBeenCalledWith('valid.token.here');
         expect(res.status).toHaveBeenCalledWith(401);
         expect(res.send).toHaveBeenCalledWith('Not authorized');
         expect(next).not.toHaveBeenCalled();
@@ -66,11 +66,11 @@ describe('UNIT', () => {
         const next = jest.fn();
 
         // Мокаем возврат userId
-        jest.spyOn(jwtService, 'getUserIdFromToken').mockResolvedValue('user123');
+        jest.spyOn(jwtService, 'getPayloadFromToken').mockResolvedValue('user123');
 
         await authJwtMiddleware(req as Request, res as Response, next as NextFunction);
 
-        expect(jwtService.getUserIdFromToken).toHaveBeenCalledWith('valid.token.here');
+        expect(jwtService.getPayloadFromToken).toHaveBeenCalledWith('valid.token.here');
         //expect(req.userId).toBe('user123');
         expect(next).toHaveBeenCalled();
         expect(res.status).not.toHaveBeenCalled();

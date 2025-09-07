@@ -5,9 +5,8 @@ import {Result} from "../../../helper/resultTypes";
 import {ResultStatus} from "../../../helper/result-status.enum";
 
 
-export const refreshTokenHandler = async (req: Request, res: Response<Result<{ newAccessToken: string } | null>>) => {
+export const refreshTokenHandler = async (req: Request, res: Response<Result<{ accessToken: string } | null>>) => {
     const oldRefreshToken = req.refreshToken!;
-
     const result = await authService.refreshTokens(oldRefreshToken);
 
     if (result.status !== ResultStatus.Success) {

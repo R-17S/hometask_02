@@ -5,12 +5,13 @@ import {tokenRepository} from "../repositories/token-repositories";
 
 export const refreshTokenGuard = async (req: Request, res: Response, next: NextFunction)=> {
     const refreshToken = req.refreshToken!;
-    const userId = await jwtService.getUserIdFromToken(refreshToken);
+    const payload  = await jwtService.getPayloadFromToken(refreshToken);
 
-    if (!userId) {
+    if (!payload ) {
         res.status(401).send('Not authorized');
         return
     }
+    const { userId, deviceId } = payload;
 
     const isRevoked = await tokenRepository.exists(refreshToken);
     if (isRevoked) {
@@ -18,6 +19,7 @@ export const refreshTokenGuard = async (req: Request, res: Response, next: NextF
         return
     }
     req.userId = userId;
+    req.deviceId = deviceId;
     next();
 }
 

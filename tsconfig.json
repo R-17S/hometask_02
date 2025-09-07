@@ -112,5 +112,7 @@
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.test.ts"],
-  "files": ["src/models/index.d.ts"] //path (e.g.: "src/types/index.d.ts")
+  "files": [
+    "src/helper/index.d.ts"
+  ] //path (e.g.: "src/types/index.d.ts")
 }

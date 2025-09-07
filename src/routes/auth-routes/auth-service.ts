@@ -157,12 +157,19 @@ export const authService = {
     },
 
     async  refreshTokens(oldRefreshToken: string): Promise<Result<{ newAccessToken: string, newRefreshToken: string } | null>> {
-        const userId = await jwtService.getUserIdFromToken(oldRefreshToken);
-        if (!userId) return ResultObject.Unauthorized('User is not authorized', [
+        const payload = await jwtService.getPayloadFromToken(oldRefreshToken);
+        if (!payload) return ResultObject.Unauthorized('User is not authorized', [
             { field: 'RefreshToken', message: 'Invalid Token' }
         ]);
-        await tokenRepository.save(oldRefreshToken, userId);
-        const deviceId = uuidv4();
+        const { userId, deviceId } = payload;
+
+        const session = await sessionsRepository.findSession(userId, deviceId);
+        if (!session) return ResultObject.Unauthorized('User is not authorized', [
+            { field: 'SessionId', message: 'Session id not found' }
+        ])
+
+        await tokenRepository.save(oldRefreshToken, userId); //а нужно ли теперь его заполнять ?
+        await sessionsRepository.updateSessionActivity(deviceId, new Date())
 
         const [newAccessToken, newRefreshToken] = await Promise.all([
             jwtService.createAccessToken(userId, deviceId),
@@ -173,19 +180,25 @@ export const authService = {
     },
 
     async revokeRefreshToken(refreshToken: string): Promise<Result<null>> {
-        const userId = await jwtService.getUserIdFromToken(refreshToken);
-        if (!userId) return ResultObject.Unauthorized('User is not authorized', [
+        const payload  = await jwtService.getPayloadFromToken(refreshToken);
+        if (!payload ) return ResultObject.Unauthorized('User is not authorized', [
             { field: 'RefreshToken', message: 'Invalid Token' }
         ]);
 
+        const { userId, deviceId } = payload;
         const isRevoked = await tokenRepository.exists(refreshToken);
         if (isRevoked) {
             return ResultObject.Unauthorized('User is not authorized', [
                 { field: 'RefreshToken', message: 'Invalid Token' }
             ]);
         }
+        // Уже отозван — считаем, что всё ок
+        // if (isRevoked) {
+        // return ResultObject.Success(null);
+        // }
 
         await tokenRepository.save(refreshToken, userId);
+        await sessionsRepository.deleteSession(userId, deviceId);
         return ResultObject.Success(null);
     }
 };

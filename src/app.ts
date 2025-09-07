@@ -9,6 +9,7 @@ import {authRouter} from "./routes/auth-routes";
 import {commentsRoutes} from "./routes/comments-routes";
 import {HttpException} from "./helper/exceptions";
 import cookieParser from "cookie-parser";
+import {securityDevicesRoutes} from "./routes/securityDevices-routes";
 
 
 
@@ -28,6 +29,7 @@ app.use(SETTINGS.PATH.USERS, usersRouter)
 app.use(SETTINGS.PATH.AUTH, authRouter)
 app.use(SETTINGS.PATH.COMMENTS, commentsRoutes)
 app.use(SETTINGS.PATH.TESTING, testingRouter)
+app.use(SETTINGS.PATH.SECURITYDEVICES, securityDevicesRoutes)
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
     if (error instanceof HttpException) {
         res.status(error.status).send(error.message)

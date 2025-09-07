@@ -11,13 +11,14 @@ export const authJwtMiddleware = async (req: Request, res: Response, next: NextF
     }
 
     const token = authHeader.split(' ')[1];
-    const userId = await jwtService.getUserIdFromToken(token);
+    const payload  = await jwtService.getPayloadFromToken(token);
 
-    if (!userId) {
+    if (!payload ) {
         res.status(401).send('Not authorized');
         return
     }
 
-    req.userId = userId;
+    req.userId = payload.userId;
+    req.deviceId = payload.deviceId;
     next();
 }
