@@ -1,6 +1,7 @@
 import {randomUUID} from "crypto";
 import {add} from "date-fns/add";
-import {usersCollection} from "../../src/db/mongoDB";
+import {sessionsCollection, usersCollection} from "../../src/db/mongoDB";
+import {v4 as uuidv4} from 'uuid';
 
 
 
@@ -27,7 +28,7 @@ export type RegisterUserResultType = {
 } // тоже что и UserDbTypes
 
 
-export const testFactoryUser= {
+export const testFactoryUser = {
     createUserDto() {
         return {
             login: 'testing',
@@ -35,6 +36,7 @@ export const testFactoryUser= {
             password: '123456789'
         }
     },
+
     createUserDtos(count: number) {
         const users = [];
 
@@ -47,16 +49,8 @@ export const testFactoryUser= {
         }
         return users;
     },
-    async insertUser(
-        {
-            login,
-            password,
-            email,
-            code,
-            expirationDate,
-            isConfirmed
-        }: RegisterUserPayloadType
-    ): Promise<RegisterUserResultType> {
+
+    async insertUser({login, password, email, code, expirationDate, isConfirmed}: RegisterUserPayloadType): Promise<RegisterUserResultType> {
         const newUser = {
             login,
             email,
@@ -73,5 +67,20 @@ export const testFactoryUser= {
             id: result.insertedId.toString(),
             ...newUser
         }
+    },
+};
+
+export async function seedUserWithDevices(userId: string, count: number) {
+    const date = new Date();
+    for (let i = 0; i < count; i++) {
+        await sessionsCollection.insertOne({
+            userId: userId,
+            deviceId: uuidv4(),
+            ip: '127.0.0.1',
+            deviceTitle: `Device-${i+1}`,
+            issuedAt: date,
+            expiresAt: new Date(date.getTime() + 20_000),
+            lastActiveDate: date,
+        });
     }
 }

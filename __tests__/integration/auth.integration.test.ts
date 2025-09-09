@@ -1,8 +1,11 @@
 import {nodemailerService} from "../../src/routes/auth-routes/application/nodemailer-service";
 import {authService} from "../../src/routes/auth-routes/auth-service";
-import {runDb, usersCollection} from "../../src/db/mongoDB";
+import {runDb, sessionsCollection, usersCollection} from "../../src/db/mongoDB";
 import {MongoMemoryServer} from "mongodb-memory-server";
-import {testFactoryUser} from "../datasets/integration-helpers";
+import {seedUserWithDevices, testFactoryUser} from "../datasets/integration-helpers";
+import {jwtService} from "../../src/routes/auth-routes/application/jwt-service";
+import {req} from "../datasets/test-client";
+import {SETTINGS} from "../../src/settings";
 
 
 describe('AUTH-INTEGRATION', () => {
@@ -15,6 +18,7 @@ describe('AUTH-INTEGRATION', () => {
 
     beforeEach(async () => {
         await usersCollection.deleteMany({})
+        await sessionsCollection.deleteMany({});
     });
 
     afterAll(async () => {
@@ -128,6 +132,136 @@ describe('AUTH-INTEGRATION', () => {
             });
         });
     });
+
+    describe('Refresh token', () => {
+        it('should update refreshToken and lastActiveDate for device 1', async () => {
+            const {login, password, email} = testFactoryUser.createUserDto();
+            const user = await testFactoryUser.insertUser({
+                login,
+                email,
+                password,
+                isConfirmed: true
+            });
+            await seedUserWithDevices(user.id, 4);
+
+            const device = await sessionsCollection.findOne({deviceTitle: 'Device-1'});
+            expect(device).toBeDefined();
+
+            const oldLastActive = device!.lastActiveDate;
+            const oldRefreshToken = await jwtService.createRefreshToken(device!.userId, device!.deviceId);
+            const result = await authService.refreshTokens(oldRefreshToken);
+            console.log('🔁 Result from refreshTokens:', result);
+
+            expect(result.status).toBe('Success');
+            expect(result.data).toHaveProperty('newAccessToken');
+            expect(result.data).toHaveProperty('newRefreshToken');
+
+            const updatedDevice = await sessionsCollection.findOne({deviceId: device!.deviceId});
+            console.log('🔍 Updated device:', updatedDevice);
+            expect(updatedDevice!.lastActiveDate).not.toEqual(oldLastActive);
+
+            const allDevices = await sessionsCollection.find({userId: device!.userId}).toArray();
+            expect(allDevices.length).toBe(4);
+        });
+
+
+        it('\'DELETE /security/devices/:deviceId\'', async () => {
+            const {login, password, email} = testFactoryUser.createUserDto();
+            const user = await testFactoryUser.insertUser({
+                login,
+                email,
+                password,
+                isConfirmed: true
+            });
+            await seedUserWithDevices(user.id, 4);
+
+            const device1 = await sessionsCollection.findOne({deviceTitle: 'Device-1'});
+            const device2 = await sessionsCollection.findOne({deviceTitle: 'Device-2'});
+            expect(device1).toBeDefined();
+            expect(device2).toBeDefined();
+
+            const refreshTokenDevice1 = await jwtService.createRefreshToken(device1!.userId, device1!.deviceId);
+
+            await req
+                .delete(`${SETTINGS.PATH.SECURITYDEVICES}/${device2!.deviceId}`)
+                .set('Cookie', `refreshToken=${refreshTokenDevice1}`)
+                .expect(204)
+
+            const res = await req
+                .get(SETTINGS.PATH.SECURITYDEVICES)
+                .set('Cookie', `refreshToken=${refreshTokenDevice1}`)
+                .expect(200)
+
+            const deviceIds = res.body.map((d: any) => d.deviceId);
+            expect(deviceIds).not.toContain(device2!.deviceId);
+            expect(deviceIds).toContain(device1!.deviceId);
+            expect(res.body.length).toBe(3);
+        });
+
+        it('should logout device 3 and verify it is removed from the list (queried by device 1)', async () => {
+            const {login, password, email} = testFactoryUser.createUserDto();
+            const user = await testFactoryUser.insertUser({
+                login,
+                email,
+                password,
+                isConfirmed: true
+            });
+            await seedUserWithDevices(user.id, 4);
+
+            const device1 = await sessionsCollection.findOne({deviceTitle: 'Device-1'});
+            const device3 = await sessionsCollection.findOne({deviceTitle: 'Device-3'});
+            expect(device1).toBeDefined();
+            expect(device3).toBeDefined();
+
+            const refreshTokenDevice1 = await jwtService.createRefreshToken(device1!.userId, device1!.deviceId);
+            const refreshTokenDevice3 = await jwtService.createRefreshToken(device3!.userId, device3!.deviceId);
+
+            await req
+                .post(SETTINGS.PATH.AUTH + '/logout')
+                .set('Cookie', `refreshToken=${refreshTokenDevice3}`)
+                .expect(204)
+
+
+            const res = await req
+                .get(SETTINGS.PATH.SECURITYDEVICES)
+                .set('Cookie', `refreshToken=${refreshTokenDevice1}`)
+                .expect(200)
+
+            expect(res.body.length).toBe(3);
+            expect(res.body[0].deviceId).toBe(device1!.deviceId);
+        });
+
+        it('should delete all devices except the current one', async () => {
+            const {login, password, email} = testFactoryUser.createUserDto();
+            const user = await testFactoryUser.insertUser({
+                login,
+                email,
+                password,
+                isConfirmed: true
+            });
+            await seedUserWithDevices(user.id, 4);
+
+            const device1 = await sessionsCollection.findOne({deviceTitle: 'Device-1'});
+            expect(device1).toBeDefined();
+
+            const refreshTokenDevice1 = await jwtService.createRefreshToken(device1!.userId, device1!.deviceId);
+
+            await req
+                .delete(SETTINGS.PATH.SECURITYDEVICES)
+                .set('Cookie', `refreshToken=${refreshTokenDevice1}`)
+                .expect(204)
+
+
+            const res = await req
+                .get(SETTINGS.PATH.SECURITYDEVICES)
+                .set('Cookie', `refreshToken=${refreshTokenDevice1}`)
+                .expect(200)
+
+                expect(res.body.length).toBe(1);
+            expect(res.body[0].deviceId).toBe(device1!.deviceId);
+        });
+    });
+
 })
 
 

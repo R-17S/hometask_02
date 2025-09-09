@@ -65,7 +65,7 @@ describe('/auth', () => {
             .expect(401);
 
         expect(res.body).toEqual({
-            errorsMessage: [{
+            errorsMessages: [{
                 field: "loginOrEmail or password",
                 message: "No such user"
             }]
@@ -97,5 +97,45 @@ describe('/auth', () => {
             //expect(res.body.errorsMessages[1].field).toEqual('password')
             //expect(res.body.errorsMessages[2].field).toEqual('loginOrEmail')
         }
+    });
+
+    describe('Login with multiple 4 user-agents', () => {
+        const correctUser = {
+            loginOrEmail: 'testuser',
+            password: 'password123'
+        };
+
+        const userAgents = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X)',
+            'Mozilla/5.0 (Linux; Android 10)',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'
+        ];
+
+        let refreshTokens: string[] = [];
+
+        it('should login 4 times with different user-agents and receive unique refreshTokens', async () => {
+            for (const agent of userAgents) {
+                const res = await req
+                    .post('/auth/login')
+                    .set('User-Agent', agent)
+                    .send(correctUser)
+                    .expect(200);
+
+                const cookieHeader = res.headers['set-cookie'];
+                console.log('Set-Cookie:', cookieHeader);
+                const cookiesArray = Array.isArray(cookieHeader) ? cookieHeader : [cookieHeader];
+                const refreshTokenCookie = cookiesArray.find((c: string) => c.startsWith('refreshToken='));
+                const refreshToken = refreshTokenCookie.split(';')[0].split('=')[1];
+                refreshTokens.push(refreshToken);
+                expect(res.body).toHaveProperty('accessToken');
+                expect(cookieHeader).toBeDefined();
+                expect(refreshTokenCookie).toBeDefined();
+            }
+
+            // Проверка уникальности refreshToken'ов
+            const uniqueTokens = new Set(refreshTokens);
+            expect(uniqueTokens.size).toBe(4);
+        });
     });
 });

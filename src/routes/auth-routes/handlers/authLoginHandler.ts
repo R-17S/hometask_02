@@ -10,6 +10,7 @@ export const authLoginHandler = async (req: Request, res: Response<Result<{ acce
 
     if (result.status !== ResultStatus.Success) {
         resultForHttpException(res, result);
+        return
     }
 
     const { accessToken, refreshToken } = result.data!;

@@ -2,7 +2,7 @@ import {Router} from "express";
 import {overallAuthValidation, overallRegistrationValidator,} from "./middleware-auth/authValidators";
 import {authLoginHandler} from "./handlers/authLoginHandler";
 import {getCurrentUserHandler} from "./handlers/getCurrentUserHandler";
-import {authJwtMiddleware} from "./middleware-auth/authJwtMiddleware";
+import {accessTokenGuard} from "./middleware-auth/accessTokenGuard";
 import {registrationHandler} from "./handlers/registrationUserHandler";
 import {confirmRegistrationHandler} from "./handlers/confirmRegistrationHandler";
 import {resendConfirmationEmailHandler} from "./handlers/resendConfirmationEmailHandler";
@@ -19,7 +19,7 @@ export const authRouter = Router();
 
 // Роуты  для главной users
 authRouter.post('/login', rateLimitMiddleware, contextMiddleware, ...overallAuthValidation, authLoginHandler);
-authRouter.get('/me', authJwtMiddleware, getCurrentUserHandler);
+authRouter.get('/me', accessTokenGuard, getCurrentUserHandler);
 
 // Роуты  для registration
 authRouter.post('/registration', ...overallRegistrationValidator, registrationHandler);

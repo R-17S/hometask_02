@@ -1,6 +1,6 @@
 import {jwtService} from "../../src/routes/auth-routes/application/jwt-service";
 import {Request, Response, NextFunction} from "express";
-import {authJwtMiddleware} from "../../src/routes/auth-routes/middleware-auth/authJwtMiddleware";
+import {accessTokenGuard} from "../../src/routes/auth-routes/middleware-auth/accessTokenGuard";
 
 // переписать тест
 describe('UNIT', () => {
@@ -20,7 +20,7 @@ describe('UNIT', () => {
 
         const next = jest.fn();
 
-        await authJwtMiddleware(req as Request, res as Response, next as NextFunction);
+        await accessTokenGuard(req as Request, res as Response, next as NextFunction);
 
         expect(res.status).toHaveBeenCalledWith(401);
         expect(res.send).toHaveBeenCalledWith('Not authorized');
@@ -43,7 +43,7 @@ describe('UNIT', () => {
 
         jest.spyOn(jwtService, 'getPayloadFromToken').mockResolvedValue(null);
 
-        await authJwtMiddleware(req as Request, res as Response, next as NextFunction);
+        await accessTokenGuard(req as Request, res as Response, next as NextFunction);
 
         expect(jwtService.getPayloadFromToken).toHaveBeenCalledWith('valid.token.here');
         expect(res.status).toHaveBeenCalledWith(401);
@@ -68,7 +68,7 @@ describe('UNIT', () => {
         // Мокаем возврат userId
         jest.spyOn(jwtService, 'getPayloadFromToken').mockResolvedValue('user123');
 
-        await authJwtMiddleware(req as Request, res as Response, next as NextFunction);
+        await accessTokenGuard(req as Request, res as Response, next as NextFunction);
 
         expect(jwtService.getPayloadFromToken).toHaveBeenCalledWith('valid.token.here');
         //expect(req.userId).toBe('user123');

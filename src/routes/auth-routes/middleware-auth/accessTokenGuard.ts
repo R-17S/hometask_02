@@ -3,7 +3,7 @@ import {jwtService} from "../application/jwt-service";
 
 
 
-export const authJwtMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+export const accessTokenGuard = async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         res.status(401).send('Not authorized');
