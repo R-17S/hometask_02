@@ -1,6 +1,7 @@
 import {Request, Response, NextFunction} from 'express';
 import {jwtService} from "../application/jwt-service";
 import {tokenRepository} from "../repositories/token-repositories";
+import {sessionsRepository} from "../repositories/session-repositories";
 
 
 export const refreshTokenGuard = async (req: Request, res: Response, next: NextFunction)=> {
@@ -18,6 +19,13 @@ export const refreshTokenGuard = async (req: Request, res: Response, next: NextF
         res.status(401).json({ message: 'Refresh token has been revoked' });
         return
     }
+
+    const session = await sessionsRepository.findSession(userId, deviceId);
+    if (!session) {
+        res.status(401).json({ message: 'Session not found' });
+        return
+    }
+
     req.userId = userId;
     req.deviceId = deviceId;
     next();

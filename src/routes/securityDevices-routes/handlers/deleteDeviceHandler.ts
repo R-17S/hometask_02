@@ -3,6 +3,7 @@ import {BadRequestException, ForbiddenException} from "../../../helper/exception
 import {sessionsQueryRepository} from "../repositories/session-query-repositories";
 
 
+
 export const deleteDeviceHandler = async (req: Request<{deviceId: string}>, res: Response, next: NextFunction) => {
     try {
         const userId = req.userId!;
