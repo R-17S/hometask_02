@@ -28,4 +28,4 @@ authRouter.post('/registration-email-resending', resendConfirmationEmailHandler)
 
 // Роуты  для токенов
 authRouter.post('/refresh-token', rateLimitMiddleware, checkRefreshTokenCookie, refreshTokenGuard, refreshTokenHandler);
-authRouter.post('/logout', rateLimitMiddleware, checkRefreshTokenCookie, logoutHandler);
+authRouter.post('/logout', rateLimitMiddleware, checkRefreshTokenCookie,refreshTokenGuard, logoutHandler);
