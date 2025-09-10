@@ -22,9 +22,9 @@ authRouter.post('/login', rateLimitMiddleware, contextMiddleware, ...overallAuth
 authRouter.get('/me', accessTokenGuard, getCurrentUserHandler);
 
 // Роуты  для registration
-authRouter.post('/registration', ...overallRegistrationValidator, registrationHandler);
-authRouter.post('/registration-confirmation', confirmRegistrationHandler);
-authRouter.post('/registration-email-resending', resendConfirmationEmailHandler);
+authRouter.post('/registration', rateLimitMiddleware, ...overallRegistrationValidator, registrationHandler);
+authRouter.post('/registration-confirmation', rateLimitMiddleware, confirmRegistrationHandler);
+authRouter.post('/registration-email-resending', rateLimitMiddleware, resendConfirmationEmailHandler);
 
 // Роуты  для токенов
 authRouter.post('/refresh-token', rateLimitMiddleware, checkRefreshTokenCookie, refreshTokenGuard, refreshTokenHandler);
