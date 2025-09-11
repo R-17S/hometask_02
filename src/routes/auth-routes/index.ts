@@ -11,14 +11,12 @@ import {refreshTokenHandler} from "./handlers/refreshTokenHandler";
 import {logoutHandler} from "./handlers/logoutHandler";
 import {checkRefreshTokenCookie} from "./middleware-auth/checkRefreshTokenCookie";
 import {rateLimitMiddleware} from "../../middlewares/rateLimit-middleware";
-import {contextMiddleware} from "./middleware-auth/requestContextMiddleware";
-
 
 export const authRouter = Router();
 
 
 // Роуты  для главной users
-authRouter.post('/login', rateLimitMiddleware, contextMiddleware, ...overallAuthValidation, authLoginHandler);
+authRouter.post('/login', rateLimitMiddleware, ...overallAuthValidation, authLoginHandler);
 authRouter.get('/me', accessTokenGuard, getCurrentUserHandler);
 
 // Роуты  для registration

@@ -6,6 +6,10 @@ import {ResultStatus} from "../../../helper/result-status.enum";
 
 
 export const authLoginHandler = async (req: Request, res: Response<Result<{ accessToken: string } | null>>) => {
+    req.context = {
+        ip: typeof req.ip === 'string' ? req.ip : 'unknown',
+        userAgent: typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'] : 'unknown device'
+    };
     const result = await authService.loginWithToken(req.body, req.context);
 
     if (result.status !== ResultStatus.Success) {

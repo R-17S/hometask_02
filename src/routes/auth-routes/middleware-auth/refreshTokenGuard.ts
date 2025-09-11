@@ -1,6 +1,5 @@
 import {Request, Response, NextFunction} from 'express';
 import {jwtService} from "../application/jwt-service";
-import {tokenRepository} from "../repositories/token-repositories";
 import {sessionsRepository} from "../repositories/session-repositories";
 
 
@@ -13,21 +12,21 @@ export const refreshTokenGuard = async (req: Request, res: Response, next: NextF
         return
     }
     const { userId, deviceId } = payload;
-
-    const isRevoked = await tokenRepository.exists(refreshToken);
-    if (isRevoked) {
-        res.status(401).json({ message: 'Refresh token has been revoked' });
-        return
-    }
-
     const session = await sessionsRepository.findSession(userId, deviceId);
     if (!session) {
         res.status(401).json({ message: 'Session not found' });
         return
     }
 
-    req.userId = userId;
-    req.deviceId = deviceId;
+    const decode = await jwtService.decodeToken(refreshToken);
+    const tokenIat = new Date(decode.iat * 1000)
+    if (tokenIat.getTime() !== session.lastActiveDate.getTime()) {
+        res.status(401).json({ message: 'Token reuse detected' });
+        return;
+    }
+
+    //req.userId = userId;
+    //req.deviceId = deviceId; //спроси падла не ЗАБУДЬ НУЖНО ЛИ РАЗГРУЗИТЬ СЕРВИС ОТ ЭТОГО ИЛИ НЕТ !!!
     next();
 }
 

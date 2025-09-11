@@ -12,7 +12,6 @@ import {ResultObject} from "../../helper/resultClass";
 import {Result} from "../../helper/resultTypes";
 import {ResultStatus} from "../../helper/result-status.enum";
 import {jwtService} from "./application/jwt-service";
-import {tokenRepository} from "./repositories/token-repositories";
 import {v4 as uuidv4} from 'uuid';
 import {sessionsRepository} from "./repositories/session-repositories";
 
@@ -37,16 +36,17 @@ export const authService = {
         const [accessToken, refreshToken] = await Promise.all([
             jwtService.createAccessToken(userId, deviceId),
             jwtService.createRefreshToken(userId, deviceId)
-        ])
-        const date = new Date();
+        ]);
+        const {iat, exp} = await jwtService.decodeToken(refreshToken)
+
         await sessionsRepository.createSession({
             userId,
             deviceId,
             ip,
             deviceTitle: userAgent,
-            issuedAt: date,
-            expiresAt: new Date(date.getTime() + 20_000),
-            lastActiveDate: date
+            issuedAt: new Date(iat! * 1000),
+            expiresAt: new Date(exp! * 1000),
+            lastActiveDate: new Date(iat! * 1000),
         });
 
         return ResultObject.Success({ accessToken, refreshToken });
@@ -162,19 +162,12 @@ export const authService = {
             { field: 'RefreshToken', message: 'Invalid Token' }
         ]);
         const { userId, deviceId } = payload;
-
-        const session = await sessionsRepository.findSession(userId, deviceId);
-        if (!session) return ResultObject.Unauthorized('User is not authorized', [
-            { field: 'SessionId', message: 'Session id not found' }
-        ])
-
-        await tokenRepository.save(oldRefreshToken, userId); //а нужно ли теперь его заполнять ?
-        await sessionsRepository.updateSessionActivity(deviceId, new Date())
-
         const [newAccessToken, newRefreshToken] = await Promise.all([
             jwtService.createAccessToken(userId, deviceId),
             jwtService.createRefreshToken(userId, deviceId)
         ])
+        const refreshPayload = await jwtService.decodeToken(newRefreshToken)
+        await sessionsRepository.updateSessionActivity(deviceId, new Date(refreshPayload.iat * 1000));
 
         return ResultObject.Success({ newAccessToken, newRefreshToken });
     },
@@ -186,18 +179,11 @@ export const authService = {
         ]);
 
         const { userId, deviceId } = payload;
-        const isRevoked = await tokenRepository.exists(refreshToken);
-        if (isRevoked) {
-            return ResultObject.Unauthorized('User is not authorized', [
-                { field: 'RefreshToken', message: 'Invalid Token' }
-            ]);
+        const session = await sessionsRepository.findSession(userId, deviceId);
+        if (!session) {
+            return ResultObject.Success(null); // если сессия удалена или её не существует - думаю считать logout успешным
         }
-        // Уже отозван — считаем, что всё ок
-        // if (isRevoked) {
-        // return ResultObject.Success(null);
-        // }
 
-        await tokenRepository.save(refreshToken, userId);
         await sessionsRepository.deleteSession(userId, deviceId);
         return ResultObject.Success(null);
     }

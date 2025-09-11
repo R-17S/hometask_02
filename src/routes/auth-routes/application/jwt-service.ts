@@ -21,5 +21,13 @@ export const jwtService =  {
 
     async getPayloadFromToken(token: string): Promise<{ userId: string; deviceId: string } | null> {
         return await this.verifyToken(token);
+    },
+
+    async decodeToken(token: string): Promise<any> {
+        try {
+            return jwt.decode(token);
+        } catch (e) {
+            return null;
+        }
     }
 };

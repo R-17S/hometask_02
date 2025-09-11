@@ -5,16 +5,16 @@ import {SessionDbType} from "../../../db/session-type";
 
 
 export async function ensureTTLIndex(collections: {
-    tokenCollection: Collection<TokenDbTypes>;
+    //tokenCollection: Collection<TokenDbTypes>;
     requestLogsCollection?: Collection<RequestLogType>;
     sessionsCollection?: Collection<SessionDbType>;
     // сунуть сюда другие коллекции если надо
 }) {
-    // TTL для токенов
-    await collections.tokenCollection.createIndex(
-        { revokedAt: 1 },
-        { expireAfterSeconds: 60 * 60 * 24 * 30 } // 30 дней
-    );
+    // // TTL для токенов
+    // await collections.tokenCollection.createIndex(
+    //     { revokedAt: 1 },
+    //     { expireAfterSeconds: 60 * 60 * 24 * 30 } // 30 дней
+    // );
 
 
     // TTL для requestLogs — чистим логи через 1 минуту

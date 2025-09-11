@@ -29,13 +29,12 @@ export async function runDb(mongoURI: string): Promise<boolean> {
     postsCollection = db.collection<PostDbTypes>(SETTINGS.DB.COLLECTION.POSTS);
     usersCollection = db.collection<UserDbTypes>(SETTINGS.DB.COLLECTION.USERS);
     commentsCollection = db.collection<CommentDbTypes>(SETTINGS.DB.COLLECTION.COMMENTS);
-    tokenCollection = db.collection<TokenDbTypes>(SETTINGS.DB.COLLECTION.TOKEN);
     sessionsCollection = db.collection<SessionDbType>(SETTINGS.DB.COLLECTION.SESSION);
     requestLogsCollection = db.collection<RequestLogType>(SETTINGS.DB.COLLECTION.REQUESTLOGS)
     try {
         await client.connect()
         await client.db().command({ ping: 1 })
-        await ensureTTLIndex({ tokenCollection });
+        await ensureTTLIndex({ requestLogsCollection, sessionsCollection });
         console.log('Successfully connected to MongoDB server')
         return true;
     } catch (error) {
