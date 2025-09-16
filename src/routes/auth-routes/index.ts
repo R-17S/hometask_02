@@ -1,5 +1,9 @@
 import {Router} from "express";
-import {overallAuthValidation, overallRegistrationValidator,} from "./middleware-auth/authValidators";
+import {
+    emailInputValidator, newPasswordValidator,
+    overallAuthValidation,
+    overallRegistrationValidator,
+} from "./middleware-auth/authValidators";
 import {authLoginHandler} from "./handlers/authLoginHandler";
 import {getCurrentUserHandler} from "./handlers/getCurrentUserHandler";
 import {accessTokenGuard} from "./middleware-auth/accessTokenGuard";
@@ -11,6 +15,8 @@ import {refreshTokenHandler} from "./handlers/refreshTokenHandler";
 import {logoutHandler} from "./handlers/logoutHandler";
 import {checkRefreshTokenCookie} from "./middleware-auth/checkRefreshTokenCookie";
 import {rateLimitMiddleware} from "../../middlewares/rateLimit-middleware";
+import {passwordRecoveryHandler} from "./handlers/passwordRecoveryHandler";
+import {newPasswordHandler} from "./handlers/newPasswordHandler";
 
 export const authRouter = Router();
 
@@ -27,3 +33,7 @@ authRouter.post('/registration-email-resending', rateLimitMiddleware, resendConf
 // Роуты  для токенов
 authRouter.post('/refresh-token', rateLimitMiddleware, checkRefreshTokenCookie, refreshTokenGuard, refreshTokenHandler);
 authRouter.post('/logout', rateLimitMiddleware, checkRefreshTokenCookie,refreshTokenGuard, logoutHandler);
+
+// Роуты  для пароля
+authRouter.post('/password-recovery', rateLimitMiddleware, ...emailInputValidator, passwordRecoveryHandler);
+authRouter.post('/new-password', rateLimitMiddleware, newPasswordValidator, newPasswordHandler)

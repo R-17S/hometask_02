@@ -3,6 +3,9 @@ import {runDb, usersCollection} from "../../src/db/mongoDB";
 import {ObjectId} from "mongodb";
 import bcrypt from "bcrypt";
 import {SETTINGS} from "../../src/settings";
+import {testFactoryUser} from "../datasets/integration-helpers";
+import {authService} from "../../src/routes/auth-routes/auth-service";
+import {rateLimitMiddleware} from "../../src/middlewares/rateLimit-middleware";
 
 
 describe('/auth', () => {
@@ -100,6 +103,11 @@ describe('/auth', () => {
     });
 
     describe('Login with multiple 4 user-agents', () => {
+        // Мокаем отправку письма
+        beforeEach(() => {
+            rateLimitMiddleware = jest.fn().mockResolvedValue(true);
+        });
+
         const correctUser = {
             loginOrEmail: 'testuser',
             password: 'password123'

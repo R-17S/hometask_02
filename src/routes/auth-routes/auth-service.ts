@@ -5,14 +5,13 @@ import {usersRepository} from "../users-routes/repositories/user-repositories";
 import {WithId} from "mongodb";
 import {randomUUID} from "node:crypto";
 import {bcryptService} from "./application/bcrypt-service";
-import {emailExamples} from "../../helper/email-templates";
+import {emailTemplates} from "../../helper/email-templates";
 import {nodemailerService} from "./application/nodemailer-service";
 import {add} from "date-fns";
 import {ResultObject} from "../../helper/resultClass";
 import {Result} from "../../helper/resultTypes";
 import {ResultStatus} from "../../helper/result-status.enum";
 import {jwtService} from "./application/jwt-service";
-import {v4 as uuidv4} from 'uuid';
 import {sessionsRepository} from "./repositories/session-repositories";
 
 
@@ -30,7 +29,7 @@ export const authService = {
         }
 
         const userId = credentialCheck.data!._id.toString();
-        const deviceId = uuidv4();
+        const deviceId = randomUUID();
         const ip = context.ip;
         const userAgent = context.userAgent;
         const [accessToken, refreshToken] = await Promise.all([
@@ -96,7 +95,7 @@ export const authService = {
             await nodemailerService.sendEmail(//отправить сообщение на почту юзера с кодом подтверждения
                 newUser.email,
                 newUser.emailConfirmation!.confirmationCode,
-                emailExamples.registrationEmail);
+                emailTemplates.registrationEmail(newUser.emailConfirmation!.confirmationCode));
         } catch (e: unknown) {
             console.error('Send email error', e); //залогировать ошибку при отправке сообщения
         }
@@ -148,7 +147,7 @@ export const authService = {
             await nodemailerService.sendEmail(
                 email,
                 newConfirmationCode,
-                emailExamples.resendConfirmationEmail
+                emailTemplates.resendConfirmationEmail(newConfirmationCode)
             );
         } catch (e: unknown) {
             console.error('Send email error', e); //залогировать ошибку при отправке сообщения
@@ -185,6 +184,44 @@ export const authService = {
         }
 
         await sessionsRepository.deleteSession(userId, deviceId);
+        return ResultObject.Success(null);
+    },
+
+    async sendRecoveryEmail(email: string): Promise<Result<null>> {
+        const user = await usersRepository.findByEmail(email);
+        if (!user) return ResultObject.Success(null);
+
+        const recoveryCode = randomUUID();
+        const expirationDate = add(new Date(), { hours: 24 });
+        const userId = user._id.toString();
+
+        await usersRepository.saveRecoveryCode(userId, recoveryCode, expirationDate)
+        try {
+            await nodemailerService.sendEmail(
+                email,
+                recoveryCode,
+                emailTemplates.recoveryPassword(recoveryCode)
+            );
+        } catch (e: unknown) {
+            console.error('Send email error', e); //залогировать ошибку при отправке сообщения
+        }
+        return ResultObject.Success(null);
+    },
+
+    async confirmPasswordRecovery(newPassword: string, recoveryCode: string): Promise<Result<null>> {
+        const user = await usersRepository.findByRecoveryCode(recoveryCode);
+
+        if (!user) return ResultObject.BadRequest('Invalid or expired recovery code', [
+            { field: 'recoveryCode', message: 'Code not found or already used' }
+        ]);
+
+        if (user.passwordRecovery!.expirationDate < new Date()) return ResultObject.BadRequest('Confirmation code expired', [
+            { field: 'recoveryCode', message: 'Code not found or already used' }
+        ]);
+
+        const passwordHash = await bcryptService.generateHash(newPassword);
+        await usersRepository.updatePassword(user._id, passwordHash)
+        await usersRepository.clearRecoveryCode(user._id);
         return ResultObject.Success(null);
     }
 };

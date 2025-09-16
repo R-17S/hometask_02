@@ -10,4 +10,8 @@ export type UserDbTypes = {
         expirationDate: Date;
         isConfirmed: boolean;
     };
+    passwordRecovery?: {
+        recoveryCode: string;
+        expirationDate: Date;
+    }
 };

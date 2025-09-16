@@ -6,6 +6,8 @@ import {seedUserWithDevices, testFactoryUser} from "../datasets/integration-help
 import {jwtService} from "../../src/routes/auth-routes/application/jwt-service";
 import {req} from "../datasets/test-client";
 import {SETTINGS} from "../../src/settings";
+import {usersRepository} from "../../src/routes/users-routes/repositories/user-repositories";
+import bcrypt from "bcrypt";
 
 
 describe('AUTH-INTEGRATION', () => {
@@ -262,6 +264,48 @@ describe('AUTH-INTEGRATION', () => {
         });
     });
 
+    describe('POST /auth/password-recovery', () => {
+
+        beforeEach( async () => {
+            nodemailerService.sendEmail = jest.fn().mockResolvedValue(true);
+        });
+
+        it('should return 204 even if email is not registered', async () => {
+            const {login, password, email} = testFactoryUser.createUserDto();
+            await authService.registerUser(login, password, email);
+
+            // Восстановление для существующего email
+            const validMail = await authService.sendRecoveryEmail(email)
+            expect(validMail.status).toBe('Success');
+
+            const userInDb = await usersRepository.findByEmail(email);
+            expect(userInDb?.passwordRecovery?.recoveryCode).toBeDefined();
+            expect(userInDb?.passwordRecovery?.expirationDate).toBeInstanceOf(Date);
+            expect(nodemailerService.sendEmail).toHaveBeenCalledTimes(2);
+
+            const ghostResult = await authService.sendRecoveryEmail('ghost@email.com');
+            expect(ghostResult.status).toBe('Success');
+            expect(nodemailerService.sendEmail).toHaveBeenCalledTimes(2); // счётчик я приказываю не меняться
+        });
+
+        it('should update password and return 204', async () => {
+            const {login, password, email} = testFactoryUser.createUserDto();
+            await authService.registerUser(login, password, email);
+
+            await authService.sendRecoveryEmail(email)
+
+            const user = await usersRepository.findByEmail(email);
+            const recoveryCode = user!.passwordRecovery!.recoveryCode;
+
+            const result = await authService.confirmPasswordRecovery('newPassword123', recoveryCode);
+            expect(result.status).toBe('Success');
+
+            const updateUser = await usersRepository.findByEmail(email);
+            const isMatch = await bcrypt.compare('newPassword123', updateUser!.passwordHash);
+            expect(isMatch).toBe(true);
+            expect(updateUser!.passwordRecovery).toBeUndefined();
+        });
+    });
 })
 
 

@@ -70,6 +70,40 @@ export const usersRepository = {
                 }
             }
         );
-    }
+    },
 
+    async saveRecoveryCode(userId: string, recoveryCode: string, expirationDate: Date): Promise<void> {
+        await usersCollection.updateOne(
+            { _id: new ObjectId(userId) },
+            {
+                $set: {
+                    passwordRecovery: {
+                        recoveryCode,
+                        expirationDate
+                    }
+                }
+            }
+        )
+    },
+
+
+    async findByRecoveryCode(recoveryCode: string): Promise<WithId<UserDbTypes> | null> {
+        return usersCollection.findOne({
+            'passwordRecovery.recoveryCode': recoveryCode
+        });
+    },
+
+    async updatePassword(userId: ObjectId, passwordHash: string): Promise<void> {
+        await usersCollection.updateOne(
+            { _id: userId },
+            { $set: { passwordHash } }
+        );
+    },
+
+    async clearRecoveryCode(userId: ObjectId): Promise<void> {
+        await usersCollection.updateOne(
+            { _id: userId },
+            { $unset: { passwordRecovery: '' } }
+        );
+    }
 };
