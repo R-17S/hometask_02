@@ -2,14 +2,15 @@ import {ObjectId} from "mongodb";
 import {CommentInputModel} from "../../../models/commentTypes";
 import {commentsCollection} from "../../../db/mongoDB";
 import {CommentDbTypes} from "../../../db/comment-type";
+import {injectable} from "inversify/lib/esm";
 
 
-
-export const commentsRepository = {
+@injectable()
+export class CommentsRepository  {
     async createComment(newComment: CommentDbTypes): Promise<ObjectId> {
         const result = await commentsCollection.insertOne(newComment);
         return result.insertedId
-    },
+    }
 
     async updateComment(id: string, input: CommentInputModel) {
         const result = await commentsCollection.updateOne(
@@ -17,19 +18,19 @@ export const commentsRepository = {
             { $set: { content: input.content } } // Обновляем только content
         );
         return result.modifiedCount === 1;
-    },
+    }
 
     async getCommentById(commentId: string) {
         return await commentsCollection.findOne({ _id: new ObjectId(commentId) });
-    },
+    }
 
     async deleteComment(id: string) {
         const result = await commentsCollection.deleteOne({ _id: new ObjectId(id) });
         return result.deletedCount === 1;
-    },
+    }
 
     async CommentExists(id: string): Promise<boolean> {
         const result = await commentsCollection.countDocuments({_id: new ObjectId(id)});
         return  result > 0;
-    },
-};
+    }
+}

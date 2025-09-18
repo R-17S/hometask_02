@@ -1,14 +1,18 @@
 import {BlogDbTypes} from "../../db/blog-type";
 import {BlogInputModel, BlogViewModel} from "../../models/blogTypes";
 import {ObjectId, WithId} from "mongodb";
-import {blogsRepository} from "./repositories/blog-repositories";
+import {BlogsRepository} from "./repositories/blog-repositories";
 import {NotFoundException} from "../../helper/exceptions";
+import {injectable, inject} from "inversify/lib/esm";
 
 
 
 
 
-export const blogsService = {
+@injectable()
+export class BlogsService {
+    constructor(@inject(BlogsRepository) private blogsRepository: BlogsRepository) {}
+
     async createBlog(input: BlogInputModel): Promise<ObjectId> {
         const newBlog = {
             name: input.name,
@@ -17,23 +21,21 @@ export const blogsService = {
             createdAt: new Date(),
             isMembership: false
         }
-        return await blogsRepository.createBlog(newBlog);
-    },
+        return await this.blogsRepository.createBlog(newBlog);
+    }
 
     async updateBlog(id: string, input: BlogInputModel) {
-        return await blogsRepository.updateBlog(id, input);
-    },
-
+        return await this.blogsRepository.updateBlog(id, input);
+    }
 
     async deleteBlog(id: string) {
-        return await blogsRepository.deleteBlog(id);
-    },
+        return await this.blogsRepository.deleteBlog(id);
+    }
 
     async checkBlogExists(blogId: string): Promise<void> {
-        const exists =  await blogsRepository.blogExists(blogId);
+        const exists =  await this.blogsRepository.blogExists(blogId);
         if (!exists) throw new NotFoundException('Blog not found');
-    },
-
+    }
 
     mapToBlogViewModel(input: WithId<BlogDbTypes>): BlogViewModel {
         return {
@@ -45,4 +47,4 @@ export const blogsService = {
             isMembership: input.isMembership
         };
     }
-};
+}

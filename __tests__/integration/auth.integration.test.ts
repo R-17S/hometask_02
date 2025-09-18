@@ -6,7 +6,7 @@ import {seedUserWithDevices, testFactoryUser} from "../datasets/integration-help
 import {jwtService} from "../../src/routes/auth-routes/application/jwt-service";
 import {req} from "../datasets/test-client";
 import {SETTINGS} from "../../src/settings";
-import {usersRepository} from "../../src/routes/users-routes/repositories/user-repositories";
+import {UsersRepository} from "../../src/routes/users-routes/repositories/user-repositories";
 import bcrypt from "bcrypt";
 
 
@@ -278,7 +278,7 @@ describe('AUTH-INTEGRATION', () => {
             const validMail = await authService.sendRecoveryEmail(email)
             expect(validMail.status).toBe('Success');
 
-            const userInDb = await usersRepository.findByEmail(email);
+            const userInDb = await UsersRepository.findByEmail(email);
             expect(userInDb?.passwordRecovery?.recoveryCode).toBeDefined();
             expect(userInDb?.passwordRecovery?.expirationDate).toBeInstanceOf(Date);
             expect(nodemailerService.sendEmail).toHaveBeenCalledTimes(2);
@@ -294,13 +294,13 @@ describe('AUTH-INTEGRATION', () => {
 
             await authService.sendRecoveryEmail(email)
 
-            const user = await usersRepository.findByEmail(email);
+            const user = await UsersRepository.findByEmail(email);
             const recoveryCode = user!.passwordRecovery!.recoveryCode;
 
             const result = await authService.confirmPasswordRecovery('newPassword123', recoveryCode);
             expect(result.status).toBe('Success');
 
-            const updateUser = await usersRepository.findByEmail(email);
+            const updateUser = await UsersRepository.findByEmail(email);
             const isMatch = await bcrypt.compare('newPassword123', updateUser!.passwordHash);
             expect(isMatch).toBe(true);
             expect(updateUser!.passwordRecovery).toBeUndefined();

@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import {injectable} from "inversify/lib/esm";
 
 
 const transporter = nodemailer.createTransport({
@@ -9,7 +10,8 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-export const nodemailerService = {
+@injectable()
+export class NodemailerService  {
     async sendEmail(to: string, code: string, template: string): Promise<void> {
         const mailOptions = {
             from: process.env.EMAIL_FROM,
@@ -21,4 +23,4 @@ export const nodemailerService = {
 
         await transporter.sendMail(mailOptions);
     }
-};
+}

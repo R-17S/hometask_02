@@ -2,14 +2,16 @@ import { PostInputModel} from "../../../models/postTypes";
 import {postsCollection} from "../../../db/mongoDB";
 import {ObjectId} from "mongodb";
 import {PostDbTypes} from "../../../db/post-type";
+import {injectable} from "inversify/lib/esm";
 
 
 
-export const postsRepository = {
+@injectable()
+export class PostsRepository {
     async createPost(newPost: PostDbTypes): Promise<ObjectId> {
         const result = await postsCollection.insertOne(newPost);
         return result.insertedId
-    },
+    }
 
     async updatePost(id: string, input: PostInputModel) {
         const updatePost = await postsCollection.updateOne(
@@ -17,42 +19,15 @@ export const postsRepository = {
             {$set: {...input}}
         );
         return updatePost.modifiedCount === 1;
-    },
+    }
 
     async deletePost(id: string) {
         const result = await postsCollection.deleteOne({_id: new ObjectId(id)});
         return result.deletedCount === 1;
-    },
+    }
 
     async postExists(postId: string): Promise<boolean> {
         const result = await postsCollection.countDocuments({_id: new ObjectId(postId)});
         return  result > 0;
-    },
-
-    // updatePost2(id: string, input: PostInputModel) {
-    //     const blog = blogsRepository.getBlogById(input.blogId)!;
-    //     let updatedPost: PostDbTypes | undefined = undefined;
-    //
-    //     db.posts = db.posts.map(p => p.id === id
-    //         ? (() => {
-    //             updatedPost = {...p, ...input, blogName: blog.name}
-    //             return updatedPost } )()
-    //         : p);
-    //
-    //     return updatedPost
-    // },
-    // map2(input: PostDbTypes) {
-    //     const postUpdate: PostViewModel = {
-    //         id: input.id,
-    //         title: input.title,
-    //         shortDescription: input.shortDescription,
-    //         content: input.content,
-    //         blogId: input.blogId,
-    //         blogName: input.blogName
-    //     }
-    //     return postUpdate;
-    // },
-
-
-
-};
+    }
+}

@@ -280,6 +280,47 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
+"@inversifyjs/common@1.5.2":
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/@inversifyjs/common/-/common-1.5.2.tgz#6836287fef1c25dddbdf6af345a33a6d6caf6835"
+  integrity sha512-WlzR9xGadABS9gtgZQ+luoZ8V6qm4Ii6RQfcfC9Ho2SOlE6ZuemFo7PKJvKI0ikm8cmKbU8hw5UK6E4qovH21w==
+
+"@inversifyjs/container@1.13.0":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@inversifyjs/container/-/container-1.13.0.tgz#3ce992904c8b348a8d5c4ce8eff6987334d2f514"
+  integrity sha512-bnacT6u3oihcGoUKhy2RTB96QPA/2CQHgiXYNpN4Ydd21SeN4FfDrZKu0TQf0uHMOSDc5mCi3PUifje7M/61qg==
+  dependencies:
+    "@inversifyjs/common" "1.5.2"
+    "@inversifyjs/core" "9.0.0"
+    "@inversifyjs/plugin" "0.2.0"
+    "@inversifyjs/reflect-metadata-utils" "1.4.0"
+
+"@inversifyjs/core@9.0.0":
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/@inversifyjs/core/-/core-9.0.0.tgz#3b2f40ee230d1df693e028d7490e82c6251d78e1"
+  integrity sha512-V/s1iM4hhUkJfRZoq5LCVKKXztO5rvBJi4og8arcfK1k3DInL08/HJ5rG/dPZz5f2reBbGM0KzVxyz3/rIySvQ==
+  dependencies:
+    "@inversifyjs/common" "1.5.2"
+    "@inversifyjs/prototype-utils" "0.1.2"
+    "@inversifyjs/reflect-metadata-utils" "1.4.0"
+
+"@inversifyjs/plugin@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@inversifyjs/plugin/-/plugin-0.2.0.tgz#03957c7d02803f32254a2ff2f8f8ffb05ec57eec"
+  integrity sha512-R/JAdkTSD819pV1zi0HP54mWHyX+H2m8SxldXRgPQarS3ySV4KPyRdosWcfB8Se0JJZWZLHYiUNiS6JvMWSPjw==
+
+"@inversifyjs/prototype-utils@0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@inversifyjs/prototype-utils/-/prototype-utils-0.1.2.tgz#2ff5241c2f50772b3202ad5f052b84852eedd8d3"
+  integrity sha512-WZAEycwVd8zVCPCQ7GRzuQmjYF7X5zbjI9cGigDbBoTHJ8y5US9om00IAp0RYislO+fYkMzgcB2SnlIVIzyESA==
+  dependencies:
+    "@inversifyjs/common" "1.5.2"
+
+"@inversifyjs/reflect-metadata-utils@1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@inversifyjs/reflect-metadata-utils/-/reflect-metadata-utils-1.4.0.tgz#3c1028eadca30e98258c512dcee52188068d8f58"
+  integrity sha512-J+Wb0dcFEkdCtPODH7dG/EwWyaEGIj/RPoBHrH4A8dxaV8QdJ97rSDnHk7nbJ/KKZ2K0lI+7J+POA6EGNd8V3w==
+
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@istanbuljs/load-nyc-config/-/load-nyc-config-1.1.0.tgz#fd3db1d59ecf7cf121e80650bb86712f9b55eced"
@@ -676,6 +717,13 @@
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/@types/http-errors/-/http-errors-2.0.4.tgz#7eb47726c391b7345a6ec35ad7f4de469cf5ba4f"
   integrity sha512-D0CFMMtydbJAegzOyHjtiKPLlvnm3iTZyZRSZoLq2mRhDdmLfIWOCYPfQJ4cu2erKghU++QvjcUjp/5h7hESpA==
+
+"@types/inversify@^2.0.33":
+  version "2.0.33"
+  resolved "https://registry.yarnpkg.com/@types/inversify/-/inversify-2.0.33.tgz#0770dae2299aaee57803f75235e64a99b74f6de0"
+  integrity sha512-WAue6NmBkfjjdGKaGSSTZY9HeSao2xL5rEd3UgGtb5lWaAqe/GmrpCxsAoGvepx2Cg932QfqukJfrmH1uN4Ptw==
+  dependencies:
+    inversify "*"
 
 "@types/istanbul-lib-coverage@*", "@types/istanbul-lib-coverage@^2.0.0", "@types/istanbul-lib-coverage@^2.0.1":
   version "2.0.6"
@@ -1869,6 +1917,15 @@ inherits@2, inherits@2.0.4:
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
   integrity sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
 
+inversify@*, inversify@^7.10.0:
+  version "7.10.0"
+  resolved "https://registry.yarnpkg.com/inversify/-/inversify-7.10.0.tgz#a4fd2a3848d6d32c559e52d776059f04a95d84a4"
+  integrity sha512-HAgfj8v1aMv2UcVMASLY/ergNt1jJKai/gW2HCUYTwMYmaGC1p3iVKw/ZQ2wI7wO92/6/KyfKV7nOYYKk+E/lg==
+  dependencies:
+    "@inversifyjs/common" "1.5.2"
+    "@inversifyjs/container" "1.13.0"
+    "@inversifyjs/core" "9.0.0"
+
 ipaddr.js@1.9.1:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/ipaddr.js/-/ipaddr.js-1.9.1.tgz#bff38543eeb8984825079ff3a2a8e6cbd46781b3"
@@ -2927,6 +2984,11 @@ readdirp@~3.6.0:
   integrity sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==
   dependencies:
     picomatch "^2.2.1"
+
+reflect-metadata@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/reflect-metadata/-/reflect-metadata-0.2.2.tgz#400c845b6cba87a21f2c65c4aeb158f4fa4d9c5b"
+  integrity sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==
 
 require-directory@^2.1.1:
   version "2.1.1"

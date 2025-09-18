@@ -4,8 +4,11 @@ import {usersCollection} from "../../../db/mongoDB";
 import {ObjectId, WithId} from "mongodb";
 import {UserAuthViewModel} from "../../../models/authType";
 import {NotFoundException} from "../../../helper/exceptions";
+import {injectable} from "inversify/lib/esm";
 
-export const usersQueryRepository = {
+
+@injectable()
+export class UsersQueryRepository {
     async getAllUsers(params: UserPaginationQueryResult): Promise<UsersViewPaginated> {
         const {
             sortBy,
@@ -47,13 +50,13 @@ export const usersQueryRepository = {
             totalCount,
             items: users.map(this.mapToUserViewModel),
         };
-    },
+    }
 
     async findUserById(id: string): Promise<UserViewModel | null>  {
         const result = await usersCollection.findOne({ _id: new ObjectId(id) });
         if (!result) throw new NotFoundException("User not found");
         return this.mapToUserViewModel(result);
-    },
+    }
 
     mapToUserViewModel(user: WithId<UserDbTypes>): UserViewModel {
         return {
@@ -62,12 +65,12 @@ export const usersQueryRepository = {
             email: user.email,
             createdAt: user.createdAt
         };
-    },
+    }
 
     async getUserById(userId: string): Promise<UserAuthViewModel | null> {
         const result = await usersCollection.findOne({ _id: new ObjectId(userId) });
         return result ? this.mapToAuthUserViewModel(result) : null;
-    },
+    }
 
     mapToAuthUserViewModel (user: WithId<UserDbTypes>): UserAuthViewModel {
         return {
@@ -75,5 +78,5 @@ export const usersQueryRepository = {
             login: user.login,
             userId: user._id.toString()
         }
-    },
-};
+    }
+}

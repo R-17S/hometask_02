@@ -4,7 +4,10 @@ import {inputErrorsResult} from "../../../middlewares/errors-middleware";
 import {authBasicMiddleware} from "../../../middlewares/autorization-middleware";
 import {ObjectId} from "mongodb";
 import {ErrorsTypeValidation} from "../../../models/errorsType";
-import {blogsRepository} from "../repositories/blog-repositories";
+import {container} from "../../../inversify.config";
+import {BlogsRepository} from "../repositories/blog-repositories";
+
+const blogsRepository = container.get(BlogsRepository);
 
 export const blogInputValidator = [
     body ('name')

@@ -3,8 +3,10 @@ import {commentsCollection} from "../../../db/mongoDB";
 import {ObjectId, WithId} from "mongodb";
 import {CommentDbTypes} from "../../../db/comment-type";
 import {NotFoundException} from "../../../helper/exceptions";
+import {injectable} from "inversify/lib/esm";
 
-export const commentQueryRepository = {
+@injectable()
+export class CommentQueryRepository  {
     async  getCommentsByPostId (id: string, params: CommentPaginationQueryResult): Promise<CommentViewPaginated> {
         const {
             pageNumber = 1,
@@ -31,13 +33,13 @@ export const commentQueryRepository = {
             totalCount,
             items: comments.map(this.mapToCommentViewModel)
         };
-    },
+    }
 
     async getCommentByIdOrError(id: string): Promise<CommentViewModel> {
         const result = await commentsCollection.findOne({_id: new ObjectId(id)})
         if (!result) throw new NotFoundException("Comment not found");
         return this.mapToCommentViewModel(result);
-    },
+    }
 
     mapToCommentViewModel(input: WithId<CommentDbTypes>): CommentViewModel {
         return {
@@ -49,5 +51,5 @@ export const commentQueryRepository = {
             },
             createdAt: input.createdAt
         };
-    },
+    }
 }

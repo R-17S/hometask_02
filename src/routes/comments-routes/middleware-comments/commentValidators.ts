@@ -3,7 +3,11 @@ import {ErrorsTypeValidation} from "../../../models/errorsType";
 import {Request, Response, NextFunction} from "express";
 import {ObjectId} from "mongodb";
 import {inputErrorsResult} from "../../../middlewares/errors-middleware";
-import {commentsRepository} from "../repositories/comment-repository";
+import {CommentsRepository} from "../repositories/comment-repository";
+import {container} from "../../../inversify.config";
+
+
+const commentsRepository = container.get(CommentsRepository);
 
 export const commentInputValidation = [
     body('content')

@@ -1,16 +1,21 @@
 import {PostByBlogIdInputModel, PostInputModel} from "../../models/postTypes";
 import {ObjectId} from "mongodb";
-import {postsRepository} from "./repositories/post-repositories";
-import {blogsQueryRepository} from "../blogs-routes/repositories/blog-query-repository";
+import {PostsRepository} from "./repositories/post-repositories";
+import {BlogsQueryRepository} from "../blogs-routes/repositories/blog-query-repository";
 import {NotFoundException} from "../../helper/exceptions";
 import {PostDbTypes} from "../../db/post-type";
+import {inject, injectable} from "inversify/lib/esm";
 
-
-export const postsService = {
+@injectable()
+export class  PostsService  {
+    constructor(
+        @inject(PostsRepository) private postsRepository: PostsRepository,
+        @inject(BlogsQueryRepository) private blogsQueryRepository: BlogsQueryRepository
+    ) {}
     async createPost(input: PostInputModel | PostByBlogIdInputModel, blogId?: string): Promise<ObjectId> {
         const effectiveBlogId = 'blogId' in input ? input.blogId : blogId;
         if (!effectiveBlogId) throw new NotFoundException('Blog ID is required');
-        const blog = await blogsQueryRepository.getBlogByIdOrError(effectiveBlogId)
+        const blog = await this.blogsQueryRepository.getBlogByIdOrError(effectiveBlogId)
 
         const newPost: PostDbTypes = {
             title: input.title,
@@ -21,19 +26,19 @@ export const postsService = {
             createdAt: new Date(),
         };
 
-        return await postsRepository.createPost(newPost)
-    },
+        return await this.postsRepository.createPost(newPost)
+    }
 
     async updatePost(id: string, input: PostInputModel) {
-        return await postsRepository.updatePost(id, input);
-    },
+        return await this.postsRepository.updatePost(id, input);
+    }
 
     async deletePost(id: string) {
-        return await postsRepository.deletePost(id);
-    },
+        return await this.postsRepository.deletePost(id);
+    }
 
     async checkPostExists(postId: string): Promise<void> {
-        const result = await postsRepository.postExists(postId);
+        const result = await this.postsRepository.postExists(postId);
         if (!result) throw new NotFoundException('Post not found');
-    },
+    }
 }

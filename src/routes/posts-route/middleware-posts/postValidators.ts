@@ -4,9 +4,12 @@ import {authBasicMiddleware} from "../../../middlewares/autorization-middleware"
 import {inputErrorsResult} from "../../../middlewares/errors-middleware";
 import {ObjectId} from "mongodb";
 import {ErrorsTypeValidation} from "../../../models/errorsType";
-import {blogsService} from "../../blogs-routes/blog-service";
-import {postsRepository} from "../repositories/post-repositories";
+import {BlogsService} from "../../blogs-routes/blog-service";
+import {container} from "../../../inversify.config";
+import {PostsRepository} from "../repositories/post-repositories";
 
+const blogsService = container.get(BlogsService);
+const postsRepository = container.get(PostsRepository);
 
 export const basePostInputValidation = [
     body ('title')

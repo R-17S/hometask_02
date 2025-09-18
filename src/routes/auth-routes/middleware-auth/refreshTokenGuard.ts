@@ -1,8 +1,10 @@
 import {Request, Response, NextFunction} from 'express';
-import {jwtService} from "../application/jwt-service";
-import {sessionsRepository} from "../repositories/session-repositories";
+import {JwtService} from "../application/jwt-service";
+import {SessionsRepository} from "../../securityDevices-routes/repositories/session-repositories";
+import {container} from "../../../inversify.config";
 
-
+const jwtService = container.get(JwtService);
+const sessionsRepository = container.get(SessionsRepository);
 export const refreshTokenGuard = async (req: Request, res: Response, next: NextFunction)=> {
     const refreshToken = req.refreshToken!;
     const payload  = await jwtService.getPayloadFromToken(refreshToken);

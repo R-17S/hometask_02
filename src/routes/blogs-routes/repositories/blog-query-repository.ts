@@ -3,8 +3,11 @@ import {blogsCollection} from "../../../db/mongoDB";
 import {ObjectId, WithId} from "mongodb";
 import {BlogDbTypes} from "../../../db/blog-type";
 import {NotFoundException} from "../../../helper/exceptions";
+import {injectable} from "inversify/lib/esm";
 
-export const blogsQueryRepository = {
+
+@injectable()
+export class BlogsQueryRepository {
     async getAllBlogs(params: BlogPaginationQueryResult): Promise<BlogsViewPaginated> {
         const {
             searchNameTerm,
@@ -41,13 +44,13 @@ export const blogsQueryRepository = {
             totalCount,
             items: blogs.map(this.mapToBlogViewModel),
         };
-    },
+    }
 
     async getBlogByIdOrError(id: string): Promise<BlogViewModel> {
         const result = await blogsCollection.findOne({ _id: new ObjectId(id) });
         if (!result) throw new NotFoundException('Blog not found');
         return this.mapToBlogViewModel(result);
-    },
+    }
 
     mapToBlogViewModel(blog: WithId<BlogDbTypes>): BlogViewModel {
         return {
@@ -59,5 +62,4 @@ export const blogsQueryRepository = {
             isMembership: blog.isMembership
         };
     }
-
-};
+}

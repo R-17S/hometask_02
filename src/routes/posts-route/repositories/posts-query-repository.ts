@@ -3,9 +3,10 @@ import {postsCollection} from "../../../db/mongoDB";
 import {PostDbTypes} from "../../../db/post-type";
 import {ObjectId, WithId} from "mongodb";
 import {NotFoundException} from "../../../helper/exceptions";
+import {injectable} from "inversify/lib/esm";
 
-
-export const postsQueryRepository = {
+@injectable()
+export class PostsQueryRepository  {
     async getPostsByBlogId(id: string, params: PostPaginationQueryResult): Promise<PostsViewPaginated> {
         const {
             pageNumber,
@@ -33,7 +34,7 @@ export const postsQueryRepository = {
             totalCount,
             items: posts.map(this.mapToPostViewModel)
         };
-    },
+    }
 
     async getAllPosts(params: PostPaginationQueryResult): Promise<PostsViewPaginated> {
         const {
@@ -60,14 +61,13 @@ export const postsQueryRepository = {
             totalCount,
             items: posts.map(this.mapToPostViewModel)
         };
-    },
+    }
 
     async getPostByIdOrError(id: string): Promise<PostViewModel> {
         const result = await postsCollection.findOne({_id: new ObjectId(id)});
         if (!result) throw new NotFoundException('Post not found');
         return this.mapToPostViewModel(result);
-    },
-
+    }
 
 
     mapToPostViewModel(input: WithId<PostDbTypes>): PostViewModel {
@@ -81,4 +81,4 @@ export const postsQueryRepository = {
             createdAt: input.createdAt
         }
     }
-};
+}

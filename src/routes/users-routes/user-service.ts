@@ -1,17 +1,20 @@
 import {UserInputModel, UserViewModel} from "../../models/userTypes";
 import {WithId} from "mongodb";
 import {UserDbTypes} from "../../db/user-type";
-import {usersRepository} from "./repositories/user-repositories";
+import {UsersRepository} from "./repositories/user-repositories";
 import {BadRequestException} from "../../helper/exceptions";
 import {bcryptService} from "../auth-routes/application/bcrypt-service";
+import {inject, injectable} from "inversify/lib/esm";
 
 
+@injectable()
+export class UsersService {
+    constructor(@inject(UsersRepository) private usersRepository: UsersRepository) {}
 
-export const usersService = {
     async createUser(input: UserInputModel): Promise<UserViewModel> {
         const [loginExists, emailExists] = await Promise.all([
-            usersRepository.findByLoginOrEmail(input.login),
-            usersRepository.findByLoginOrEmail(input.email)
+            this.usersRepository.findByLoginOrEmail(input.login),
+            this.usersRepository.findByLoginOrEmail(input.email)
         ]);
 
         if (loginExists) throw new BadRequestException('Login should be unique');
@@ -25,13 +28,13 @@ export const usersService = {
             createdAt: new Date(),
         };
 
-        const createdUser = await usersRepository.createUser(newUser);
+        const createdUser = await this.usersRepository.createUser(newUser);
         return this.mapToUserViewModel(createdUser);
-    },
+    }
 
     async deleteUser(id:string) {
-        return await usersRepository.deleteUser(id);
-    },
+        return await this.usersRepository.deleteUser(id);
+    }
 
     mapToUserViewModel(user: WithId<UserDbTypes>): UserViewModel {
         return {
@@ -40,5 +43,5 @@ export const usersService = {
             email: user.email,
             createdAt: user.createdAt
         };
-    },
+    }
 }

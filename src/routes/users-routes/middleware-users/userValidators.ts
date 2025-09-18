@@ -4,9 +4,10 @@ import {inputErrorsResult} from "../../../middlewares/errors-middleware";
 import {NextFunction, Request, Response} from "express";
 import {ErrorsTypeValidation} from "../../../models/errorsType";
 import {ObjectId} from "mongodb";
-import {usersRepository} from "../repositories/user-repositories";
+import {UsersRepository} from "../repositories/user-repositories";
+import {container} from "../../../inversify.config";
 
-
+const usersRepository = container.get(UsersRepository);
 export const userInputValidator = [
     body ('login')
         .trim()

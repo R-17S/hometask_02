@@ -1,15 +1,17 @@
 
 import {SETTINGS} from "../../../settings";
 import jwt from 'jsonwebtoken';
+import {injectable} from "inversify/lib/esm";
 
-export const jwtService =  {
+@injectable()
+export class JwtService   {
     async createAccessToken(userId: string, deviceId: string) {
         return jwt.sign({userId, deviceId }, SETTINGS.JWT_SECRET, { expiresIn: '10s' })
-    },
+    }
 
     async createRefreshToken(userId: string, deviceId: string) {
         return jwt.sign({userId, deviceId }, SETTINGS.JWT_SECRET, { expiresIn: '20s' })
-    },
+    }
 
     async verifyToken(token: string): Promise<{ userId: string, deviceId: string } | null> {
         try {
@@ -17,11 +19,11 @@ export const jwtService =  {
         } catch (e) {
             return null;
         }
-    },
+    }
 
     async getPayloadFromToken(token: string): Promise<{ userId: string; deviceId: string } | null> {
         return await this.verifyToken(token);
-    },
+    }
 
     async decodeToken(token: string): Promise<any> {
         try {
@@ -30,4 +32,4 @@ export const jwtService =  {
             return null;
         }
     }
-};
+}

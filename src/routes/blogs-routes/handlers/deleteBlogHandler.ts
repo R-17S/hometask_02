@@ -1,11 +1,21 @@
 import {NextFunction, Request, Response} from "express";
-import {blogsService} from "../blog-service";
+import {BlogsService} from "../blog-service";
+import {injectable, inject} from "inversify";
 
-export const deleteBlogHandler = async (req: Request<{id: string}>, res: Response<void>, next:NextFunction) => {
-    try {
-        await blogsService.deleteBlog(req.params.id);
-        res.sendStatus(204);
-    } catch (error) {
-        next(error);
+
+
+
+@injectable()
+export class BlogsController {
+    constructor(
+        @inject(BlogsService) private blogsService: BlogsService,
+    ) {}
+    async  deleteBlogById (req: Request<{id: string}>, res: Response<void>, next:NextFunction) {
+        try {
+            await this.blogsService.deleteBlog(req.params.id);
+            res.sendStatus(204);
+        } catch (error) {
+            next(error);
+        }
     }
-};
+}
