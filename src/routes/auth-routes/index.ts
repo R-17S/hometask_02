@@ -1,8 +1,8 @@
 import {Router} from "express";
 import {
-    emailInputValidator, newPasswordValidator,
+    emailInputValidator, passwordValidator,
     overallAuthValidation,
-    overallRegistrationValidator,
+    overallRegistrationValidator, newPasswordValidator,
 } from "./middleware-auth/authValidators";
 import {accessTokenGuard} from "./middleware-auth/accessTokenGuard";
 import {refreshTokenGuard} from "./middleware-auth/refreshTokenGuard";
@@ -32,4 +32,4 @@ authRouter.post('/logout', rateLimitMiddleware, checkRefreshTokenCookie,refreshT
 
 // Роуты  для пароля
 authRouter.post('/password-recovery', rateLimitMiddleware, ...emailInputValidator, authController.passwordRecovery.bind(authController));
-authRouter.post('/new-password', rateLimitMiddleware, newPasswordValidator, authController.newPassword.bind(authController))
+authRouter.post('/new-password', rateLimitMiddleware, ...newPasswordValidator, authController.newPassword.bind(authController))

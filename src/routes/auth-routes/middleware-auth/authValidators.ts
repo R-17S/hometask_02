@@ -28,7 +28,7 @@ export const registrationValidator = [
         .trim()
         .notEmpty().withMessage('Email is required')
         .isEmail().withMessage('Invalid email format')
-        .matches(/^[\w-]+@([\w-]+\.)+[\w-]{2,4}$/).withMessage('Email pattern mismatch')
+        .matches(/^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/).withMessage('Email pattern mismatch')
 ];
 
 export const emailValidator = [
@@ -36,16 +36,20 @@ export const emailValidator = [
         .trim()
         .notEmpty().withMessage('Email is required')
         .isEmail().withMessage('Invalid email format')
-        .matches(/^[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}$/).withMessage('Email pattern mismatch')
+        .matches(/^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/).withMessage('Email pattern mismatch')
 ];
 
-export const newPasswordValidator = [
+export const passwordValidator = [
     body('newPassword')
         .isString().withMessage('Password must be a string')
         .isLength({ min: 6, max: 20 }).withMessage('Password must be between 6 and 20 characters'),
     body('recoveryCode')
         .isString().withMessage('Recovery code must be a string')
         .notEmpty().withMessage('Recovery code is required'),
+]
+
+export const newPasswordValidator =[
+    ...passwordValidator,
     inputErrorsResult
 ]
 
