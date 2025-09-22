@@ -28,7 +28,6 @@ export const registrationValidator = [
         .trim()
         .notEmpty().withMessage('Email is required')
         .isEmail().withMessage('Invalid email format')
-        .matches(/^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/).withMessage('Email pattern mismatch')
 ];
 
 export const emailValidator = [
@@ -36,7 +35,6 @@ export const emailValidator = [
         .trim()
         .notEmpty().withMessage('Email is required')
         .isEmail().withMessage('Invalid email format')
-        .matches(/^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/).withMessage('Email pattern mismatch')
 ];
 
 export const passwordValidator = [
