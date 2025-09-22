@@ -87,6 +87,10 @@ export class AuthController {
     async passwordRecovery(req: Request<{}, {}, { email: string }>, res: Response) {
         const {email} = req.body;
         const result = await this.authService.sendRecoveryEmail(email);
+        if (result.status === ResultStatus.Success) {
+            res.sendStatus(204);
+            return
+        }
         resultForHttpException(res, result);
     }
 
