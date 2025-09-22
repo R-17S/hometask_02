@@ -1,4 +1,4 @@
-
+import {inject, injectable} from "inversify";
 import {AuthInputModel} from "../../models/authType";
 import {UserDbTypes} from "../../db/user-type";
 import {UsersRepository} from "../users-routes/repositories/user-repositories";
@@ -13,13 +13,12 @@ import {Result} from "../../helper/resultTypes";
 import {ResultStatus} from "../../helper/result-status.enum";
 import {JwtService} from "./application/jwt-service";
 import {SessionsRepository} from "../securityDevices-routes/repositories/session-repositories";
-import {inject, injectable} from "inversify/lib/esm";
-import {BlogsRepository} from "../blogs-routes/repositories/blog-repositories";
+
+
 
 @injectable()
 export class AuthService  {
-    constructor(@inject(BlogsRepository) private blogsRepository: BlogsRepository,
-                @inject(JwtService) private jwtService: JwtService,
+    constructor(@inject(JwtService) private jwtService: JwtService,
                 @inject(SessionsRepository) private sessionsRepository: SessionsRepository,
                 @inject(UsersRepository) private usersRepository: UsersRepository,
                 @inject(BcryptService) private bcryptService: BcryptService,

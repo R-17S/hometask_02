@@ -3,7 +3,7 @@ import {WithId} from "mongodb";
 import {SessionDbType} from "../../../db/session-type";
 import {SessionViewModel} from "../../../models/sessionType";
 import {NotFoundException} from "../../../helper/exceptions";
-import {injectable} from "inversify/lib/esm";
+import {injectable} from "inversify";
 
 @injectable()
 export class SessionsQueryRepository  {

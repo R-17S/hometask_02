@@ -3,13 +3,15 @@ import {WithId} from "mongodb";
 import {UserDbTypes} from "../../db/user-type";
 import {UsersRepository} from "./repositories/user-repositories";
 import {BadRequestException} from "../../helper/exceptions";
-import {bcryptService} from "../auth-routes/application/bcrypt-service";
-import {inject, injectable} from "inversify/lib/esm";
+import {BcryptService} from "../auth-routes/application/bcrypt-service";
+import {inject, injectable} from "inversify";
 
 
 @injectable()
 export class UsersService {
-    constructor(@inject(UsersRepository) private usersRepository: UsersRepository) {}
+    constructor(@inject(UsersRepository) private usersRepository: UsersRepository,
+                @inject(BcryptService) private bcryptService: BcryptService
+    ) {}
 
     async createUser(input: UserInputModel): Promise<UserViewModel> {
         const [loginExists, emailExists] = await Promise.all([
@@ -20,7 +22,7 @@ export class UsersService {
         if (loginExists) throw new BadRequestException('Login should be unique');
         if (emailExists) throw new BadRequestException('Email should be unique');
 
-        const passwordHash = await bcryptService.generateHash(input.password);
+        const passwordHash = await this.bcryptService.generateHash(input.password);
         const newUser = {
             login: input.login,
             passwordHash,

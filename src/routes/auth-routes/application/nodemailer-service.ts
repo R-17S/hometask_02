@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import {injectable} from "inversify/lib/esm";
+import {injectable} from "inversify";
 
 
 const transporter = nodemailer.createTransport({

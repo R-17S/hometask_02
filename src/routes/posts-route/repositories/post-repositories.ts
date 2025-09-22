@@ -2,7 +2,7 @@ import { PostInputModel} from "../../../models/postTypes";
 import {postsCollection} from "../../../db/mongoDB";
 import {ObjectId} from "mongodb";
 import {PostDbTypes} from "../../../db/post-type";
-import {injectable} from "inversify/lib/esm";
+import {injectable} from "inversify";
 
 
 

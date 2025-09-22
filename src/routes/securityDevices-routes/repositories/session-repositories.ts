@@ -1,6 +1,6 @@
 import {SessionDbType} from "../../../db/session-type";
 import {sessionsCollection} from "../../../db/mongoDB";
-import {injectable} from "inversify/lib/esm";
+import {injectable} from "inversify";
 
 
 @injectable()

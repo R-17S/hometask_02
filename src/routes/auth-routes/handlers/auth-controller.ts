@@ -1,4 +1,4 @@
-import {inject, injectable} from "inversify/lib/esm";
+import {inject, injectable} from "inversify";
 import {Request, Response} from "express";
 import {Result} from "../../../helper/resultTypes";
 import {AuthService} from "../auth-service";

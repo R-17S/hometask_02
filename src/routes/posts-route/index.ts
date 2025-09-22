@@ -8,7 +8,7 @@ import {container} from "../../inversify.config";
 
 
 const postsController = container.get(PostsController);
-const postsRouter = Router();
+export const postsRouter = Router();
 
 // Роут для получения комментов поста
 postsRouter.get('/:postId/comments', postIdValidator, postsController.getCommentsByPostId.bind(postsController));

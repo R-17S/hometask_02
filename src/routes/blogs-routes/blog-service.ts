@@ -3,7 +3,7 @@ import {BlogInputModel, BlogViewModel} from "../../models/blogTypes";
 import {ObjectId, WithId} from "mongodb";
 import {BlogsRepository} from "./repositories/blog-repositories";
 import {NotFoundException} from "../../helper/exceptions";
-import {injectable, inject} from "inversify/lib/esm";
+import {injectable, inject} from "inversify";
 
 
 

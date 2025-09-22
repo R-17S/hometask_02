@@ -1,4 +1,4 @@
-import {inject, injectable} from "inversify/lib/esm";
+import {inject, injectable} from "inversify";
 import {NextFunction, Request, Response} from "express";
 import {CommentInputModel, CommentInputQuery, CommentViewModel, CommentViewPaginated} from "../../../models/commentTypes";
 import {CommentsService} from "../../comments-routes/comments-service";

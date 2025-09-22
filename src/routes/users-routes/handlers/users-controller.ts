@@ -1,4 +1,4 @@
-import {inject, injectable} from "inversify/lib/esm";
+import {inject, injectable} from "inversify";
 import {NextFunction, Request, Response} from "express";
 import {UserInputModel, UserInputQuery, UsersViewPaginated, UserViewModel} from "../../../models/userTypes";
 import {UsersService} from "../user-service";

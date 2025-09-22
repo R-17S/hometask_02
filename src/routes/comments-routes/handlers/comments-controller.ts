@@ -1,4 +1,4 @@
-import {inject, injectable} from "inversify/lib/esm";
+import {inject, injectable} from "inversify";
 import {CommentsService} from "../comments-service";
 import {CommentQueryRepository} from "../repositories/comment-query-repository";
 import {NextFunction, Request, Response} from "express";

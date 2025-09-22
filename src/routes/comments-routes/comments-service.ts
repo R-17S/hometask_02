@@ -1,4 +1,4 @@
-import {inject, injectable} from "inversify/lib/esm";
+import {inject, injectable} from "inversify";
 import { CommentInputModel } from "../../models/commentTypes";
 import {ObjectId} from "mongodb";
 import {UsersQueryRepository} from "../users-routes/repositories/user-query-repository";

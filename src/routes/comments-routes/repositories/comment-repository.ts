@@ -2,7 +2,7 @@ import {ObjectId} from "mongodb";
 import {CommentInputModel} from "../../../models/commentTypes";
 import {commentsCollection} from "../../../db/mongoDB";
 import {CommentDbTypes} from "../../../db/comment-type";
-import {injectable} from "inversify/lib/esm";
+import {injectable} from "inversify";
 
 
 @injectable()

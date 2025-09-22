@@ -5,7 +5,7 @@ import {SETTINGS} from "../../src/settings";
 import {req} from "../datasets/test-client";
 import {blogsCollection, commentsCollection, postsCollection, runDb, usersCollection} from "../../src/db/mongoDB";
 import {ObjectId} from "mongodb";
-import {jwtService} from "../../src/routes/auth-routes/application/jwt-service";
+import {JwtService} from "../../src/routes/auth-routes/application/jwt-service";
 
 
 
@@ -486,11 +486,13 @@ describe('/posts', () => {
     });
 
     it('create should comment for existing post', async () => {
+        const jwtService = new JwtService();
+        const deviceId = 'test-device-id';
         const newCommentData = {
             content: 'Valid comment length is 20 characters'
         };
         const testComment  = dataset4.comments[0];
-        const token = await jwtService.createAccessToken(testComment.commentatorInfo.userId)
+        const token = await jwtService.createAccessToken(testComment.commentatorInfo.userId, deviceId)
 
 
         const res = await req
@@ -527,13 +529,14 @@ describe('/posts', () => {
     });
 
     it('create should return 400 for invalid comment data', async () => {
-
+        const jwtService = new JwtService();
+        const deviceId = 'test-device-id';
         const incorrectPost = {
             content: createString(301),
         };
 
         const testComment  = dataset4.comments[0];
-        const token = await jwtService.createAccessToken(testComment.commentatorInfo.userId)
+        const token = await jwtService.createAccessToken(testComment.commentatorInfo.userId, deviceId)
 
 
         const res = await req

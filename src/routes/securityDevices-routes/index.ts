@@ -7,8 +7,8 @@ import {SecurityDeviceController} from "./handlers/securityDevice-controller";
 
 
 const securityDeviceController = container.get(SecurityDeviceController);
-const securityDevicesRoutes = Router();
+export const securityDevicesRoutes = Router();
 
 securityDevicesRoutes.get('/', checkRefreshTokenCookie, refreshTokenGuard, securityDeviceController.getDevices.bind(securityDeviceController));
 securityDevicesRoutes.delete('/', rateLimitMiddleware, checkRefreshTokenCookie, refreshTokenGuard, securityDeviceController.deleteOtherDevices.bind(securityDeviceController));
-securityDevicesRoutes.delete('/:deviceId', rateLimitMiddleware, checkRefreshTokenCookie, refreshTokenGuard , securityDeviceController.getDevices.bind(securityDeviceController));
+securityDevicesRoutes.delete('/:deviceId', rateLimitMiddleware, checkRefreshTokenCookie, refreshTokenGuard , securityDeviceController.deleteDevice.bind(securityDeviceController));

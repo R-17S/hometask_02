@@ -1,17 +1,29 @@
-import {nodemailerService} from "../../src/routes/auth-routes/application/nodemailer-service";
-import {authService} from "../../src/routes/auth-routes/auth-service";
+import {NodemailerService} from "../../src/routes/auth-routes/application/nodemailer-service";
+import {AuthService} from "../../src/routes/auth-routes/auth-service";
 import {runDb, sessionsCollection, usersCollection} from "../../src/db/mongoDB";
 import {MongoMemoryServer} from "mongodb-memory-server";
-import {seedUserWithDevices, testFactoryUser} from "../datasets/integration-helpers";
-import {jwtService} from "../../src/routes/auth-routes/application/jwt-service";
+import {seedUserWithDevices, syncLastActiveDate, testFactoryUser} from "../datasets/integration-helpers";
+import {JwtService, } from "../../src/routes/auth-routes/application/jwt-service";
 import {req} from "../datasets/test-client";
 import {SETTINGS} from "../../src/settings";
 import {UsersRepository} from "../../src/routes/users-routes/repositories/user-repositories";
 import bcrypt from "bcrypt";
+import {BcryptService} from "../../src/routes/auth-routes/application/bcrypt-service";
+import {SessionsRepository} from "../../src/routes/securityDevices-routes/repositories/session-repositories";
+
 
 
 describe('AUTH-INTEGRATION', () => {
     let mongoServer: MongoMemoryServer;
+
+    const jwtService = new JwtService();
+    const sessionsRepository = new SessionsRepository();
+    const usersRepository = new UsersRepository();
+    const bcryptService = new BcryptService();
+    const nodemailerService = new NodemailerService();
+    const authService = new AuthService( jwtService, sessionsRepository, usersRepository, bcryptService, nodemailerService);
+
+
 
     beforeAll(async () => {
         mongoServer = await MongoMemoryServer.create();
@@ -75,11 +87,11 @@ describe('AUTH-INTEGRATION', () => {
     });
 
     describe('Confirm email', () => {
-        const confirmEmailUseCase = authService.confirmRegistration;
+
 
         // ветка if для невалидного кода
         it('should reject invalid confirmation code', async () => {
-            const result = await confirmEmailUseCase('invalid_code_123');
+            const result = await authService.confirmRegistration('invalid_code_123');
 
             expect(result.status).toBe('BadRequest');
             expect(result.extensions).toContainEqual({
@@ -102,7 +114,7 @@ describe('AUTH-INTEGRATION', () => {
                 expirationDate: new Date(), // Код уже недействителен!
             });
 
-            const result = await confirmEmailUseCase(code);
+            const result = await authService.confirmRegistration(code);
 
             //  Ожидаем BadRequest
             expect(result.status).toBe('BadRequest');
@@ -125,7 +137,7 @@ describe('AUTH-INTEGRATION', () => {
                 isConfirmed: true,
             });
 
-            const result = await confirmEmailUseCase(code);
+            const result = await authService.confirmRegistration(code);
 
             expect(result.status).toBe('BadRequest');
             expect(result.extensions).toContainEqual({
@@ -135,7 +147,7 @@ describe('AUTH-INTEGRATION', () => {
         });
     });
 
-    describe('Refresh token', () => {
+    describe('/security/devices', () => {
         it('should update refreshToken and lastActiveDate for device 1', async () => {
             const {login, password, email} = testFactoryUser.createUserDto();
             const user = await testFactoryUser.insertUser({
@@ -183,7 +195,11 @@ describe('AUTH-INTEGRATION', () => {
             expect(device2).toBeDefined();
 
             const refreshTokenDevice1 = await jwtService.createRefreshToken(device1!.userId, device1!.deviceId);
-
+            const decode = await jwtService.decodeToken(refreshTokenDevice1);
+            await sessionsCollection.updateOne(
+                { deviceId: device1!.deviceId },
+                { $set: { lastActiveDate: new Date(decode.iat * 1000) } }
+            );
             await req
                 .delete(`${SETTINGS.PATH.SECURITYDEVICES}/${device2!.deviceId}`)
                 .set('Cookie', `refreshToken=${refreshTokenDevice1}`)
@@ -217,6 +233,8 @@ describe('AUTH-INTEGRATION', () => {
 
             const refreshTokenDevice1 = await jwtService.createRefreshToken(device1!.userId, device1!.deviceId);
             const refreshTokenDevice3 = await jwtService.createRefreshToken(device3!.userId, device3!.deviceId);
+            await syncLastActiveDate(device1!.deviceId, refreshTokenDevice1);
+            await syncLastActiveDate(device3!.deviceId, refreshTokenDevice3);
 
             await req
                 .post(SETTINGS.PATH.AUTH + '/logout')
@@ -247,11 +265,14 @@ describe('AUTH-INTEGRATION', () => {
             expect(device1).toBeDefined();
 
             const refreshTokenDevice1 = await jwtService.createRefreshToken(device1!.userId, device1!.deviceId);
+            await syncLastActiveDate(device1!.deviceId, refreshTokenDevice1);
 
             await req
                 .delete(SETTINGS.PATH.SECURITYDEVICES)
                 .set('Cookie', `refreshToken=${refreshTokenDevice1}`)
                 .expect(204)
+            const stillExists = await sessionsCollection.findOne({ deviceId: device1!.deviceId });
+            console.log('✅ Сессия device1 после удаления:', stillExists);
 
 
             const res = await req
@@ -278,7 +299,7 @@ describe('AUTH-INTEGRATION', () => {
             const validMail = await authService.sendRecoveryEmail(email)
             expect(validMail.status).toBe('Success');
 
-            const userInDb = await UsersRepository.findByEmail(email);
+            const userInDb = await usersRepository.findByEmail(email);
             expect(userInDb?.passwordRecovery?.recoveryCode).toBeDefined();
             expect(userInDb?.passwordRecovery?.expirationDate).toBeInstanceOf(Date);
             expect(nodemailerService.sendEmail).toHaveBeenCalledTimes(2);
@@ -294,13 +315,13 @@ describe('AUTH-INTEGRATION', () => {
 
             await authService.sendRecoveryEmail(email)
 
-            const user = await UsersRepository.findByEmail(email);
+            const user = await usersRepository.findByEmail(email);
             const recoveryCode = user!.passwordRecovery!.recoveryCode;
 
             const result = await authService.confirmPasswordRecovery('newPassword123', recoveryCode);
             expect(result.status).toBe('Success');
 
-            const updateUser = await UsersRepository.findByEmail(email);
+            const updateUser = await usersRepository.findByEmail(email);
             const isMatch = await bcrypt.compare('newPassword123', updateUser!.passwordHash);
             expect(isMatch).toBe(true);
             expect(updateUser!.passwordRecovery).toBeUndefined();

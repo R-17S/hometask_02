@@ -27,8 +27,9 @@ export const refreshTokenGuard = async (req: Request, res: Response, next: NextF
         return;
     }
 
-    //req.userId = userId;
-    //req.deviceId = deviceId; //спроси падла не ЗАБУДЬ НУЖНО ЛИ РАЗГРУЗИТЬ СЕРВИС ОТ ЭТОГО ИЛИ НЕТ !!!
+    req.userId = userId; //для теста
+    req.deviceId = deviceId; //спроси падла не ЗАБУДЬ НУЖНО ЛИ РАЗГРУЗИТЬ СЕРВИС ОТ ЭТОГО ИЛИ НЕТ !!!
+
     next();
 }
 

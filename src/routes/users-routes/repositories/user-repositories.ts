@@ -2,7 +2,7 @@ import {usersCollection} from "../../../db/mongoDB";
 import {UserDbTypes} from "../../../db/user-type";
 import {ObjectId, WithId} from "mongodb";
 import {NotFoundException} from "../../../helper/exceptions";
-import {injectable} from "inversify/lib/esm";
+import {injectable} from "inversify";
 
 @injectable()
 export class UsersRepository {

@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import {injectable} from "inversify/lib/esm";
+import {injectable} from "inversify";
 
 @injectable()
 export class BcryptService  {

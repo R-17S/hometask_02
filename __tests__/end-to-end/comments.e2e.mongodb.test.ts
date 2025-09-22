@@ -4,19 +4,21 @@ import {SETTINGS} from "../../src/settings";
 import {req} from "../datasets/test-client";
 import {blogsCollection, commentsCollection, postsCollection, runDb, usersCollection} from "../../src/db/mongoDB";
 import {ObjectId} from "mongodb";
-import {jwtService} from "../../src/routes/auth-routes/application/jwt-service";
-
+import {JwtService} from "../../src/routes/auth-routes/application/jwt-service";
 import jwt from "jsonwebtoken";
 
 
 
 describe('/comments', () => {
+    const jwtService = new JwtService();
+    const deviceId = 'test-device-id';
     beforeAll(async () => { // очистка базы данных перед началом тестирования
         await runDb(SETTINGS.MONGO_URL)
         await blogsCollection.deleteMany({})
         await postsCollection.deleteMany({})
         await usersCollection.deleteMany({})
         await commentsCollection.deleteMany({})
+
     })
 
     it('should update', async () => {
@@ -35,7 +37,7 @@ describe('/comments', () => {
         };
 
         // 3. Создаем токен автора комментария
-        const token = await jwtService.createAccessToken(testComment.commentatorInfo.userId);
+        const token = await jwtService.createAccessToken(testComment.commentatorInfo.userId, deviceId);
 
 
         const res = await req
@@ -53,6 +55,7 @@ describe('/comments', () => {
     it('update should return 401 without authorization header', async () => {
         const { _id: commentId } = dataset4.comments[0];
 
+
         await req
             .put(`${SETTINGS.PATH.COMMENTS}/${commentId}`)
             .send({ content: 'Any content' })
@@ -60,9 +63,11 @@ describe('/comments', () => {
     });
 
     it('update should return 403 when trying to update another users comment', async () => {
+        const jwtService = new JwtService();
+        const deviceId = 'test-device-id';
         const { _id: commentId } = dataset4.comments[0];
         const otherUser = dataset4.users[1];
-        const token = await jwtService.createAccessToken(otherUser._id.toString());
+        const token = await jwtService.createAccessToken(otherUser._id.toString(), deviceId);
 
 
         await req
@@ -74,7 +79,9 @@ describe('/comments', () => {
 
     it('update should return 404 for non-existent comment', async () => {
         const user = dataset4.users[0];
-        const token = await jwtService.createAccessToken(user._id.toString());
+        const jwtService = new JwtService();
+        const deviceId = 'test-device-id';
+        const token = await jwtService.createAccessToken(user._id.toString(), deviceId);
 
 
         await req
@@ -86,7 +93,7 @@ describe('/comments', () => {
 
     it('update should return 400 for invalid comment data', async () => {
         const {_id: commentId, commentatorInfo} = dataset4.comments[0];
-        const token = await jwtService.createAccessToken(commentatorInfo.userId);
+        const token = await jwtService.createAccessToken(commentatorInfo.userId, deviceId);
 
 
         const response = await req
@@ -181,7 +188,7 @@ describe('/comments', () => {
             _id: new ObjectId() // Генерируем новый ID для изоляции теста
         };
         await commentsCollection.insertOne(testComment);
-        const token = await jwtService.createAccessToken(testComment.commentatorInfo.userId);
+        const token = await jwtService.createAccessToken(testComment.commentatorInfo.userId, deviceId);
 
         await req
             .delete(`${SETTINGS.PATH.COMMENTS}/${testComment._id.toString()}`)
@@ -204,7 +211,7 @@ describe('/comments', () => {
     it ('delete should return 400 when commentId is invalid', async () => {
         const invalidCommentId = 'invalidCommentId';
         const testComment  = dataset4.comments[0];
-        const token = await jwtService.createAccessToken(testComment.commentatorInfo.userId);
+        const token = await jwtService.createAccessToken(testComment.commentatorInfo.userId, deviceId);
         const res = await req
             .delete(`${SETTINGS.PATH.COMMENTS}/${invalidCommentId}`)
             .set('Authorization', `Bearer ${token}`)
@@ -224,7 +231,7 @@ describe('/comments', () => {
 
         const nonExistentId = new ObjectId();
         const testComment  = dataset4.comments[0];
-        const token = await jwtService.createAccessToken(testComment.commentatorInfo.userId);
+        const token = await jwtService.createAccessToken(testComment.commentatorInfo.userId, deviceId);
         await req
             .delete(`${SETTINGS.PATH.COMMENTS}/${nonExistentId}`)
             .set('Authorization', `Bearer ${token}`)

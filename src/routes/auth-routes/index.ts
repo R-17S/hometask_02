@@ -4,8 +4,6 @@ import {
     overallAuthValidation,
     overallRegistrationValidator,
 } from "./middleware-auth/authValidators";
-
-import {getCurrentUserHandler} from "./handlers/getCurrentUserHandler";
 import {accessTokenGuard} from "./middleware-auth/accessTokenGuard";
 import {refreshTokenGuard} from "./middleware-auth/refreshTokenGuard";
 import {checkRefreshTokenCookie} from "./middleware-auth/checkRefreshTokenCookie";
@@ -16,12 +14,12 @@ import {AuthController} from "./handlers/auth-controller";
 
 
 const authController = container.get(AuthController);
-export const authRouter = Router();
+export const authRouter= Router();
 
 
 // Роуты  для главной users
 authRouter.post('/login', rateLimitMiddleware, ...overallAuthValidation, authController.authLogin.bind(authController));
-authRouter.get('/me', accessTokenGuard, getCurrentUserHandler);
+authRouter.get('/me', accessTokenGuard, authController.getCurrentUser.bind(authController));
 
 // Роуты  для registration
 authRouter.post('/registration', rateLimitMiddleware, ...overallRegistrationValidator, authController.registration.bind(authController));

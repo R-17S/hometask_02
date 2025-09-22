@@ -7,7 +7,7 @@ import {BlogsController} from "./handlers/blogs-controller";
 
 
 const blogsController = container.get(BlogsController);
-const blogsRouter = Router();
+export const blogsRouter = Router();
 
 // Роут для получения постов блога
 blogsRouter.get('/:blogId/posts', blogIdValidator, blogsController.getPostsByBlogId.bind(blogsController));

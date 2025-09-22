@@ -4,7 +4,7 @@ import {usersCollection} from "../../../db/mongoDB";
 import {ObjectId, WithId} from "mongodb";
 import {UserAuthViewModel} from "../../../models/authType";
 import {NotFoundException} from "../../../helper/exceptions";
-import {injectable} from "inversify/lib/esm";
+import {injectable} from "inversify";
 
 
 @injectable()

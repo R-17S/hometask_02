@@ -3,7 +3,7 @@ import {commentsCollection} from "../../../db/mongoDB";
 import {ObjectId, WithId} from "mongodb";
 import {CommentDbTypes} from "../../../db/comment-type";
 import {NotFoundException} from "../../../helper/exceptions";
-import {injectable} from "inversify/lib/esm";
+import {injectable} from "inversify";
 
 @injectable()
 export class CommentQueryRepository  {

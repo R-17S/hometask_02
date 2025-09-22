@@ -2,6 +2,7 @@ import {randomUUID} from "crypto";
 import {add} from "date-fns/add";
 import {sessionsCollection, usersCollection} from "../../src/db/mongoDB";
 import {v4 as uuidv4} from 'uuid';
+import {JwtService} from "../../src/routes/auth-routes/application/jwt-service";
 
 
 
@@ -26,7 +27,7 @@ export type RegisterUserResultType = {
         isConfirmed: boolean
     }
 } // тоже что и UserDbTypes
-
+const jwtService = new JwtService();
 
 export const testFactoryUser = {
     createUserDto() {
@@ -83,4 +84,12 @@ export async function seedUserWithDevices(userId: string, count: number) {
             lastActiveDate: date,
         });
     }
+}
+
+export async function syncLastActiveDate(deviceId: string, token: string) {
+    const { iat } = await jwtService.decodeToken(token);
+    await sessionsCollection.updateOne(
+        { deviceId },
+        { $set: { lastActiveDate: new Date(iat * 1000) } }
+    );
 }

@@ -3,7 +3,7 @@ import {postsCollection} from "../../../db/mongoDB";
 import {PostDbTypes} from "../../../db/post-type";
 import {ObjectId, WithId} from "mongodb";
 import {NotFoundException} from "../../../helper/exceptions";
-import {injectable} from "inversify/lib/esm";
+import {injectable} from "inversify";
 
 @injectable()
 export class PostsQueryRepository  {

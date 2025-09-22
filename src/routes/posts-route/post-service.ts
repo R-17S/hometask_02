@@ -4,7 +4,7 @@ import {PostsRepository} from "./repositories/post-repositories";
 import {BlogsQueryRepository} from "../blogs-routes/repositories/blog-query-repository";
 import {NotFoundException} from "../../helper/exceptions";
 import {PostDbTypes} from "../../db/post-type";
-import {inject, injectable} from "inversify/lib/esm";
+import {inject, injectable} from "inversify";
 
 @injectable()
 export class  PostsService  {

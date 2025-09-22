@@ -16,6 +16,13 @@ import {UsersController} from "./routes/users-routes/handlers/users-controller";
 import {UsersQueryRepository} from "./routes/users-routes/repositories/user-query-repository";
 import {UsersRepository} from "./routes/users-routes/repositories/user-repositories";
 import {UsersService} from "./routes/users-routes/user-service";
+import {AuthService} from "./routes/auth-routes/auth-service";
+import {AuthController} from "./routes/auth-routes/handlers/auth-controller";
+import {NodemailerService} from "./routes/auth-routes/application/nodemailer-service";
+import {JwtService} from "./routes/auth-routes/application/jwt-service";
+import {BcryptService} from "./routes/auth-routes/application/bcrypt-service";
+import {SessionsRepository} from "./routes/securityDevices-routes/repositories/session-repositories";
+import {SecurityDeviceController} from "./routes/securityDevices-routes/handlers/securityDevice-controller";
 
 
 const container = new Container();
@@ -39,11 +46,20 @@ container.bind<CommentsController>(CommentsController).toSelf();
 
 //контейнер для сессий
 container.bind<SessionsQueryRepository>(SessionsQueryRepository).toSelf();
+container.bind<SessionsRepository>(SessionsRepository).toSelf();
+container.bind<SecurityDeviceController>(SecurityDeviceController).toSelf();
 
 //контейнер для юзеров
 container.bind<UsersRepository>(UsersRepository).toSelf();
 container.bind<UsersQueryRepository>(UsersQueryRepository).toSelf();
 container.bind<UsersService>(UsersService).toSelf();
 container.bind<UsersController>(UsersController).toSelf();
+
+//контейнер для auth
+container.bind<AuthService>(AuthService).toSelf();
+container.bind<AuthController>(AuthController).toSelf();
+container.bind<BcryptService>(BcryptService).toSelf();
+container.bind<JwtService>(JwtService).toSelf();
+container.bind<NodemailerService>(NodemailerService).toSelf();
 
 export { container };

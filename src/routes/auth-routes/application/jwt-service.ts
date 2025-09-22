@@ -1,7 +1,7 @@
 
 import {SETTINGS} from "../../../settings";
 import jwt from 'jsonwebtoken';
-import {injectable} from "inversify/lib/esm";
+import {injectable} from "inversify";
 
 @injectable()
 export class JwtService   {

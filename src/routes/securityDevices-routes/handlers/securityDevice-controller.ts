@@ -1,4 +1,4 @@
-import {inject, injectable} from "inversify/lib/esm";
+import {inject, injectable} from "inversify";
 import {NextFunction, Request, Response} from "express";
 import {BadRequestException, ForbiddenException} from "../../../helper/exceptions";
 import {SessionsQueryRepository} from "../repositories/session-query-repositories";

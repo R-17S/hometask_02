@@ -1,4 +1,4 @@
-import {inject, injectable} from "inversify/lib/esm";
+import {inject, injectable} from "inversify";
 import {BlogsService} from "../blog-service";
 import {BlogsQueryRepository} from "../repositories/blog-query-repository";
 import {NextFunction, Request, Response} from "express";
