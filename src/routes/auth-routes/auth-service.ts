@@ -193,7 +193,7 @@ export class AuthService  {
         return ResultObject.Success(null);
     }
 
-    async sendRecoveryEmail(email: string): Promise<Result<null>> {
+    async sendRecoveryEmail(email: string): Promise<Result<string | null>> {
         const user = await this.usersRepository.findByEmail(email);
         if (!user) return ResultObject.Success(null);
 
@@ -211,7 +211,7 @@ export class AuthService  {
         } catch (e: unknown) {
             console.error('Send email error', e); //залогировать ошибку при отправке сообщения
         }
-        return ResultObject.Success(null);
+        return ResultObject.Success(recoveryCode);
     }
 
     async confirmPasswordRecovery(newPassword: string, recoveryCode: string): Promise<Result<null>> {
