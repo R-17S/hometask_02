@@ -18,7 +18,7 @@ export const emailTemplates = {
     recoveryPassword: (code: string) => `
       <h1>Password recovery</h1>
       <p>To finish password recovery please follow the link below:
-        <a href="https://your-front.com/confirm-registration?code=${code}">Recover password</a>
+        <a href="https://your-front.com/confirm-registration?recoveryCode=${code}">Recover password</a>
       </p>
     `
 };
