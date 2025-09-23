@@ -211,7 +211,7 @@ export class AuthService  {
         } catch (e: unknown) {
             console.error('Send email error', e); //залогировать ошибку при отправке сообщения
         }
-        return ResultObject.Success(recoveryCode);
+        return ResultObject.Success(null);
     }
 
     async confirmPasswordRecovery(newPassword: string, recoveryCode: string): Promise<Result<null>> {
