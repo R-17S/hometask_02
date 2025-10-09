@@ -43,7 +43,7 @@ export class SecurityDeviceController {
     async getDevices(req: Request, res: Response, next: NextFunction) {
         try {
             const userId = req.userId!;
-            const session = await this.sessionsQueryRepository.findByUserId(userId);
+            const session = await this.sessionsQueryRepository.getSessionsByUserId(userId);
             res.status(200).json(session);
         } catch (error) {
             next(error);

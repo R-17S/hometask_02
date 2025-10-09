@@ -1,7 +1,6 @@
 import {PostsViewPaginated, PostViewModel, PostPaginationQueryResult} from "../../../models/postTypes";
-import {postsCollection} from "../../../db/mongoDB";
-import {PostDbTypes} from "../../../db/post-type";
-import {ObjectId, WithId} from "mongodb";
+import {PostDbTypes, PostModel} from "../../../db/post-type";
+import {WithId} from "mongodb";
 import {NotFoundException} from "../../../helper/exceptions";
 import {injectable} from "inversify";
 
@@ -18,13 +17,13 @@ export class PostsQueryRepository  {
         const filter = {blogId: id};
 
         const [totalCount, posts] = await Promise.all([
-            postsCollection.countDocuments(filter),
-            postsCollection
+            PostModel.countDocuments(filter),
+            PostModel
                 .find(filter)
                 .sort({[sortBy]: sortDirection === 'asc' ? 1 : -1})
                 .skip((pageNumber - 1) * pageSize)
                 .limit(pageSize)
-                .toArray()
+                .lean()
         ])
 
         return {
@@ -45,13 +44,13 @@ export class PostsQueryRepository  {
         } = params;
 
         const [totalCount, posts] = await Promise.all([
-            postsCollection.countDocuments({}),
-            postsCollection
+            PostModel.countDocuments({}),
+            PostModel
                 .find({})
                 .sort({[sortBy]: sortDirection === 'asc' ? 1 : -1})
                 .skip((pageNumber - 1) * pageSize)
                 .limit(pageSize)
-                .toArray()
+                .lean()
         ])
 
         return {
@@ -64,7 +63,7 @@ export class PostsQueryRepository  {
     }
 
     async getPostByIdOrError(id: string): Promise<PostViewModel> {
-        const result = await postsCollection.findOne({_id: new ObjectId(id)});
+        const result = await PostModel.findById(id);
         if (!result) throw new NotFoundException('Post not found');
         return this.mapToPostViewModel(result);
     }

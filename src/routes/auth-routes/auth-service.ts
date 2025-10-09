@@ -184,7 +184,7 @@ export class AuthService  {
         ]);
 
         const { userId, deviceId } = payload;
-        const session = await this.sessionsRepository.findSession(userId, deviceId);
+        const session = await this.sessionsRepository.getSession(userId, deviceId);
         if (!session) {
             return ResultObject.Success(null); // если сессия удалена или её не существует - думаю считать logout успешным
         }

@@ -11,6 +11,11 @@ export type CommentViewModel = {
         userLogin: string;
     };
     createdAt: Date;
+    "likesInfo": {
+        "likesCount": number,
+        "dislikesCount": number,
+        "myStatus": 'Like' | 'Dislike' | 'None',
+    }
 };
 
 export type CommentInputQuery = {
@@ -35,5 +40,7 @@ export type CommentViewPaginated = {
     totalCount: number;
     items: CommentViewModel[];
 };
+
+export type MyLikeStatusTypes = 'Like' | 'Dislike' | 'None';
 
 

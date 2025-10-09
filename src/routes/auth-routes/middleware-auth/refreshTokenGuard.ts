@@ -5,6 +5,7 @@ import {container} from "../../../inversify.config";
 
 const jwtService = container.get(JwtService);
 const sessionsRepository = container.get(SessionsRepository);
+
 export const refreshTokenGuard = async (req: Request, res: Response, next: NextFunction)=> {
     const refreshToken = req.refreshToken!;
     const payload  = await jwtService.getPayloadFromToken(refreshToken);
@@ -14,7 +15,7 @@ export const refreshTokenGuard = async (req: Request, res: Response, next: NextF
         return
     }
     const { userId, deviceId } = payload;
-    const session = await sessionsRepository.findSession(userId, deviceId);
+    const session = await sessionsRepository.getSession(userId, deviceId);
     if (!session) {
         res.status(401).json({ message: 'Session not found' });
         return

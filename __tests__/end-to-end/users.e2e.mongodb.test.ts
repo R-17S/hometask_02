@@ -2,18 +2,25 @@
 import {authToken, createString,dataset3} from "../datasets/datasets";
 import {SETTINGS} from "../../src/settings";
 import {req} from "../datasets/test-client";
-import {blogsCollection, postsCollection, runDb, usersCollection} from "../../src/db/mongoDB";
 import {ObjectId} from "mongodb";
 import bcrypt from "bcrypt";
 import {UserInputModel} from "../../src/models/userTypes";
+import mongoose from "mongoose";
+import {BlogModel} from "../../src/db/blog-type";
+import {PostModel} from "../../src/db/post-type";
+import {UserModel} from "../../src/db/user-type";
 
 
 describe('/users', () => {
     beforeAll(async () => { // очистка базы данных перед началом тестирования
-        await runDb(SETTINGS.MONGO_URL)
-        await blogsCollection.deleteMany({})
-        await postsCollection.deleteMany({})
-        await usersCollection.deleteMany({})
+        await mongoose.connect(SETTINGS.MONGO_URL)
+        await BlogModel.deleteMany({})
+        await PostModel.deleteMany({})
+        await UserModel.deleteMany({})
+    })
+
+    afterAll(async () => {
+        await mongoose.disconnect()
     })
 
     it('should create new user and return it', async () => {
@@ -36,7 +43,7 @@ describe('/users', () => {
             createdAt: expect.any(String)
         });
 
-        const userInDb = await usersCollection.findOne({
+        const userInDb = await UserModel.findOne({
             _id: ObjectId.createFromHexString(res.body.id) // метод для преобразования id в _id
         });
 
@@ -112,7 +119,7 @@ describe('/users', () => {
     });
 
     it ('should get empty array', async () => {
-        await usersCollection.deleteMany({});
+        await UserModel.deleteMany({});
 
         const res = await req
             .get(SETTINGS.PATH.USERS)
@@ -129,7 +136,7 @@ describe('/users', () => {
     });
 
     it('should get not empty array', async () => {
-        await usersCollection.insertMany(dataset3.users)
+        await UserModel.insertMany(dataset3.users)
 
         const res = await req
             .get(SETTINGS.PATH.USERS)
@@ -159,15 +166,15 @@ describe('/users', () => {
 
 
     it ('should delete', async () => {
-        await usersCollection.deleteMany({});
-        await usersCollection.insertMany(dataset3.users)
+        await UserModel.deleteMany({});
+        await UserModel.insertMany(dataset3.users)
 
         await req
             .delete(SETTINGS.PATH.USERS + '/' + dataset3.users[0]._id)
             .set('Authorization', `Basic ${authToken}`)
             .expect(204)
 
-        const postInDb = await usersCollection.countDocuments({});
+        const postInDb = await UserModel.countDocuments({});
         expect(postInDb).toBe(3);
     });
 

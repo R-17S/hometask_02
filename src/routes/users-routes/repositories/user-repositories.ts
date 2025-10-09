@@ -1,68 +1,56 @@
-import {usersCollection} from "../../../db/mongoDB";
-import {UserDbTypes} from "../../../db/user-type";
+
+import {UserDbTypes, UserModel} from "../../../db/user-type";
 import {ObjectId, WithId} from "mongodb";
-import {NotFoundException} from "../../../helper/exceptions";
 import {injectable} from "inversify";
 
 @injectable()
 export class UsersRepository {
     async createUser(newUser: UserDbTypes): Promise<WithId<UserDbTypes>> {
-        const result = await usersCollection.insertOne(newUser);
-        return {
-            ...newUser,
-            _id: result.insertedId
-        };
+        return await UserModel.create(newUser);
     }
 
     async deleteUser(id:string) {
-        const result = await usersCollection.deleteOne({ _id: new ObjectId(id) });
+        const result = await UserModel.deleteOne({ _id: new ObjectId(id) });
         return result.deletedCount === 1;
     }
 
-    async isUserExistOrError(loginOrEmail: string): Promise<'login' | 'email'> {
-        const user = await usersCollection.findOne({
-            $or : [{login: loginOrEmail}, {email: loginOrEmail}]
-        });
-        if (!user) throw new NotFoundException('User not found');
-        return user.login === loginOrEmail? 'login' : 'email';
-    }
 
     async findByLoginOrEmail(loginOrEmail: string): Promise<WithId<UserDbTypes> | null> {
-        return usersCollection.findOne({
+        return UserModel.findOne({
             $or: [{ login: loginOrEmail }, { email: loginOrEmail }]
-        });
+        }).lean();
     }
 
-    async getUserByLoginOrEmail(login: string, email: string): Promise<UserDbTypes | null> {
-        return usersCollection.findOne({
+    async getUserByLoginOrEmail(login: string, email: string): Promise<WithId<UserDbTypes> | null> {
+        return UserModel.findOne({
             $or: [{ login }, { email }]
-        });
+        }).lean();
     }
 
     async findByConfirmationCode(code: string): Promise<WithId<UserDbTypes> | null> {
-        return usersCollection.findOne({
+        return UserModel.findOne({
             'emailConfirmation.confirmationCode': code
-        });
+        }).lean();
     }
 
     async updateConfirmationStatus(userId: string): Promise<void> {
-        await usersCollection.updateOne(
+        await UserModel.updateOne(
             { _id: new ObjectId(userId) },
             { $set: { 'emailConfirmation.isConfirmed': true } }
         );
     }
 
     async userExists(id: string): Promise<boolean> {
-        const result = await usersCollection.countDocuments({_id: new ObjectId(id)});
-        return  result > 0;
+        const result = await UserModel.exists({_id: new ObjectId(id)});
+        return  !!result;
     }
 
     async findByEmail(email: string): Promise<WithId<UserDbTypes> | null> {
-        return usersCollection.findOne({ email });
+        return UserModel.findOne({ email }).lean();
     }
 
     async updateConfirmationCode(userId: string, newCode: string, newExpirationDate: Date): Promise<void> {
-        await usersCollection.updateOne(
+        await UserModel.updateOne(
             { _id: new ObjectId(userId) },
             {
                 $set: {
@@ -74,7 +62,7 @@ export class UsersRepository {
     }
 
     async saveRecoveryCode(userId: string, recoveryCode: string, expirationDate: Date): Promise<void> {
-        await usersCollection.updateOne(
+        await UserModel.updateOne(
             { _id: new ObjectId(userId) },
             {
                 $set: {
@@ -89,20 +77,20 @@ export class UsersRepository {
 
 
     async findByRecoveryCode(recoveryCode: string): Promise<WithId<UserDbTypes> | null> {
-        return usersCollection.findOne({
+        return UserModel.findOne({
             'passwordRecovery.recoveryCode': recoveryCode
-        });
+        }).lean();
     }
 
     async updatePassword(userId: ObjectId, passwordHash: string): Promise<void> {
-        await usersCollection.updateOne(
+        await UserModel.updateOne(
             { _id: userId },
             { $set: { passwordHash } }
         );
     }
 
     async clearRecoveryCode(userId: ObjectId): Promise<void> {
-        await usersCollection.updateOne(
+        await UserModel.updateOne(
             { _id: userId },
             { $unset: { passwordRecovery: '' } }
         );

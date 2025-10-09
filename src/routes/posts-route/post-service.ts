@@ -1,5 +1,4 @@
 import {PostByBlogIdInputModel, PostInputModel} from "../../models/postTypes";
-import {ObjectId} from "mongodb";
 import {PostsRepository} from "./repositories/post-repositories";
 import {BlogsQueryRepository} from "../blogs-routes/repositories/blog-query-repository";
 import {NotFoundException} from "../../helper/exceptions";
@@ -12,7 +11,7 @@ export class  PostsService  {
         @inject(PostsRepository) private postsRepository: PostsRepository,
         @inject(BlogsQueryRepository) private blogsQueryRepository: BlogsQueryRepository
     ) {}
-    async createPost(input: PostInputModel | PostByBlogIdInputModel, blogId?: string): Promise<ObjectId> {
+    async createPost(input: PostInputModel | PostByBlogIdInputModel, blogId?: string): Promise<string> {
         const effectiveBlogId = 'blogId' in input ? input.blogId : blogId;
         if (!effectiveBlogId) throw new NotFoundException('Blog ID is required');
         const blog = await this.blogsQueryRepository.getBlogByIdOrError(effectiveBlogId)

@@ -3,22 +3,29 @@ import {authToken, createString, dataset2, dataset4, post1, user1, user2} from "
 import {PostInputModel} from "../../src/models/postTypes";
 import {SETTINGS} from "../../src/settings";
 import {req} from "../datasets/test-client";
-import {blogsCollection, commentsCollection, postsCollection, runDb, usersCollection} from "../../src/db/mongoDB";
 import {ObjectId} from "mongodb";
 import {JwtService} from "../../src/routes/auth-routes/application/jwt-service";
+import mongoose from "mongoose";
+import {PostModel} from "../../src/db/post-type";
+import {BlogModel} from "../../src/db/blog-type";
+import {UserModel} from "../../src/db/user-type";
+import {CommentModel} from "../../src/db/comment-type";
 
 
 
 describe('/posts', () => {
     beforeAll(async () => { // очистка базы данных перед началом тестирования
-        await runDb(SETTINGS.MONGO_URL)
-        await postsCollection.deleteMany({})
+        await mongoose.connect(SETTINGS.MONGO_URL)
+        await PostModel.deleteMany({})
+    })
+
+    afterAll(async () => {
+        await mongoose.disconnect()
     })
 
     it('should create newPost', async () => {
 
-        const testBlog = await blogsCollection.insertOne({
-            _id: new ObjectId(),
+        const testBlog = await BlogModel.create({
             name: 'Test Blog',
             description: 'Test',
             websiteUrl: 'https://test.com',
@@ -27,16 +34,11 @@ describe('/posts', () => {
         });
         console.log(testBlog)
 
-        expect(testBlog).toMatchObject({
-            acknowledged: true,
-            insertedId: expect.any(ObjectId)
-        });
-
         const newPost = {
             title: 'Create Post',
             shortDescription: 'Create Short',
             content: 'Create Content',
-            blogId: testBlog.insertedId.toString(), // Используем ID созданного блога
+            blogId: testBlog._id.toString(), // Используем ID созданного блога
         };
 
         const res = await req
@@ -51,15 +53,6 @@ describe('/posts', () => {
             blogName: expect.any(String),
             createdAt: expect.any(String)
         });
-
-        // // 6. Проверка в БД
-        // const postInDb = await postsCollection.findOne({
-        //     _id: new ObjectId(res.body.id)
-        // });
-        // expect(postInDb).toMatchObject({
-        //     title: newPost.title,
-        //     blogId: new ObjectId(newPost.blogId)
-        // });
     });
 
 
@@ -105,12 +98,12 @@ describe('/posts', () => {
         expect(res.body.errorsMessages[2].field).toEqual('content')
         expect(res.body.errorsMessages[3].field).toEqual('blogId')
 
-        // const blogInDb = await postsCollection.countDocuments({});
-        // expect(blogInDb).toBe(3);
+        const postInDb = await PostModel.countDocuments({});
+        expect(postInDb).toBe(1);
     });
 
     it ('should get empty array', async () => {
-        await postsCollection.deleteMany({});
+        await PostModel.deleteMany({});
 
         const res = await req
             .get(SETTINGS.PATH.POSTS)
@@ -126,7 +119,7 @@ describe('/posts', () => {
     });
 
     it('should get not empty array', async () => {
-        await postsCollection.insertMany(dataset2.posts)
+        await PostModel.insertMany(dataset2.posts)
 
         const res = await req
             .get(SETTINGS.PATH.POSTS)
@@ -150,9 +143,6 @@ describe('/posts', () => {
             totalCount: 1,
             items: [expectedPost]
         });
-        // Дополнительные проверки (если нужно)
-        expect(res.body.items.length).toBe(1); // Проверяем длину массива items
-        expect(res.body.totalCount).toBe(1);  // Проверяем общее количество
     });
 
     it ('shouldn\'t get find 400', async () => {
@@ -198,15 +188,15 @@ describe('/posts', () => {
     });
 
     it ('should delete', async () => {
-        await postsCollection.deleteMany({});
-        await postsCollection.insertMany(dataset2.posts)
+        await PostModel.deleteMany({});
+        await PostModel.insertMany(dataset2.posts)
 
         await req
             .delete(SETTINGS.PATH.POSTS + '/' + dataset2.posts[0]._id)
             .set('Authorization', `Basic ${authToken}`)
             .expect(204)
 
-        const postInDb = await postsCollection.countDocuments({});
+        const postInDb = await PostModel.countDocuments({});
         expect(postInDb).toBe(0);
     });
 
@@ -252,9 +242,9 @@ describe('/posts', () => {
 
 
     it('should update', async () => {
-        await postsCollection.deleteMany({});
-        await blogsCollection.insertMany(dataset2.blogs);
-        await postsCollection.insertMany(dataset2.posts);
+        await PostModel.deleteMany({});
+        await BlogModel.insertMany(dataset2.blogs);
+        await PostModel.insertMany(dataset2.posts);
 
         // const blogExists = await blogsCollection.findOne({
         //     _id: dataset2.blogs[1]._id
@@ -274,17 +264,14 @@ describe('/posts', () => {
             .send(post)
             .expect(204)
 
-        const updateBlog = await postsCollection.findOne({_id: dataset2.posts[0]._id});
+        const updateBlog = await PostModel.findOne({_id: dataset2.posts[0]._id});
 
-        expect(updateBlog).toEqual({
-            _id: dataset2.posts[0]._id,
-            title: post.title,
-            shortDescription: post.shortDescription,
-            content: post.content,
-            blogId: post.blogId,
-            blogName: dataset2.posts[0].blogName,
-            createdAt: dataset2.posts[0].createdAt,
-        });
+        expect(updateBlog?.title).toBe(post.title)
+        expect(updateBlog?.shortDescription).toBe(post.shortDescription)
+        expect(updateBlog?.content).toBe(post.content)
+        expect(updateBlog?.blogId.toString()).toBe(post.blogId)
+        expect(updateBlog?.blogName).toBe(dataset2.posts[0].blogName)
+        expect(updateBlog?.createdAt.toISOString()).toBe(dataset2.posts[0].createdAt.toISOString())
 
         //expect(db.posts[0]).toEqual({...db.posts[0], ...post, blogName: dataset2.blogs[0].name});
     });
@@ -375,12 +362,12 @@ describe('/posts', () => {
     });
 
     it('get should  return 200 and paginated comment', async () => {
-        await postsCollection.deleteMany({});
-        await usersCollection.deleteMany({});
-        await commentsCollection.deleteMany({});
-        await postsCollection.insertMany(dataset4.posts);
-        await usersCollection.insertMany(dataset4.users);
-        await commentsCollection.insertMany(dataset4.comments);
+        await PostModel.deleteMany({});
+        await UserModel.deleteMany({});
+        await CommentModel.deleteMany({});
+        await PostModel.insertMany(dataset4.posts);
+        await UserModel.insertMany(dataset4.users);
+        await CommentModel.insertMany(dataset4.comments);
 
         const testPostId = dataset4.posts[0]._id;
         const res = await req
@@ -442,11 +429,11 @@ describe('/posts', () => {
     });
 
     it('get should return 200 and paginated comments', async () => {
-        await postsCollection.deleteMany({});
-        await usersCollection.deleteMany({});
-        await commentsCollection.deleteMany({});
-        await postsCollection.insertMany(dataset4.posts);
-        await usersCollection.insertMany(dataset4.users);
+        await PostModel.deleteMany({});
+        await UserModel.deleteMany({});
+        await CommentModel.deleteMany({});
+        await PostModel.insertMany(dataset4.posts);
+        await UserModel.insertMany(dataset4.users);
         // Создаем 15 тестовых коментов
         const comments = Array.from({length: 15}, (_, i) => ({
             _id: new ObjectId(),
@@ -458,7 +445,7 @@ describe('/posts', () => {
             postId: post1._id.toString(),
             createdAt: new Date(2023, 0, i + 1)
         }));
-        await commentsCollection.insertMany(comments);
+        await CommentModel.insertMany(comments);
 
         const res = await req
             .get(`/posts/${dataset4.posts[0]._id}/comments`)
@@ -508,7 +495,12 @@ describe('/posts', () => {
                 userId: user1._id.toString(),
                 userLogin: user1.login
             },
-            createdAt: expect.any(String)
+            createdAt: expect.any(String),
+            likesInfo: {
+                dislikesCount: 0,
+                likesCount: 0,
+                myStatus: 'None'
+            }
         });
     });
 

@@ -1,6 +1,6 @@
 import {NodemailerService} from "../../src/routes/auth-routes/application/nodemailer-service";
 import {AuthService} from "../../src/routes/auth-routes/auth-service";
-import {runDb, sessionsCollection, usersCollection} from "../../src/db/mongoDB";
+
 import {MongoMemoryServer} from "mongodb-memory-server";
 import {seedUserWithDevices, syncLastActiveDate, testFactoryUser} from "../datasets/integration-helpers";
 import {JwtService, } from "../../src/routes/auth-routes/application/jwt-service";
@@ -10,6 +10,9 @@ import {UsersRepository} from "../../src/routes/users-routes/repositories/user-r
 import bcrypt from "bcrypt";
 import {BcryptService} from "../../src/routes/auth-routes/application/bcrypt-service";
 import {SessionsRepository} from "../../src/routes/securityDevices-routes/repositories/session-repositories";
+import mongoose from "mongoose";
+import {UserModel} from "../../src/db/user-type";
+import {SessionModel} from "../../src/db/session-type";
 
 
 
@@ -27,12 +30,12 @@ describe('AUTH-INTEGRATION', () => {
 
     beforeAll(async () => {
         mongoServer = await MongoMemoryServer.create();
-        await runDb(mongoServer.getUri());
+        await mongoose.connect(mongoServer.getUri());
     });
 
     beforeEach(async () => {
-        await usersCollection.deleteMany({})
-        await sessionsCollection.deleteMany({});
+        await UserModel.deleteMany({})
+        await SessionModel.deleteMany({});
     });
 
     afterAll(async () => {
@@ -62,7 +65,7 @@ describe('AUTH-INTEGRATION', () => {
             expect(nodemailerService.sendEmail).toBeCalledTimes(1);
 
             // ✅ Проверка записи в базе
-            const dbUser = await usersCollection.findOne({login});
+            const dbUser = await UserModel.findOne({login});
             expect(dbUser).toBeDefined();
             expect(dbUser?.emailConfirmation?.isConfirmed).toBe(false);
         });
@@ -81,7 +84,7 @@ describe('AUTH-INTEGRATION', () => {
                 {field: 'login', message: 'Already exists'}
             ]);
 
-            const count = await usersCollection.countDocuments({$or: [{login}, {email}]});
+            const count = await UserModel.countDocuments({$or: [{login}, {email}]});
             expect(count).toBe(1);
         });
     });
@@ -158,7 +161,7 @@ describe('AUTH-INTEGRATION', () => {
             });
             await seedUserWithDevices(user.id, 4);
 
-            const device = await sessionsCollection.findOne({deviceTitle: 'Device-1'});
+            const device = await SessionModel.findOne({deviceTitle: 'Device-1'});
             expect(device).toBeDefined();
 
             const oldLastActive = device!.lastActiveDate;
@@ -170,11 +173,11 @@ describe('AUTH-INTEGRATION', () => {
             expect(result.data).toHaveProperty('newAccessToken');
             expect(result.data).toHaveProperty('newRefreshToken');
 
-            const updatedDevice = await sessionsCollection.findOne({deviceId: device!.deviceId});
+            const updatedDevice = await SessionModel.findOne({deviceId: device!.deviceId});
             console.log('🔍 Updated device:', updatedDevice);
             expect(updatedDevice!.lastActiveDate).not.toEqual(oldLastActive);
 
-            const allDevices = await sessionsCollection.find({userId: device!.userId}).toArray();
+            const allDevices = await SessionModel.find({userId: device!.userId});
             expect(allDevices.length).toBe(4);
         });
 
@@ -189,14 +192,14 @@ describe('AUTH-INTEGRATION', () => {
             });
             await seedUserWithDevices(user.id, 4);
 
-            const device1 = await sessionsCollection.findOne({deviceTitle: 'Device-1'});
-            const device2 = await sessionsCollection.findOne({deviceTitle: 'Device-2'});
+            const device1 = await SessionModel.findOne({deviceTitle: 'Device-1'});
+            const device2 = await SessionModel.findOne({deviceTitle: 'Device-2'});
             expect(device1).toBeDefined();
             expect(device2).toBeDefined();
 
             const refreshTokenDevice1 = await jwtService.createRefreshToken(device1!.userId, device1!.deviceId);
             const decode = await jwtService.decodeToken(refreshTokenDevice1);
-            await sessionsCollection.updateOne(
+            await SessionModel.updateOne(
                 { deviceId: device1!.deviceId },
                 { $set: { lastActiveDate: new Date(decode.iat * 1000) } }
             );
@@ -226,8 +229,8 @@ describe('AUTH-INTEGRATION', () => {
             });
             await seedUserWithDevices(user.id, 4);
 
-            const device1 = await sessionsCollection.findOne({deviceTitle: 'Device-1'});
-            const device3 = await sessionsCollection.findOne({deviceTitle: 'Device-3'});
+            const device1 = await SessionModel.findOne({deviceTitle: 'Device-1'});
+            const device3 = await SessionModel.findOne({deviceTitle: 'Device-3'});
             expect(device1).toBeDefined();
             expect(device3).toBeDefined();
 
@@ -261,7 +264,7 @@ describe('AUTH-INTEGRATION', () => {
             });
             await seedUserWithDevices(user.id, 4);
 
-            const device1 = await sessionsCollection.findOne({deviceTitle: 'Device-1'});
+            const device1 = await SessionModel.findOne({deviceTitle: 'Device-1'});
             expect(device1).toBeDefined();
 
             const refreshTokenDevice1 = await jwtService.createRefreshToken(device1!.userId, device1!.deviceId);
@@ -271,7 +274,7 @@ describe('AUTH-INTEGRATION', () => {
                 .delete(SETTINGS.PATH.SECURITYDEVICES)
                 .set('Cookie', `refreshToken=${refreshTokenDevice1}`)
                 .expect(204)
-            const stillExists = await sessionsCollection.findOne({ deviceId: device1!.deviceId });
+            const stillExists = await SessionModel.findOne({ deviceId: device1!.deviceId });
             console.log('✅ Сессия device1 после удаления:', stillExists);
 
 

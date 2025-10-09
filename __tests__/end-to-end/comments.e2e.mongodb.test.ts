@@ -2,10 +2,14 @@
 import {dataset3, dataset4} from "../datasets/datasets";
 import {SETTINGS} from "../../src/settings";
 import {req} from "../datasets/test-client";
-import {blogsCollection, commentsCollection, postsCollection, runDb, usersCollection} from "../../src/db/mongoDB";
 import {ObjectId} from "mongodb";
 import {JwtService} from "../../src/routes/auth-routes/application/jwt-service";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
+import {BlogModel} from "../../src/db/blog-type";
+import {PostModel} from "../../src/db/post-type";
+import {UserModel} from "../../src/db/user-type";
+import {CommentModel} from "../../src/db/comment-type";
 
 
 
@@ -13,24 +17,27 @@ describe('/comments', () => {
     const jwtService = new JwtService();
     const deviceId = 'test-device-id';
     beforeAll(async () => { // очистка базы данных перед началом тестирования
-        await runDb(SETTINGS.MONGO_URL)
-        await blogsCollection.deleteMany({})
-        await postsCollection.deleteMany({})
-        await usersCollection.deleteMany({})
-        await commentsCollection.deleteMany({})
+        await mongoose.connect(SETTINGS.MONGO_URL)
+        await BlogModel.deleteMany({})
+        await PostModel.deleteMany({})
+        await UserModel.deleteMany({})
+        await CommentModel.deleteMany({})
 
+    })
+    afterAll(async () => {
+        await mongoose.disconnect()
     })
 
     it('should update', async () => {
-        await commentsCollection.deleteMany({})
-        await commentsCollection.insertMany(dataset4.comments);
+        await CommentModel.deleteMany({})
+        await CommentModel.insertMany(dataset4.comments);
 
         // 2. Подготовка данных для запроса
         const testComment = {
             ...dataset4.comments[0],
             _id: new ObjectId()
         };
-        await commentsCollection.insertOne(testComment);
+        await CommentModel.insertOne(testComment);
         console.log(testComment);
         const updateData = {
             content: 'Updated comment content with valid length'
@@ -48,7 +55,7 @@ describe('/comments', () => {
         console.log(res.body);
 
 
-        const updatedComment = await commentsCollection.findOne({_id: testComment._id});
+        const updatedComment = await CommentModel.findOne({_id: testComment._id});
         expect(updatedComment?.content).toBe(updateData.content);
     });
 
@@ -131,12 +138,12 @@ describe('/comments', () => {
 
 
     it ('get should return 200', async () => {
-        await commentsCollection.deleteMany({});
+        await CommentModel.deleteMany({});
         const testComment = {
             ...dataset4.comments[0],
             _id: new ObjectId()
         };
-        await commentsCollection.insertOne(testComment);
+        await CommentModel.insertOne(testComment);
 
         // 2. Исправленный URL (без лишней скобки)
         const res = await req
@@ -151,7 +158,12 @@ describe('/comments', () => {
                 userId: testComment.commentatorInfo.userId,
                 userLogin: testComment.commentatorInfo.userLogin
             },
-            createdAt: testComment.createdAt.toISOString()
+            createdAt: testComment.createdAt.toISOString(),
+            likesInfo: {
+                dislikesCount: 0,
+                likesCount: 0,
+                myStatus: 'None'
+            }
         };
         expect(res.body).toEqual(expectedComment)
     });
@@ -182,12 +194,12 @@ describe('/comments', () => {
 
 
     it ('delete should return 204', async () => {
-        await commentsCollection.deleteMany({});
+        await CommentModel.deleteMany({});
         const testComment = {
             ...dataset4.comments[3],
             _id: new ObjectId() // Генерируем новый ID для изоляции теста
         };
-        await commentsCollection.insertOne(testComment);
+        await CommentModel.insertOne(testComment);
         const token = await jwtService.createAccessToken(testComment.commentatorInfo.userId, deviceId);
 
         await req
@@ -195,13 +207,13 @@ describe('/comments', () => {
             .set('Authorization', `Bearer ${token}`)
             .expect(204)
 
-        const deletedComment = await commentsCollection.findOne({
+        const deletedComment = await CommentModel.findOne({
             _id: testComment._id
         });
         expect(deletedComment).toBeNull();
 
         // Проверяем количество оставшихся комментариев (0, так как удалили единственный)
-        const remainingComments = await commentsCollection.countDocuments({});
+        const remainingComments = await CommentModel.countDocuments({});
         expect(remainingComments).toBe(0);
 
         // const commentsInDb = await usersCollection.countDocuments({});

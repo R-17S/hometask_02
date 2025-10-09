@@ -1,7 +1,6 @@
 import {BlogViewModel, BlogsViewPaginated, BlogPaginationQueryResult} from "../../../models/blogTypes";
-import {blogsCollection} from "../../../db/mongoDB";
-import {ObjectId, WithId} from "mongodb";
-import {BlogDbTypes} from "../../../db/blog-type";
+import {WithId} from "mongodb";
+import {BlogDbTypes, BlogModel} from "../../../db/blog-type";
 import {NotFoundException} from "../../../helper/exceptions";
 import {injectable} from "inversify";
 
@@ -28,13 +27,13 @@ export class BlogsQueryRepository {
         const skip = (pageNumber - 1) * pageSize;
 
         const [totalCount, blogs] = await Promise.all([
-            blogsCollection.countDocuments(filter),
-            blogsCollection
+            BlogModel.countDocuments(filter),
+            BlogModel
                 .find(filter)
                 .sort(sortOptions)
                 .skip(skip)
                 .limit(pageSize)
-                .toArray()
+                .lean()
         ]);
 
         return {
@@ -47,7 +46,7 @@ export class BlogsQueryRepository {
     }
 
     async getBlogByIdOrError(id: string): Promise<BlogViewModel> {
-        const result = await blogsCollection.findOne({ _id: new ObjectId(id) });
+        const result = await BlogModel.findById(id).lean();
         if (!result) throw new NotFoundException('Blog not found');
         return this.mapToBlogViewModel(result);
     }

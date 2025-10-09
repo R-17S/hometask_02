@@ -26,7 +26,7 @@ export const blog1: WithId<BlogDbTypes> = {
     websiteUrl: 'https://blog1.com',
     createdAt: new Date(),
     isMembership: false
-} as const
+}
 
 export const blog2: WithId<BlogDbTypes> = {
     _id: new ObjectId(),
@@ -35,7 +35,7 @@ export const blog2: WithId<BlogDbTypes> = {
     websiteUrl: 'https://blog2.com',
     createdAt: new Date(),
     isMembership: false
-} as const
+}
 
 export const post1: WithId<PostDbTypes> = {
     _id: new ObjectId(),
@@ -159,7 +159,7 @@ export const dataset1 = {
     posts: [],
     users: [],
     comments: []
-} as const
+}
 
 export const dataset2 = {
     blogs: [blog1, blog2],

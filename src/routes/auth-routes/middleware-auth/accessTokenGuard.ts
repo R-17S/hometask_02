@@ -5,6 +5,7 @@ import {container} from "../../../inversify.config";
 
 
 const jwtService = container.get(JwtService);
+
 export const accessTokenGuard = async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {

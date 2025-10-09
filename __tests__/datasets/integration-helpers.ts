@@ -1,8 +1,10 @@
 import {randomUUID} from "crypto";
 import {add} from "date-fns/add";
-import {sessionsCollection, usersCollection} from "../../src/db/mongoDB";
+
 import {v4 as uuidv4} from 'uuid';
 import {JwtService} from "../../src/routes/auth-routes/application/jwt-service";
+import {UserModel} from "../../src/db/user-type";
+import {SessionModel} from "../../src/db/session-type";
 
 
 
@@ -63,9 +65,9 @@ export const testFactoryUser = {
                 isConfirmed: isConfirmed ?? false
             }
         };
-        const result = await usersCollection.insertOne(newUser);
+        const result = await UserModel.insertOne(newUser);
         return {
-            id: result.insertedId.toString(),
+            id: result._id.toString(),
             ...newUser
         }
     },
@@ -74,7 +76,7 @@ export const testFactoryUser = {
 export async function seedUserWithDevices(userId: string, count: number) {
     const date = new Date();
     for (let i = 0; i < count; i++) {
-        await sessionsCollection.insertOne({
+        await SessionModel.insertOne({
             userId: userId,
             deviceId: uuidv4(),
             ip: '127.0.0.1',
@@ -88,7 +90,7 @@ export async function seedUserWithDevices(userId: string, count: number) {
 
 export async function syncLastActiveDate(deviceId: string, token: string) {
     const { iat } = await jwtService.decodeToken(token);
-    await sessionsCollection.updateOne(
+    await SessionModel.updateOne(
         { deviceId },
         { $set: { lastActiveDate: new Date(iat * 1000) } }
     );

@@ -22,7 +22,7 @@ export class PostsController {
     async createCommentByPostId(req: Request<{ postId: string }, {}, CommentInputModel>, res: Response<CommentViewModel | { error: string }>, next: NextFunction) {
         try {
             const newComment = await this.commentsService.createComment(req.body, req.params.postId, req.userId as string);
-            const commentToView = await this.commentQueryRepository.getCommentByIdOrError(newComment.toString());
+            const commentToView = await this.commentQueryRepository.getCommentByIdOrError(newComment.toString(), req.userId as string);
             res.status(201).json(commentToView);
         } catch (error) {
             next(error);
@@ -52,13 +52,15 @@ export class PostsController {
         try {
             await this.postsService.checkPostExists(req.params.postId);
             const {pageNumber, pageSize, sortBy, sortDirection} = paginationQueryComment(req);
+            const userId = req.userId as string;
             const commentByPostId = await this.commentQueryRepository.getCommentsByPostId(req.params.postId,
                 {
                     pageNumber,
                     pageSize,
                     sortBy,
                     sortDirection
-                }
+                },
+                userId
             );
 
             res.status(200).json(commentByPostId);

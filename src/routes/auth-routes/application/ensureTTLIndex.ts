@@ -1,12 +1,12 @@
 import {Collection} from "mongodb";
 import {TokenDbTypes} from "../../../db/token-type";
-import {RequestLogType} from "../../../models/requestType";
+import {RequestLogDbType} from "../../../db/requestDbType";
 import {SessionDbType} from "../../../db/session-type";
 
 
 export async function ensureTTLIndex(collections: {
     //tokenCollection: Collection<TokenDbTypes>;
-    requestLogsCollection?: Collection<RequestLogType>;
+    requestLogsCollection?: Collection<RequestLogDbType>;
     sessionsCollection?: Collection<SessionDbType>;
     // сунуть сюда другие коллекции если надо
 }) {

@@ -2,18 +2,24 @@ import {BlogInputModel} from "../../src/models/blogTypes";
 import {req} from "../datasets/test-client";
 import {SETTINGS} from "../../src/settings";
 import {authToken, blog1, createString, dataset1, dataset2} from "../datasets/datasets";
-import {blogsCollection, postsCollection, runDb} from "../../src/db/mongoDB";
 import {ObjectId} from "mongodb";
+import mongoose from "mongoose";
+import {BlogModel} from "../../src/db/blog-type";
+import {PostModel} from "../../src/db/post-type";
 
 
 describe('/blogs', () => {
     beforeAll(async () => { // очистка базы данных перед началом тестирования
-        await runDb(SETTINGS.MONGO_URL)
-        await blogsCollection.deleteMany({})
+        await mongoose.connect(SETTINGS.MONGO_URL)
+        await BlogModel.deleteMany({})
+    })
+
+    afterAll(async () => {
+        await mongoose.disconnect()
     })
 
     it('should create new blog and return it', async () => {
-        const blogs = await blogsCollection.insertMany([
+        const blogs = await BlogModel.insertMany([
             {
                 _id: new ObjectId(),
                 name: 'Blog 3',
@@ -33,14 +39,7 @@ describe('/blogs', () => {
         ]);
         console.log(blogs)
 
-        expect(blogs).toMatchObject({
-            acknowledged: true,
-            insertedCount: 2,
-            insertedIds: {
-                '0': expect.any(ObjectId),
-                '1': expect.any(ObjectId)
-            }
-        });
+        expect(blogs.length).toBe(2)
 
         const newBlog = {
             name: 'New Blog',
@@ -53,7 +52,7 @@ describe('/blogs', () => {
             .set('Authorization', `Basic ${authToken}`)
             .send(newBlog)
             .expect(201);
-
+        console.log(res.body);
         expect(res.body).toEqual({
             id: expect.any(String),
             name: newBlog.name,
@@ -63,7 +62,7 @@ describe('/blogs', () => {
             isMembership: false
         });
 
-        const blogInDb = await blogsCollection.findOne({_id: ObjectId.createFromHexString(res.body.id)});
+        const blogInDb = await BlogModel.findOne({_id: ObjectId.createFromHexString(res.body.id)});
         expect(blogInDb).not.toBeNull();
     });
 
@@ -84,7 +83,7 @@ describe('/blogs', () => {
 
         console.log(res.text)
 
-        const blogInDb = await blogsCollection.countDocuments({})
+        const blogInDb = await BlogModel.countDocuments({})
         expect(blogInDb).toBe(3);
     });
 
@@ -107,12 +106,12 @@ describe('/blogs', () => {
         expect(res.body.errorsMessages[1].field).toEqual('description');
         expect(res.body.errorsMessages[2].field).toEqual('websiteUrl');
 
-        const blogInDb = await blogsCollection.countDocuments({});
+        const blogInDb = await BlogModel.countDocuments({});
         expect(blogInDb).toBe(3);
     });
 
     it('should get empty array', async () => {
-        await blogsCollection.deleteMany({});
+        await BlogModel.deleteMany({});
 
         const res = await req
             .get(SETTINGS.PATH.BLOGS)
@@ -128,7 +127,7 @@ describe('/blogs', () => {
     });
 
     it('should get not empty array', async () => {
-        await blogsCollection.insertMany(dataset1.blogs)
+        await BlogModel.insertMany(dataset1.blogs)
 
         const res = await req
             .get(SETTINGS.PATH.BLOGS)
@@ -202,15 +201,15 @@ describe('/blogs', () => {
     });
 
     it('should delete', async () => {
-        await blogsCollection.deleteMany({});
-        await blogsCollection.insertMany(dataset1.blogs)
+        await BlogModel.deleteMany({});
+        await BlogModel.insertMany(dataset1.blogs)
 
         await req
             .delete(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0]._id)
             .set('Authorization', `Basic ${authToken}`)
             .expect(204)
 
-        const blogInDb = await blogsCollection.countDocuments({});
+        const blogInDb = await BlogModel.countDocuments({});
         expect(blogInDb).toBe(0);
     });
 
@@ -252,8 +251,8 @@ describe('/blogs', () => {
     });
 
     it('should update', async () => {
-        await blogsCollection.deleteMany({});
-        await blogsCollection.insertMany(dataset1.blogs);
+        await BlogModel.deleteMany({});
+        await BlogModel.insertMany(dataset1.blogs);
 
         const blog: BlogInputModel = {
             name: 'Blog update',
@@ -262,27 +261,34 @@ describe('/blogs', () => {
         }
 
         await req
-            .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0]._id)
+            .put(`${SETTINGS.PATH.BLOGS}/${dataset1.blogs[0]._id.toString()}`)
+            //.put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0]._id.toString())
             .set('Authorization', `Basic ${authToken}`)
             .send(blog)
             .expect(204) // проверка на ошибку
 
-        const updateBlog = await blogsCollection.findOne({_id: dataset1.blogs[0]._id});
+        const updateBlog = await BlogModel.findOne({_id: dataset1.blogs[0]._id});
 
-        expect(updateBlog).toMatchObject({
-            name: blog.name,
-            description: blog.description,
-            websiteUrl: blog.websiteUrl,
-            createdAt: dataset1.blogs[0].createdAt,
-            isMembership: dataset1.blogs[0].isMembership
-        });
+        // expect(updateBlog).toMatchObject({
+        //     name: blog.name,
+        //     description: blog.description,
+        //     websiteUrl: blog.websiteUrl,
+        //     createdAt: dataset1.blogs[0].createdAt,
+        //     isMembership: dataset1.blogs[0].isMembership
+        // });
+
+        expect(updateBlog?.name).toBe(blog.name)
+        expect(updateBlog?.description).toBe(blog.description)
+        expect(updateBlog?.websiteUrl).toBe(blog.websiteUrl)
+        expect(updateBlog?.isMembership).toBe(dataset1.blogs[0].isMembership)
+        expect(updateBlog?.createdAt.toISOString()).toBe(dataset1.blogs[0].createdAt.toISOString())
 
         //expect(dataset1.blogs[0]).toEqual({...dataset1.blogs[0], ...blog})
     });
 
     it('shouldn\'t update 400', async () => {
-        await blogsCollection.deleteMany({});
-        await blogsCollection.insertMany(dataset1.blogs);
+        await BlogModel.deleteMany({});
+        await BlogModel.insertMany(dataset1.blogs);
 
         const blog: BlogInputModel = {
             name: 'Blog update',
@@ -302,8 +308,8 @@ describe('/blogs', () => {
     });
 
     it('shouldn\'t update 404', async () => {
-        await blogsCollection.deleteMany({});
-        await blogsCollection.insertMany(dataset1.blogs);
+        await BlogModel.deleteMany({});
+        await BlogModel.insertMany(dataset1.blogs);
 
         const blog: BlogInputModel = {
             name: 'Blog update',
@@ -367,10 +373,10 @@ describe('/blogs', () => {
     });
 
     it('get should return 200 and paginated posts', async () => {
-        await blogsCollection.deleteMany({});
-        await postsCollection.deleteMany({});
-        await blogsCollection.insertMany(dataset2.blogs);
-        await postsCollection.insertMany(dataset2.posts);
+        await BlogModel.deleteMany({});
+        await PostModel.deleteMany({});
+        await BlogModel.insertMany(dataset2.blogs);
+        await PostModel.insertMany(dataset2.posts);
 
         const testBlogId = dataset2.blogs[0]._id;
         const response = await req
@@ -424,9 +430,9 @@ describe('/blogs', () => {
     });
 
     it('get should apply pagination correctly', async () => {
-        await blogsCollection.deleteMany({});
-        await postsCollection.deleteMany({});
-        await blogsCollection.insertMany(dataset2.blogs);
+        await BlogModel.deleteMany({});
+        await PostModel.deleteMany({});
+        await BlogModel.insertMany(dataset2.blogs);
         // Создаем 15 тестовых постов
         const posts = Array.from({length: 15}, (_, i) => ({
             _id: new ObjectId(),
@@ -437,7 +443,7 @@ describe('/blogs', () => {
             blogName: blog1.name,
             createdAt: new Date(2023, 0, i + 1)
         }));
-        await postsCollection.insertMany(posts);
+        await PostModel.insertMany(posts);
 
         const response = await req
             .get(`/blogs/${dataset2.blogs[0]._id}/posts`)
@@ -505,7 +511,7 @@ describe('/blogs', () => {
 
         console.log(res.text)
 
-        const blogInDb = await blogsCollection.countDocuments({})
+        const blogInDb = await BlogModel.countDocuments({})
         expect(blogInDb).toBe(2);
     });
 
@@ -528,7 +534,7 @@ describe('/blogs', () => {
         expect(res.body.errorsMessages[1].field).toEqual('description');
         expect(res.body.errorsMessages[2].field).toEqual('websiteUrl');
 
-        const blogInDb = await blogsCollection.countDocuments({});
+        const blogInDb = await BlogModel.countDocuments({});
         expect(blogInDb).toBe(2);
     });
 });

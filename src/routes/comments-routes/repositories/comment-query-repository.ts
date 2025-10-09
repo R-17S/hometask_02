@@ -1,13 +1,17 @@
-import {CommentPaginationQueryResult, CommentViewModel, CommentViewPaginated} from "../../../models/commentTypes";
-import {commentsCollection} from "../../../db/mongoDB";
-import {ObjectId, WithId} from "mongodb";
-import {CommentDbTypes} from "../../../db/comment-type";
+import {CommentPaginationQueryResult, CommentViewModel, CommentViewPaginated, MyLikeStatusTypes} from "../../../models/commentTypes";
+import {WithId} from "mongodb";
+import {CommentDbTypes, CommentModel} from "../../../db/comment-type";
 import {NotFoundException} from "../../../helper/exceptions";
-import {injectable} from "inversify";
+import {inject, injectable} from "inversify";
+import {CommentsLikeService} from "../comments-like-service";
 
 @injectable()
 export class CommentQueryRepository  {
-    async  getCommentsByPostId (id: string, params: CommentPaginationQueryResult): Promise<CommentViewPaginated> {
+    constructor(
+        @inject(CommentsLikeService) private commentLikesService: CommentsLikeService
+    ) {}
+
+    async  getCommentsByPostId (id: string, params: CommentPaginationQueryResult, userId: string): Promise<CommentViewPaginated> {
         const {
             pageNumber = 1,
             pageSize = 10,
@@ -17,39 +21,54 @@ export class CommentQueryRepository  {
 
         const filter = {postId:id};
         const [totalCount, comments] = await Promise.all([
-            commentsCollection.countDocuments(filter),
-            commentsCollection
+            CommentModel.countDocuments(filter),
+            CommentModel
                 .find(filter)
                 .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
                 .skip((pageNumber - 1) * pageSize)
                 .limit(pageSize)
-                .toArray()
+                .lean()
         ]);
+
+        const items = await Promise.all(
+            comments.map(async (comment) => {
+                const myStatus = await this.commentLikesService.getMyStatus(userId, comment._id.toString());
+                return this.mapToCommentViewModel(comment, myStatus);
+            })
+        );
 
         return {
             pagesCount: Math.ceil(totalCount / pageSize),
             page: pageNumber,
             pageSize,
             totalCount,
-            items: comments.map(this.mapToCommentViewModel)
+            items
         };
     }
 
-    async getCommentByIdOrError(id: string): Promise<CommentViewModel> {
-        const result = await commentsCollection.findOne({_id: new ObjectId(id)})
+    async getCommentByIdOrError(id: string, userId: string): Promise<CommentViewModel> {
+        const result = await CommentModel.findById(id).lean()
         if (!result) throw new NotFoundException("Comment not found");
-        return this.mapToCommentViewModel(result);
+        const myStatus = userId
+            ? await this.commentLikesService.getMyStatus(userId, id)
+            : 'None';
+        return this.mapToCommentViewModel(result, myStatus);
     }
 
-    mapToCommentViewModel(input: WithId<CommentDbTypes>): CommentViewModel {
+    mapToCommentViewModel(comment: WithId<CommentDbTypes>, myStatus: MyLikeStatusTypes): CommentViewModel {
         return {
-            id: input._id.toString(),
-            content: input.content,
+            id: comment._id.toString(),
+            content: comment.content,
             commentatorInfo: {
-                userId: input.commentatorInfo.userId,
-                userLogin: input.commentatorInfo.userLogin,
+                userId: comment.commentatorInfo.userId,
+                userLogin: comment.commentatorInfo.userLogin,
             },
-            createdAt: input.createdAt
+            createdAt: comment.createdAt,
+            likesInfo: {
+                likesCount: comment.likesCount ?? 0,
+                dislikesCount: comment.dislikesCount ?? 0,
+                myStatus,
+            }
         };
     }
 }

@@ -1,19 +1,16 @@
 import {BlogDbTypes} from "../../db/blog-type";
 import {BlogInputModel, BlogViewModel} from "../../models/blogTypes";
-import {ObjectId, WithId} from "mongodb";
+import {WithId} from "mongodb";
 import {BlogsRepository} from "./repositories/blog-repositories";
 import {NotFoundException} from "../../helper/exceptions";
 import {injectable, inject} from "inversify";
-
-
-
 
 
 @injectable()
 export class BlogsService {
     constructor(@inject(BlogsRepository) private blogsRepository: BlogsRepository) {}
 
-    async createBlog(input: BlogInputModel): Promise<ObjectId> {
+    async createBlog(input: BlogInputModel): Promise<string> {
         const newBlog = {
             name: input.name,
             description: input.description,

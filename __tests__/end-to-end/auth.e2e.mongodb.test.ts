@@ -1,9 +1,11 @@
 import {req} from "../datasets/test-client";
-import {runDb, usersCollection} from "../../src/db/mongoDB";
+
 import {ObjectId} from "mongodb";
 import bcrypt from "bcrypt";
 import {SETTINGS} from "../../src/settings";
 import { Request, Response, NextFunction } from 'express';
+import mongoose from "mongoose";
+import {UserModel} from "../../src/db/user-type";
 
 
 jest.mock('../../src/middlewares/rateLimit-middleware.ts', () => ({
@@ -18,12 +20,12 @@ describe('/auth', () => {
     };
 
     beforeAll(async () => {
-        await runDb(SETTINGS.MONGO_URL)
-        await usersCollection.deleteMany({});
+        await mongoose.connect(SETTINGS.MONGO_URL)
+        await UserModel.deleteMany({});
 
         // Создаем тестового пользователя
         const passwordHash = await bcrypt.hash(correctUser.password, 10);
-        await usersCollection.insertOne({
+        await UserModel.insertOne({
             _id: new ObjectId(),
             login: correctUser.loginOrEmail,
             email: 'testuser@example.com',
@@ -33,7 +35,8 @@ describe('/auth', () => {
     });
 
     afterAll(async () => {
-        await usersCollection.deleteMany({});
+        await UserModel.deleteMany({});
+        await mongoose.disconnect()
     });
 
     it('should return 200 on successful auth', async () => {

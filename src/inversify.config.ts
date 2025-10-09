@@ -23,6 +23,8 @@ import {JwtService} from "./routes/auth-routes/application/jwt-service";
 import {BcryptService} from "./routes/auth-routes/application/bcrypt-service";
 import {SessionsRepository} from "./routes/securityDevices-routes/repositories/session-repositories";
 import {SecurityDeviceController} from "./routes/securityDevices-routes/handlers/securityDevice-controller";
+import {CommentsLikeService} from "./routes/comments-routes/comments-like-service";
+import {CommentLikeRepository} from "./routes/comments-routes/repositories/comment-like-repository";
 
 
 const container = new Container();
@@ -43,6 +45,8 @@ container.bind<CommentsRepository>(CommentsRepository).toSelf();
 container.bind<CommentQueryRepository>(CommentQueryRepository).toSelf();
 container.bind<CommentsService>(CommentsService).toSelf();
 container.bind<CommentsController>(CommentsController).toSelf();
+container.bind<CommentsLikeService>(CommentsLikeService).toSelf();
+container.bind<CommentLikeRepository>(CommentLikeRepository).toSelf();
 
 //контейнер для сессий
 container.bind<SessionsQueryRepository>(SessionsQueryRepository).toSelf();

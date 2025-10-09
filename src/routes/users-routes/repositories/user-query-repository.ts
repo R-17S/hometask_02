@@ -1,6 +1,5 @@
 import {UsersViewPaginated, UserViewModel, UserPaginationQueryResult} from "../../../models/userTypes";
-import {UserDbTypes} from "../../../db/user-type";
-import {usersCollection} from "../../../db/mongoDB";
+import {UserDbTypes, UserModel} from "../../../db/user-type";
 import {ObjectId, WithId} from "mongodb";
 import {UserAuthViewModel} from "../../../models/authType";
 import {NotFoundException} from "../../../helper/exceptions";
@@ -34,13 +33,13 @@ export class UsersQueryRepository {
         const skip = (pageNumber - 1) * pageSize;
 
         const [totalCount, users] = await Promise.all([
-            usersCollection.countDocuments(filter),
-            usersCollection
+            UserModel.countDocuments(filter),
+            UserModel
                 .find(filter)
                 .sort(sortOptions)
                 .skip(skip)
                 .limit(pageSize)
-                .toArray()
+                .lean()
         ]);
 
         return {
@@ -53,7 +52,7 @@ export class UsersQueryRepository {
     }
 
     async findUserById(id: string): Promise<UserViewModel | null>  {
-        const result = await usersCollection.findOne({ _id: new ObjectId(id) });
+        const result = await UserModel.findOne({ _id: new ObjectId(id) }).lean();
         if (!result) throw new NotFoundException("User not found");
         return this.mapToUserViewModel(result);
     }
@@ -68,7 +67,7 @@ export class UsersQueryRepository {
     }
 
     async getUserById(userId: string): Promise<UserAuthViewModel | null> {
-        const result = await usersCollection.findOne({ _id: new ObjectId(userId) });
+        const result = await UserModel.findById(userId).lean();
         return result ? this.mapToAuthUserViewModel(result) : null;
     }
 
