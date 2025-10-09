@@ -55,11 +55,7 @@ export class CommentsService  {
     }
 
     async updateLikeStatus(commentId: string, userId: string, status: LikeStatusTypes): Promise<void> {
-        const comment = await this.commentsRepository.getCommentById(commentId);
-        if (!comment) throw new NotFoundException("Comment not found");
-
         await this.commentsLikeService.updateStatus(userId, commentId, status);
-
         const {likesCount, dislikesCount} = await this.commentsLikeService.getLikesCount(commentId);
         await this.commentLikeRepository.updateLikeCounts(commentId, likesCount, dislikesCount);
     }

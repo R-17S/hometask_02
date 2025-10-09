@@ -15,6 +15,7 @@ export class CommentLikeRepository {
             {status, updatedAt: new Date()},
             {upsert: true, new: true}// что бы не забыть сомнительные поля, но ОК upsert создаст док,если его нет, new вернёт новый
         );
+        console.log('Saving like:', { userId, commentId, status });
     }
 
     async count (commentId: string, status: LikeStatusTypes): Promise<number> {
