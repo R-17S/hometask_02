@@ -57,10 +57,6 @@ export class CommentsController {
                 return;
             }
 
-            if(likeStatus === 'None') {
-                res.sendStatus(204);
-                return;
-            }
             await this.commentsService.updateLikeStatus(commentId, userId, likeStatus);
             res.sendStatus(204);
         } catch (error) {

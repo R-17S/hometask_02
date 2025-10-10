@@ -1,11 +1,10 @@
 import {inject, injectable} from "inversify";
-import {CommentInputModel} from "../../models/commentTypes";
+import {CommentInputModel, MyLikeStatusTypes} from "../../models/commentTypes";
 import {UsersQueryRepository} from "../users-routes/repositories/user-query-repository";
 import {ForbiddenException, NotFoundException} from "../../helper/exceptions";
 import {CommentsRepository} from "./repositories/comment-repository";
 import {PostsRepository} from "../posts-route/repositories/post-repositories";
 import {CommentsLikeService} from "./comments-like-service";
-import {LikeStatusTypes} from "../../db/commentLikeDb-type";
 import {CommentLikeRepository} from "./repositories/comment-like-repository";
 
 
@@ -54,7 +53,7 @@ export class CommentsService  {
         return await this.commentsRepository.deleteComment(id);
     }
 
-    async updateLikeStatus(commentId: string, userId: string, status: LikeStatusTypes): Promise<void> {
+    async updateLikeStatus(commentId: string, userId: string, status: MyLikeStatusTypes): Promise<void> {
         await this.commentsLikeService.updateStatus(userId, commentId, status);
         const {likesCount, dislikesCount} = await this.commentsLikeService.getLikesCount(commentId);
         await this.commentLikeRepository.updateLikeCounts(commentId, likesCount, dislikesCount);

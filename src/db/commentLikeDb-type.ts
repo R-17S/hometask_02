@@ -2,12 +2,13 @@ import mongoose from "mongoose";
 import {SETTINGS} from "../settings";
 
 
-export type LikeStatusTypes = 'Like' | 'Dislike';
+export type LikeStatusDbTypes = 'Like' | 'Dislike';
+
 
 export type CommentLikeDbTypes = {
     userId: string;
     commentId: string;
-    status: LikeStatusTypes;
+    status: LikeStatusDbTypes;
     updatedAt: Date;
 }
 
