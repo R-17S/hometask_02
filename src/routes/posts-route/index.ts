@@ -5,13 +5,14 @@ import {overallCommentValidation} from "../comments-routes/middleware-comments/c
 import {accessTokenGuard} from "../auth-routes/middleware-auth/accessTokenGuard";
 import {PostsController} from "./handlers/posts-controller";
 import {container} from "../../inversify.config";
+import {optionalAccessAuthGuard} from "../auth-routes/middleware-auth/optionalAccessAuthGuard";
 
 
 const postsController = container.get(PostsController);
 export const postsRouter = Router();
 
 // Роут для получения комментов поста
-postsRouter.get('/:postId/comments', postIdValidator, postsController.getCommentsByPostId.bind(postsController));
+postsRouter.get('/:postId/comments', optionalAccessAuthGuard, postIdValidator, postsController.getCommentsByPostId.bind(postsController));
 postsRouter.post('/:postId/comments', accessTokenGuard, postIdValidator, ...overallCommentValidation, postsController.createCommentByPostId.bind(postsController));
 
 // Роуты  для главной posts
