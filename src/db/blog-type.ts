@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import {SETTINGS} from "../settings";
 
-
 export type BlogDbTypes = {
     name: string;
     description: string;

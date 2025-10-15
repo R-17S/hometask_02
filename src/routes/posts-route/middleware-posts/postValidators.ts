@@ -4,11 +4,11 @@ import {authBasicMiddleware} from "../../../middlewares/autorization-middleware"
 import {inputErrorsResult} from "../../../middlewares/errors-middleware";
 import {ObjectId} from "mongodb";
 import {ErrorsTypeValidation} from "../../../models/errorsType";
-import {BlogsService} from "../../blogs-routes/blog-service";
 import {container} from "../../../inversify.config";
 import {PostsRepository} from "../repositories/post-repositories";
+import {BlogsRepository} from "../../blogs-routes/repositories/blog-repositories";
 
-const blogsService = container.get(BlogsService);
+const blogsRepository = container.get(BlogsRepository);
 const postsRepository = container.get(PostsRepository);
 
 export const basePostInputValidation = [
@@ -40,7 +40,7 @@ export const postInputValidation = [
     .isString().withMessage('BlogId must be a string')
     .trim()
     .custom(async blogId => {
-       await blogsService.checkBlogExists(blogId);
+       await blogsRepository.exists(blogId);
     }).withMessage('No blog found at existing blogId'),
 ];
 
@@ -49,7 +49,7 @@ export const postExistsValidator = async (req: Request<{id: string}>, res: Respo
         res.status(400).json({errorsMessage: [{field: 'id', message: 'Invalid post ID'}]});
         return;
     }
-    const post = await postsRepository.postExists(req.params.id);
+    const post = await postsRepository.exists(req.params.id);
     if (!post) {
         res.status(404).json({errorsMessage:[ {field: 'id', message: 'Post not found'}]});
         return;
@@ -77,8 +77,4 @@ export const overallBasePostValidation = [
     inputErrorsResult
 ];
 
-// export const TextPostValidation = [
-//     postExistsValidation,
-//     inputErrorsResult
-// ];
 

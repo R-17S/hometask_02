@@ -2,7 +2,7 @@ import {inject, injectable} from "inversify";
 import {NextFunction, Request, Response} from "express";
 import {CommentInputModel, CommentInputQuery, CommentViewModel, CommentViewPaginated} from "../../../models/commentTypes";
 import {CommentsService} from "../../comments-routes/comments-service";
-import {CommentQueryRepository} from "../../comments-routes/repositories/comment-query-repository";
+import {CommentsQueryRepository} from "../../comments-routes/repositories/comments-query-repository";
 import {PostInputModel, PostInputQuery, PostsViewPaginated, PostViewModel} from "../../../models/postTypes";
 import {PostsService} from "../post-service";
 import {PostsQueryRepository} from "../repositories/posts-query-repository";
@@ -16,7 +16,7 @@ export class PostsController {
         @inject(PostsService) private postsService: PostsService,
         @inject(PostsQueryRepository) private postsQueryRepository: PostsQueryRepository,
         @inject(CommentsService) private commentsService: CommentsService,
-        @inject(CommentQueryRepository) private commentQueryRepository: CommentQueryRepository,
+        @inject(CommentsQueryRepository) private commentQueryRepository: CommentsQueryRepository,
     ) {}
 
     async createCommentByPostId(req: Request<{ postId: string }, {}, CommentInputModel>, res: Response<CommentViewModel | { error: string }>, next: NextFunction) {
@@ -31,9 +31,9 @@ export class PostsController {
 
     async createPost(req: Request<{}, {}, PostInputModel>, res: Response<PostViewModel>, next: NextFunction) {
         try {
-            const newPost = await this.postsService.createPost(req.body);
-            const newPostId = await this.postsQueryRepository.getPostByIdOrError(newPost.toString());
-            res.status(201).json(newPostId);
+            const newPostId = await this.postsService.createPost(req.body);
+            const newPost = await this.postsQueryRepository.getPostByIdOrError(newPostId);
+            res.status(201).json(newPost);
         } catch (error) {
             next(error);
         }

@@ -1,31 +1,31 @@
-import {BlogDbTypes, BlogModel} from "../../../db/blog-type";
-import {BlogInputModel} from "../../../models/blogTypes";
+import {BlogModel} from "../../../db/blog-type";
 import { injectable } from 'inversify';
 import {ObjectId} from "mongodb";
+import {NotFoundException} from "../../../helper/exceptions";
 
 
 @injectable()
 export class BlogsRepository {
-    async createBlog(newBlog: BlogDbTypes): Promise<string> {
-        const result = await BlogModel.create(newBlog);
-        return result._id.toString();
+    async save(blog: InstanceType<typeof BlogModel>): Promise<void> {
+        await blog.save();
+    }
+    // InstanceType это тип такого экземпляра, нельзя тут всунуть простой тип (Это plain object — просто описание полей, без поведения, без методов,)
+    async findById(id: string): Promise<InstanceType<typeof BlogModel> | null> {
+        return BlogModel.findById(id);
     }
 
-    async updateBlog(id: string, input: BlogInputModel): Promise<boolean> {
-        const updateBlog = await BlogModel.updateOne(
-            { _id: new ObjectId(id) },
-            {$set: input}
-        );
-        return updateBlog.modifiedCount === 1;
+    async delete(id: string): Promise<boolean> {
+        const result = await BlogModel.deleteOne({ _id: new ObjectId(id) });
+        return result.deletedCount === 1;
     }
 
-    async deleteBlog(id: string) {
-        const result = await BlogModel.deleteOne({_id: new ObjectId(id)});
-        return result.deletedCount === 1
+    async exists(id: string): Promise<boolean> {
+        return !!(await BlogModel.exists({ _id: new ObjectId(id) }));
     }
 
-    async blogExists(id: string): Promise<boolean> {
-        const result = await BlogModel.exists({_id: new ObjectId(id)});
-        return  !!result;
+    async getBlogNameOrError(id: string): Promise<string> {
+        const blog = await BlogModel.findById(id).lean();
+        if (!blog) throw new NotFoundException('Blog not found');
+        return blog.name;
     }
 }

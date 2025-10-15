@@ -3,20 +3,25 @@ import {CommentsService} from "../../src/routes/comments-routes/comments-service
 import {CommentModel} from "../../src/db/comment-type";
 import {CommentsRepository} from "../../src/routes/comments-routes/repositories/comment-repository";
 import {PostsRepository} from "../../src/routes/posts-route/repositories/post-repositories";
-import {UsersQueryRepository} from "../../src/routes/users-routes/repositories/user-query-repository";
+
 import {CommentsLikeService} from "../../src/routes/comments-routes/comments-like-service";
 import {CommentLikeRepository} from "../../src/routes/comments-routes/repositories/comment-like-repository";
 import {Types} from "mongoose";
+import {UsersRepository} from "../../src/routes/users-routes/repositories/user-repositories";
+import {PostsService} from "../../src/routes/posts-route/post-service";
+import {BlogsRepository} from "../../src/routes/blogs-routes/repositories/blog-repositories";
 
 
 // переписать тест
 describe('UNIT', () => {
     const commentsRepository = new CommentsRepository();
     const postsRepository = new PostsRepository();
-    const usersQueryRepository = new UsersQueryRepository();
+    const blogsRepository = new BlogsRepository();
+    const usersRepository = new UsersRepository();
     const commentLikeRepository = new CommentLikeRepository();
+    const postsService = new PostsService(postsRepository, blogsRepository);
     const commentsLikeService = new CommentsLikeService(commentLikeRepository);
-    const commentsService= new CommentsService(commentsRepository, postsRepository, usersQueryRepository, commentsLikeService, commentLikeRepository);
+    const commentsService= new CommentsService(commentsRepository, postsService, usersRepository, commentsLikeService, commentLikeRepository);
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -37,7 +42,7 @@ describe('UNIT', () => {
         // jest.spyOn(CommentModel, 'findById').mockReturnValue({
         //     lean: () => Promise.resolve({ _id: 'comment-id' })
         // } as any);
-        jest.spyOn(commentsRepository, 'getCommentById').mockResolvedValue({ _id: 'comment-id' } as any);
+        //jest.spyOn(commentsRepository, 'getCommentById').mockResolvedValue({ _id: 'comment-id' } as any);
 
 
         //Тут мокаем commentsLikeService
@@ -76,7 +81,7 @@ describe('UNIT', () => {
 
     it('should create new like if not exists', async () => {
         //тут мокаем и возвращаем, что комент найден
-        jest.spyOn(commentsRepository, 'getCommentById').mockResolvedValue({ _id: 'comment-id' } as any);
+        //jest.spyOn(commentsRepository, 'getCommentById').mockResolvedValue({ _id: 'comment-id' } as any);
         //тут мокаем commentLikeRepository внутри commentsLikeService
         jest.spyOn(commentLikeRepository, 'find').mockResolvedValue(null);
         //if (currentState?.status === status) return; внутри из за проверки не проходит

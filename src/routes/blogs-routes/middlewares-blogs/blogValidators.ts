@@ -35,7 +35,7 @@ export const blogExistsValidator = async  (req: Request<{id: string}>, res: Resp
         res.status(400).json({errorsMessage: [{field: 'id', message: 'Invalid blog ID'}]});
         return;
     }
-    const blog = await blogsRepository.blogExists(req.params.id);
+    const blog = await blogsRepository.exists(req.params.id);
     if (!blog) {
         res.status(404).json({errorsMessage: [{field: 'id', message: 'Blog not found'}]});
         return;

@@ -7,7 +7,7 @@ import {PostsRepository} from "./routes/posts-route/repositories/post-repositori
 import {PostsQueryRepository} from "./routes/posts-route/repositories/posts-query-repository";
 import {PostsService} from "./routes/posts-route/post-service";
 import {PostsController} from "./routes/posts-route/handlers/posts-controller";
-import {CommentQueryRepository} from "./routes/comments-routes/repositories/comment-query-repository";
+import {CommentsQueryRepository} from "./routes/comments-routes/repositories/comments-query-repository";
 import {CommentsRepository} from "./routes/comments-routes/repositories/comment-repository";
 import {CommentsService} from "./routes/comments-routes/comments-service";
 import {CommentsController} from "./routes/comments-routes/handlers/comments-controller";
@@ -42,7 +42,7 @@ container.bind<PostsController>(PostsController).toSelf();
 
 //контейнер для комментов
 container.bind<CommentsRepository>(CommentsRepository).toSelf();
-container.bind<CommentQueryRepository>(CommentQueryRepository).toSelf();
+container.bind<CommentsQueryRepository>(CommentsQueryRepository).toSelf();
 container.bind<CommentsService>(CommentsService).toSelf();
 container.bind<CommentsController>(CommentsController).toSelf();
 container.bind<CommentsLikeService>(CommentsLikeService).toSelf();

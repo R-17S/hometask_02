@@ -1,6 +1,6 @@
 import {UserInputModel, UserViewModel} from "../../models/userTypes";
 import {WithId} from "mongodb";
-import {UserDbTypes} from "../../db/user-type";
+import {UserDbTypes, UserModel} from "../../db/user-type";
 import {UsersRepository} from "./repositories/user-repositories";
 import {BadRequestException} from "../../helper/exceptions";
 import {BcryptService} from "../auth-routes/application/bcrypt-service";
@@ -23,19 +23,19 @@ export class UsersService {
         if (emailExists) throw new BadRequestException('Email should be unique');
 
         const passwordHash = await this.bcryptService.generateHash(input.password);
-        const newUser = {
+        const user = new UserModel({
             login: input.login,
             passwordHash,
             email: input.email,
-            createdAt: new Date(),
-        };
+            createdAt: new Date()
+        });
 
-        const createdUser = await this.usersRepository.createUser(newUser);
-        return this.mapToUserViewModel(createdUser);
+        await this.usersRepository.save(user);
+        return this.mapToUserViewModel(user);
     }
 
     async deleteUser(id:string) {
-        return await this.usersRepository.deleteUser(id);
+        return await this.usersRepository.delete(id);
     }
 
     mapToUserViewModel(user: WithId<UserDbTypes>): UserViewModel {

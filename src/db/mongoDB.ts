@@ -9,7 +9,7 @@ dotenv.config();
 
 export async function runDb(mongoURI: string): Promise<boolean> {
     try {
-        await mongoose.connect(SETTINGS.MONGO_URL || mongoURI);
+        await mongoose.connect(SETTINGS.MONGO_URL || mongoURI, { dbName: SETTINGS.DB.NAME });
         console.log('Connected to MongoDB via Mongoose')
         return true;
     } catch (error) {

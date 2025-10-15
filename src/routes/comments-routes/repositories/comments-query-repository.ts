@@ -6,7 +6,7 @@ import {inject, injectable} from "inversify";
 import {CommentsLikeService} from "../comments-like-service";
 
 @injectable()
-export class CommentQueryRepository  {
+export class CommentsQueryRepository {
     constructor(
         @inject(CommentsLikeService) private commentLikesService: CommentsLikeService
     ) {}

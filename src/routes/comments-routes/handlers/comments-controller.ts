@@ -1,6 +1,6 @@
 import {inject, injectable} from "inversify";
 import {CommentsService} from "../comments-service";
-import {CommentQueryRepository} from "../repositories/comment-query-repository";
+import {CommentsQueryRepository} from "../repositories/comments-query-repository";
 import {NextFunction, Request, Response} from "express";
 import {CommentInputModel, CommentViewModel, MyLikeStatusTypes} from "../../../models/commentTypes";
 import {CommentsRepository} from "../repositories/comment-repository";
@@ -10,7 +10,7 @@ import {CommentsRepository} from "../repositories/comment-repository";
 export class CommentsController {
     constructor(
         @inject(CommentsService) private commentsService: CommentsService,
-        @inject(CommentQueryRepository) private commentQueryRepository: CommentQueryRepository,
+        @inject(CommentsQueryRepository) private commentQueryRepository: CommentsQueryRepository,
         @inject(CommentsRepository) private commentsRepository: CommentsRepository
     ) {}
 
@@ -51,7 +51,7 @@ export class CommentsController {
             const commentId = req.params.commentId;
             const likeStatus = req.body.likeStatus;
             const userId = req.userId as string;
-            const exists  = await this.commentsRepository.CommentExists(commentId);
+            const exists  = await this.commentsRepository.exists(commentId);
             if (!exists) {
                 res.status(404).send({ message: 'Comment not found' });
                 return;

@@ -23,7 +23,7 @@ export const commentExistsValidation = async (req: Request<{id: string}>,res: Re
         return;
     }
 
-    const comment = await commentsRepository.CommentExists(req.params.id);
+    const comment = await commentsRepository.exists(req.params.id);
     if (!comment) {
         res.status(404).json({errorsMessage: [{field: 'id', message: 'Comment not found'}]});
         return;

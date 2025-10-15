@@ -29,9 +29,7 @@ export class BlogsController {
         }
     }
 
-    async createPostByBlogId(req: Request<{
-        blogId: string
-    }, {}, PostByBlogIdInputModel>, res: Response<PostViewModel>, next: NextFunction) {
+    async createPostByBlogId(req: Request<{ blogId: string }, {}, PostByBlogIdInputModel>, res: Response<PostViewModel>, next: NextFunction) {
         try {
             const newPost = await this.postsService.createPost(req.body, req.params.blogId);
             const newPostId = await this.postsQueryRepository.getPostByIdOrError(newPost.toString());

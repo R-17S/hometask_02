@@ -17,6 +17,7 @@ export const SETTINGS = {
     //MONGO_URL: 'mongodb://localhost:27017',
     JWT_SECRET: process.env.JWT_SECRET || 'super-secret-key',
     DB: {
+        NAME: process.env.DB_NAME || 'blog-platform',
         COLLECTION: {
             BLOGS: 'blogs',
             POSTS: 'posts',

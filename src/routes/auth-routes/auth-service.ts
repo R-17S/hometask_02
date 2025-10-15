@@ -1,8 +1,7 @@
 import {inject, injectable} from "inversify";
 import {AuthInputModel} from "../../models/authType";
-import {UserDbTypes} from "../../db/user-type";
+import {UserModel} from "../../db/user-type";
 import {UsersRepository} from "../users-routes/repositories/user-repositories";
-import {WithId} from "mongodb";
 import {randomUUID} from "node:crypto";
 import {BcryptService} from "./application/bcrypt-service";
 import {emailTemplates} from "../../helper/email-templates";
@@ -57,7 +56,7 @@ export class AuthService  {
         return ResultObject.Success({ accessToken, refreshToken });
     }
 
-    async checkCredentials(input: AuthInputModel): Promise<Result<WithId<UserDbTypes> | null>> {
+    async checkCredentials(input: AuthInputModel): Promise<Result<InstanceType<typeof UserModel> | null>> {
         const user = await this.usersRepository.findByLoginOrEmail(input.loginOrEmail);
         if (!user) return ResultObject.NotFound('User not found', [
             { field: 'loginOrEmail', message: 'No such user' }
@@ -71,31 +70,29 @@ export class AuthService  {
         return ResultObject.Success(user)
     }
 
-    async registerUser(login: string, password: string, email: string): Promise<Result<WithId<UserDbTypes> | null>> {
-        const user = await this.usersRepository.getUserByLoginOrEmail(login, email);
-        if (user) return ResultObject.BadRequest(user.login === login
+    async registerUser(login: string, password: string, email: string): Promise<Result<null>> {
+        const userCheck = await this.usersRepository.findByLoginOrEmailStrict(login, email);
+        if (userCheck) return ResultObject.BadRequest(userCheck.login === login
             ? 'Login already exists'
             : 'Email already exists', [
-            { field: user.login === login ? 'login' : 'email', message: 'Already exists' }
+            { field: userCheck.login === login ? 'login' : 'email', message: 'Already exists' }
         ]);//проверить существует ли уже юзер с таким логином или почтой и если да - не регистрировать
 
         const passwordHash = await this.bcryptService.generateHash(password)//создать хэш пароля
 
-        const newUser: UserDbTypes = { // сформировать dto юзера
+        const newUser = new UserModel({
             login,
             email,
             passwordHash,
             createdAt: new Date(),
-            emailConfirmation: {    // доп поля необходимые для подтверждения
+            emailConfirmation: {
                 confirmationCode: randomUUID(),
-                expirationDate: add(new Date(), {
-                    hours: 1,
-                    minutes: 30,
-                }),
+                expirationDate: add(new Date(), { hours: 1, minutes: 30 }),
                 isConfirmed: false
             }
-        };
-        const createdUser = await this.usersRepository.createUser(newUser); // сохранить юзера в базе данных
+        });
+
+        await this.usersRepository.save(newUser);// сохранить юзера в базе данных
 
         try {
             await this.nodemailerService.sendEmail(//отправить сообщение на почту юзера с кодом подтверждения
@@ -121,15 +118,17 @@ export class AuthService  {
                 { field: 'code', message: 'Code expired' }
         ]);
 
-        // 3. Обновляем статус с false на true
-        await this.usersRepository.updateConfirmationStatus(user._id.toString());
+        // 3. Обновляем статус с false на true, а теперь то за чем если можно в модельке поменять
+        //await this.usersRepository.updateConfirmationStatus(user._id.toString());
+        user.emailConfirmation!.isConfirmed = true;
+        await this.usersRepository.save(user);
 
         return ResultObject.Success(null);
     }
 
     async resendConfirmationEmail(email: string): Promise<Result<null>> {
         // 1. Находим пользователя по email
-        const user = await this.usersRepository.findByEmail(email);
+        const user = await this.usersRepository.findByLoginOrEmail(email);
 
         // 2. Проверяем нашелся ли он вообще, не стоит ли  у него статус true
         if (!user) return ResultObject.BadRequest('User with this email not found', [
@@ -146,7 +145,10 @@ export class AuthService  {
         const newExpirationDate = add(new Date(), { hours: 24 });
 
         // 4. Обновляем данные
-        await this.usersRepository.updateConfirmationCode(user._id.toString(), newConfirmationCode, newExpirationDate);
+        //await this.usersRepository.updateConfirmationCode(user._id.toString(), newConfirmationCode, newExpirationDate);
+        user.emailConfirmation!.confirmationCode = newConfirmationCode;
+        user.emailConfirmation!.expirationDate = newExpirationDate;
+        await this.usersRepository.save(user);
 
         // 5. Отправляем письмо
         try {
@@ -194,14 +196,18 @@ export class AuthService  {
     }
 
     async sendRecoveryEmail(email: string): Promise<Result<string | null>> {
-        const user = await this.usersRepository.findByEmail(email);
+        const user = await this.usersRepository.findByLoginOrEmail(email);
         if (!user) return ResultObject.Success(null);
 
         const recoveryCode = randomUUID();
         const expirationDate = add(new Date(), { hours: 24 });
-        const userId = user._id.toString();
 
-        await this.usersRepository.saveRecoveryCode(userId, recoveryCode, expirationDate)
+        user.passwordRecovery = {
+            recoveryCode,
+            expirationDate
+        };
+
+        await this.usersRepository.save(user);
         try {
             await this.nodemailerService.sendEmail(
                 email,
@@ -225,9 +231,10 @@ export class AuthService  {
             { field: 'recoveryCode', message: 'Code not found or already used' }
         ]);
 
-        const passwordHash = await this.bcryptService.generateHash(newPassword);
-        await this.usersRepository.updatePassword(user._id, passwordHash)
-        await this.usersRepository.clearRecoveryCode(user._id);
+        user.passwordHash = await this.bcryptService.generateHash(newPassword);
+        user.passwordRecovery = undefined; //или тут "" оставить
+
+        await this.usersRepository.save(user);
         return ResultObject.Success(null);
     }
 }
