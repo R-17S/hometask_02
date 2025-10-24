@@ -9,6 +9,13 @@ export class CommentLikeRepository {
         return CommentLikeModel.findOne({userId, commentId})
     }
 
+    async findMany (userId: string, commentIds: string[]) {
+        return CommentLikeModel.find({
+            userId,
+            commentId: { $in: commentIds }
+        }).lean();
+    }
+
     async save (userId: string, commentId: string, status: LikeStatusDbTypes) {
         await CommentLikeModel.findOneAndUpdate(
             {userId, commentId},

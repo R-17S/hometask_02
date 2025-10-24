@@ -4,11 +4,13 @@ import {CommentDbTypes, CommentModel} from "../../../db/comment-type";
 import {NotFoundException} from "../../../helper/exceptions";
 import {inject, injectable} from "inversify";
 import {CommentsLikeService} from "../comments-like-service";
+import {CommentLikeRepository} from "./comment-like-repository";
 
 @injectable()
 export class CommentsQueryRepository {
     constructor(
-        @inject(CommentsLikeService) private commentLikesService: CommentsLikeService
+        @inject(CommentsLikeService) private commentLikesService: CommentsLikeService,
+        @inject(CommentLikeRepository) private commentLikeRepository: CommentLikeRepository,
     ) {}
 
     async  getCommentsByPostId (id: string, params: CommentPaginationQueryResult, userId: string): Promise<CommentViewPaginated> {
@@ -29,13 +31,19 @@ export class CommentsQueryRepository {
                 .limit(pageSize)
                 .lean()
         ]);
+        const commentIds = comments.map(c => c._id.toString());
+        const likes = await this.commentLikeRepository.findMany(userId, commentIds);
 
-        const items = await Promise.all(
-            comments.map(async (comment) => {
-                const myStatus = await this.commentLikesService.getMyStatus(userId, comment._id.toString());
+        const likeMap = new Map<string, MyLikeStatusTypes>();
+        likes.forEach(like => {
+            likeMap.set(like.commentId, like.status);
+        })
+
+        const items = comments.map(comment => {
+                const myStatus =  likeMap.get(comment._id.toString()) ?? 'None';
                 return this.mapToCommentViewModel(comment, myStatus);
-            })
-        );
+        });
+
 
         return {
             pagesCount: Math.ceil(totalCount / pageSize),
