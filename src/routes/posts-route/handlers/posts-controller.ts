@@ -89,12 +89,17 @@ export class PostsController {
     async getPosts(req: Request<{}, {}, {}, PostInputQuery>, res: Response<PostsViewPaginated>, next: NextFunction) {
         try {
             const {pageNumber, pageSize, sortBy, sortDirection} = paginationQueryPost(req);
-            const posts = await this.postsQueryRepository.getAllPosts({
-                pageNumber,
-                pageSize,
-                sortBy,
-                sortDirection,
-            });
+            const userId = req.userId as string;
+            const posts = await this.postsQueryRepository.getAllPosts(
+                {
+                    pageNumber,
+                    pageSize,
+                    sortBy,
+                    sortDirection,
+                },
+                userId
+            );
+
             res.status(200).send(posts);
         } catch (error) {
             next(error);

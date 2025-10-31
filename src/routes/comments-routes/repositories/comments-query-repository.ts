@@ -13,7 +13,7 @@ export class CommentsQueryRepository {
         @inject(CommentLikeRepository) private commentLikeRepository: CommentLikeRepository,
     ) {}
 
-    async  getCommentsByPostId (id: string, params: CommentPaginationQueryResult, userId: string): Promise<CommentViewPaginated> {
+    async  getCommentsByPostId (id: string, params: CommentPaginationQueryResult, userId?: string): Promise<CommentViewPaginated> {
         const {
             pageNumber = 1,
             pageSize = 10,
@@ -32,7 +32,7 @@ export class CommentsQueryRepository {
                 .lean()
         ]);
         const commentIds = comments.map(c => c._id.toString());
-        const likes = await this.commentLikeRepository.findMany(userId, commentIds);
+        const likes = userId ? await this.commentLikeRepository.findMany(userId, commentIds) : []
 
         const likeMap = new Map<string, MyLikeStatusTypes>();
         likes.forEach(like => {

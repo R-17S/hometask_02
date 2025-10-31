@@ -78,13 +78,15 @@ export class BlogsController {
         try {
             await this.blogsService.checkBlogExists(req.params.blogId);
             const {pageNumber, pageSize, sortBy, sortDirection} = paginationQueryPost(req);
+            const userId = req.userId;
             const postByBlogId = await this.postsQueryRepository.getPostsByBlogId(req.params.blogId,
                 {
                     pageNumber,
                     pageSize,
                     sortBy,
                     sortDirection,
-                }
+                },
+                userId
             );
 
             res.status(200).send(postByBlogId)
