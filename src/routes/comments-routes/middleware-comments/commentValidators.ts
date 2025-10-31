@@ -39,18 +39,10 @@ export const commentIdValidator = async (req: Request<{commentId: string}>, res:
     next();
 };
 
-export const likeValidation = [
-    body('likeStatus')
-        .isString().withMessage('likeStatus must be a string')
-        .isIn(['Like', 'Dislike', 'None']).withMessage('likeStatus must be Like, Dislike or None')
-];
+
 
 export const overallCommentValidation = [
     ...commentInputValidation,
     inputErrorsResult
 ];
 
-export const likeInputValidation = [
-    ...likeValidation,
-    inputErrorsResult
-];

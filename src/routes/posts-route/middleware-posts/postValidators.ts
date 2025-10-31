@@ -40,8 +40,11 @@ export const postInputValidation = [
     .isString().withMessage('BlogId must be a string')
     .trim()
     .custom(async blogId => {
-       await blogsRepository.exists(blogId);
-    }).withMessage('No blog found at existing blogId'),
+       const exist = await blogsRepository.exists(blogId);
+        if (!exist) {
+            throw new Error('No blog found at existing blogId');
+        }
+    })
 ];
 
 export const postExistsValidator = async (req: Request<{id: string}>, res: Response<ErrorsTypeValidation | {}>, next: NextFunction) => {

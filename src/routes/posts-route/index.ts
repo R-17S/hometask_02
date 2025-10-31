@@ -6,6 +6,7 @@ import {accessTokenGuard} from "../auth-routes/middleware-auth/accessTokenGuard"
 import {PostsController} from "./handlers/posts-controller";
 import {container} from "../../inversify.config";
 import {optionalAccessAuthGuard} from "../auth-routes/middleware-auth/optionalAccessAuthGuard";
+import {likeInputValidation} from "../../middlewares/like-middleware";
 
 
 const postsController = container.get(PostsController);
@@ -17,9 +18,12 @@ postsRouter.post('/:postId/comments', accessTokenGuard, postIdValidator, ...over
 
 // Роуты  для главной posts
 postsRouter.get('/', postsController.getPosts.bind(postsController));
-postsRouter.get('/:id', postExistsValidator, postsController.getPost.bind(postsController));
+postsRouter.get('/:id', optionalAccessAuthGuard, postExistsValidator, postsController.getPost.bind(postsController));
 postsRouter.post('/', ...overallPostValidation, postsController.createPost.bind(postsController));
 postsRouter.put('/:id', postExistsValidator, ...overallPostValidation, postsController.updatePost.bind(postsController) );
 postsRouter.delete('/:id', authBasicMiddleware, postExistsValidator, postsController.deletePost.bind(postsController));
+
+//Роуты для лайков
+postsRouter.put('/:postId/like-status', accessTokenGuard, likeInputValidation, postsController.updateLikeStatus.bind(postsController));
 
 

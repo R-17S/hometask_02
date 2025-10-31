@@ -51,7 +51,13 @@ describe('/posts', () => {
             id: expect.any(String),
             ...newPost,
             blogName: expect.any(String),
-            createdAt: expect.any(String)
+            createdAt: expect.any(String),
+            extendedLikesInfo: {
+                likesCount: 0,
+                dislikesCount: 0,
+                myStatus: 'None',
+                newestLikes: []
+            }
         });
     });
 
@@ -134,6 +140,12 @@ describe('/posts', () => {
             blogId: dataset2.posts[0].blogId,
             blogName: dataset2.posts[0].blogName,
             createdAt: dataset2.posts[0].createdAt.toISOString(),
+            extendedLikesInfo: {
+                likesCount: 0,
+                dislikesCount: 0,
+                myStatus: 'None',
+                newestLikes: []
+            }
         }
 
         expect(res.body).toEqual({
@@ -182,6 +194,12 @@ describe('/posts', () => {
             blogId: dataset2.posts[0].blogId,
             blogName: dataset2.posts[0].blogName,
             createdAt: dataset2.posts[0].createdAt.toISOString(),
+            extendedLikesInfo: {
+                likesCount: 0,
+                dislikesCount: 0,
+                myStatus: 'None',
+                newestLikes: []
+            }
         };
 
         expect(res.body).toEqual(expectedPost);
@@ -243,19 +261,19 @@ describe('/posts', () => {
 
     it('should update', async () => {
         await PostModel.deleteMany({});
-        await BlogModel.insertMany(dataset2.blogs);
+        const pandingBlogs = await BlogModel.insertMany(dataset2.blogs);
         await PostModel.insertMany(dataset2.posts);
 
         // const blogExists = await blogsCollection.findOne({
         //     _id: dataset2.blogs[1]._id
         // });
         // expect(blogExists).not.toBeNull();
-
+        console.log(pandingBlogs);
         const post: PostInputModel = {
             title: 'Post 15',
             shortDescription: 'Short 15',
             content: 'Content 15',
-            blogId: dataset2.blogs[1]._id.toString(),
+            blogId: dataset2.blogs[0]._id.toString(),
         };
 
         await req

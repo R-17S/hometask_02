@@ -27,7 +27,7 @@ export class CommentsController {
 
     async getComment(req: Request<{ id: string }>, res: Response<CommentViewModel>, next: NextFunction) {
         try {
-            const userId = req.userId as string
+            const userId = req.userId as string// это вызывает сомнения
             const foundComment = await this.commentQueryRepository.getCommentByIdOrError(req.params.id, userId);
             res.status(200).json(foundComment)
         } catch (error) {

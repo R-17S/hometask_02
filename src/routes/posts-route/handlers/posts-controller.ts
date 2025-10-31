@@ -1,6 +1,12 @@
 import {inject, injectable} from "inversify";
 import {NextFunction, Request, Response} from "express";
-import {CommentInputModel, CommentInputQuery, CommentViewModel, CommentViewPaginated} from "../../../models/commentTypes";
+import {
+    CommentInputModel,
+    CommentInputQuery,
+    CommentViewModel,
+    CommentViewPaginated,
+    MyLikeStatusTypes
+} from "../../../models/commentTypes";
 import {CommentsService} from "../../comments-routes/comments-service";
 import {CommentsQueryRepository} from "../../comments-routes/repositories/comments-query-repository";
 import {PostInputModel, PostInputQuery, PostsViewPaginated, PostViewModel} from "../../../models/postTypes";
@@ -31,8 +37,9 @@ export class PostsController {
 
     async createPost(req: Request<{}, {}, PostInputModel>, res: Response<PostViewModel>, next: NextFunction) {
         try {
+            const userId = req.userId as string
             const newPostId = await this.postsService.createPost(req.body);
-            const newPost = await this.postsQueryRepository.getPostByIdOrError(newPostId);
+            const newPost = await this.postsQueryRepository.getPostByIdOrError(newPostId, userId);
             res.status(201).json(newPost);
         } catch (error) {
             next(error);
@@ -50,7 +57,7 @@ export class PostsController {
 
     async getCommentsByPostId(req: Request<{postId: string}, {}, {}, CommentInputQuery>, res: Response<CommentViewPaginated>, next: NextFunction) {
         try {
-            await this.postsService.checkPostExists(req.params.postId);
+            await this.postsService.checkPostExistsOrError(req.params.postId);
             const {pageNumber, pageSize, sortBy, sortDirection} = paginationQueryComment(req);
             const userId = req.userId as string;
             const commentByPostId = await this.commentQueryRepository.getCommentsByPostId(req.params.postId,
@@ -71,7 +78,8 @@ export class PostsController {
 
     async getPost(req: Request<{ id: string }>, res: Response<PostViewModel>, next: NextFunction) {
         try {
-            const foundPost = await this.postsQueryRepository.getPostByIdOrError(req.params.id);
+            const userId = req.userId as string // мне не нравиться , я не знаю что, но как будто логика не такая
+            const foundPost = await this.postsQueryRepository.getPostByIdOrError(req.params.id, userId);
             res.status(200).send(foundPost);
         } catch (error) {
             next(error);
@@ -97,6 +105,19 @@ export class PostsController {
         try {
             await this.postsService.updatePost(req.params.id, req.body);
             res.sendStatus(204)//.json(isUpdate);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async updateLikeStatus(req: Request<{ postId: string }, {}, {likeStatus: MyLikeStatusTypes }>, res: Response<void>, next: NextFunction) {
+        try {
+            const postId = req.params.postId;
+            const likeStatus = req.body.likeStatus;
+            const userId = req.userId as string;
+            await this.postsService.checkPostExistsOrError(postId);
+            await this.postsService.updateStatus(postId, userId, likeStatus);
+            res.sendStatus(204);
         } catch (error) {
             next(error);
         }

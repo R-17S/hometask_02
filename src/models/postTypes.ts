@@ -16,7 +16,17 @@ export type PostViewModel = {
     blogId: string,
     blogName: string
     createdAt: Date;
-}
+    "extendedLikesInfo": {
+        "likesCount": number,
+        "dislikesCount": number,
+        "myStatus": 'Like' | 'Dislike' | 'None',
+        newestLikes: Array<{
+            addedAt: Date;
+            userId: string;
+            login: string;
+        }>;
+    };
+};
 
 export type PostInputQuery = {
     pageNumber?: string;

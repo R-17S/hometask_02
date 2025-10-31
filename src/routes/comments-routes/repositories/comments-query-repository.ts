@@ -54,7 +54,7 @@ export class CommentsQueryRepository {
         };
     }
 
-    async getCommentByIdOrError(id: string, userId: string): Promise<CommentViewModel> {
+    async getCommentByIdOrError(id: string, userId?: string): Promise<CommentViewModel> {
         const result = await CommentModel.findById(id).lean()
         if (!result) throw new NotFoundException("Comment not found");
         const myStatus = userId

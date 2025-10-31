@@ -4,6 +4,7 @@ import {NotFoundException} from "../../helper/exceptions";
 import {PostModel} from "../../db/post-type";
 import {inject, injectable} from "inversify";
 import {BlogsRepository} from "../blogs-routes/repositories/blog-repositories";
+import {MyLikeStatusTypes} from "../../models/commentTypes";
 
 @injectable()
 export class  PostsService  {
@@ -46,8 +47,27 @@ export class  PostsService  {
         return this.postsRepository.delete(id);
     }
 
-    async checkPostExists(postId: string): Promise<void> {
+    async checkPostExistsOrError(postId: string): Promise<void> {
         const exists = await this.postsRepository.exists(postId);
         if (!exists) throw new NotFoundException('Post not found');
+    }
+
+    async updateStatus(postId: string, userId: string, status: MyLikeStatusTypes) {
+        await this.postsRepository.upsert(userId, postId, status);
+        const [likesCount, dislikesCount] = await Promise.all([
+            this.postsRepository.getLikesCount(postId),
+            this.postsRepository.getDislikesCount(postId),
+        ]);
+        await this.postsRepository.updateLikeCounts(postId, likesCount, dislikesCount);
+    };
+
+    async getMyStatus(userId: string, postId: string): Promise<MyLikeStatusTypes> {
+        return this.postsRepository.getMyStatus(userId, postId);
+    }
+
+    async getLikesCount(postId: string): Promise<{likesCount: number, dislikesCount: number}> {
+        const likesCount = await this.postsRepository.getLikesCount(postId);
+        const dislikesCount = await this.postsRepository.getDislikesCount(postId);
+        return {likesCount, dislikesCount}
     }
 }

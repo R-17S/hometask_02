@@ -2,13 +2,13 @@ import {Router} from "express";
 import {
     commentExistsValidation,
     commentIdValidator,
-    likeInputValidation,
     overallCommentValidation
 } from "./middleware-comments/commentValidators";
 import {accessTokenGuard} from "../auth-routes/middleware-auth/accessTokenGuard";
 import {container} from "../../inversify.config";
 import {CommentsController} from "./handlers/comments-controller";
 import {optionalAccessAuthGuard} from "../auth-routes/middleware-auth/optionalAccessAuthGuard";
+import {likeInputValidation} from "../../middlewares/like-middleware";
 
 
 

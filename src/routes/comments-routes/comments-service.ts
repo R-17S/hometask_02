@@ -21,7 +21,7 @@ export class CommentsService  {
     ) {}
 
     async createComment(input: CommentInputModel, postId: string, userId: string): Promise<string> {
-        await this.postsService.checkPostExists(postId);
+        await this.postsService.checkPostExistsOrError(postId);
         const userLogin = await this.usersRepository.getUserLoginByIdOrError(userId);
         const comment = new CommentModel({
             content: input.content,

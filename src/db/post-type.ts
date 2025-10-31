@@ -9,6 +9,8 @@ export type PostDbTypes = {
     blogId: string;
     blogName: string;
     createdAt: Date;
+    likesCount?: number,
+    dislikesCount?: number,
 };
 
 const postSchema = new mongoose.Schema<PostDbTypes>({
@@ -18,6 +20,8 @@ const postSchema = new mongoose.Schema<PostDbTypes>({
     blogId: { type: String, required: true },
     blogName: { type: String, required: true },
     createdAt: { type: Date, required: true },
+    likesCount: { type: Number, default: 0 },
+    dislikesCount: { type: Number, default: 0 }
 })
 
 export const PostModel = mongoose.model<PostDbTypes>(SETTINGS.DB.COLLECTION.POSTS, postSchema);
