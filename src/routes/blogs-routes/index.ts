@@ -4,13 +4,14 @@ import {authBasicMiddleware} from "../../middlewares/autorization-middleware";
 import {overallBasePostValidation} from "../posts-route/middleware-posts/postValidators";
 import {container} from "../../inversify.config";
 import {BlogsController} from "./handlers/blogs-controller";
+import {optionalAccessAuthGuard} from "../auth-routes/middleware-auth/optionalAccessAuthGuard";
 
 
 const blogsController = container.get(BlogsController);
 export const blogsRouter = Router();
 
 // Роут для получения постов блога
-blogsRouter.get('/:blogId/posts', blogIdValidator, blogsController.getPostsByBlogId.bind(blogsController));
+blogsRouter.get('/:blogId/posts', blogIdValidator,optionalAccessAuthGuard, blogsController.getPostsByBlogId.bind(blogsController));
 blogsRouter.post('/:blogId/posts', blogIdValidator, ...overallBasePostValidation, blogsController.createPostByBlogId.bind(blogsController));
 
 // Роуты  для главной blogs

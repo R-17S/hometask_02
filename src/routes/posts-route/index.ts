@@ -17,7 +17,7 @@ postsRouter.get('/:postId/comments', optionalAccessAuthGuard, postIdValidator, p
 postsRouter.post('/:postId/comments', accessTokenGuard, postIdValidator, ...overallCommentValidation, postsController.createCommentByPostId.bind(postsController));
 
 // Роуты  для главной posts
-postsRouter.get('/', postsController.getPosts.bind(postsController));
+postsRouter.get('/', optionalAccessAuthGuard, postsController.getPosts.bind(postsController));
 postsRouter.get('/:id', optionalAccessAuthGuard, postExistsValidator, postsController.getPost.bind(postsController));
 postsRouter.post('/', ...overallPostValidation, postsController.createPost.bind(postsController));
 postsRouter.put('/:id', postExistsValidator, ...overallPostValidation, postsController.updatePost.bind(postsController) );
